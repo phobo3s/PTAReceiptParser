@@ -1,0 +1,100 @@
+# rules.toml — Fiş kategorileme kuralları
+# Sırayla denenir, ilk eşleşen kazanır.
+# Kriterler AND'dir — hepsi sağlanmalı.
+#
+# Kullanılabilir kriterler:
+#   item       = ürün adı regex (büyük/küçük harf fark etmez)
+#   store      = Market adı regex
+#   amount_min = minimum tutar (TL)
+#   amount_max = maksimum tutar (TL)
+#   account    = hedef hledger account (zorunlu)
+
+# ── Yakıt ─────────────────────────────────────────────────────────────────────
+[[rule]]
+store      = "TANKAR|OPET|SHELL|BP|TOTAL|PO|PETROL OFISI|TURKPETROL"
+amount_min = 500.0
+account    = "Gider:ulasim:yakit"
+comment    = "Akaryakıt istasyonu yüksek tutar → yakıt"
+
+[[rule]]
+store      = "TANKAR|OPET|SHELL|BP|TOTAL|PO|PETROL OFISI|TURKPETROL"
+amount_max = 499.99
+account    = "Gider:Market"
+comment    = "Akaryakıt istasyonu düşük tutar → Market alışverişi"
+
+# ── Meyve & Sebze ─────────────────────────────────────────────────────────────
+[[rule]]
+item    = "ELMA|ARMUT|MUZ|PORTAKAL|MANDALINA|LIMON|UZUM|CILEK|KARPUZ|KAVUN|SEFTALI|ERIK|VİŞNE|KİRAZ|İNCİR|NAR|AVOKADO"
+account = "Gider:Market:Meyve"
+
+[[rule]]
+item    = "PATATES|SOGAN|DOMATES|BIBER|SALATALIK|PATLICAN|KABAK|HAVUC|BROKOLI|ISPANAK|MAYDANOZ|DEREOTU|SARMSAK|PIRASA|MANTAR|MARUL|ROKA|TAZE FASULYE|BEZELYE"
+account = "Gider:Market:Sebze"
+
+# ── Et & Tavuk ────────────────────────────────────────────────────────────────
+[[rule]]
+item    = "KIYMA|BIFTEK|PIRZOLA|KUZU|DANA|KASAP|SUCUK|SALAM|SOSIS"
+account = "Gider:Market:Et"
+
+[[rule]]
+item    = "TAVUK|PILIÇ|HINDI"
+account = "Gider:Market:Tavuk"
+
+# ── Süt & Süt Ürünleri ────────────────────────────────────────────────────────
+[[rule]]
+item    = "SUT|YOGURT|PEYNIR|TEREYAG|KAYMAK|AYRAN|KEFİR"
+account = "Gider:Market:Süt-Ürünleri"
+
+# ── Ekmek & Tahıl ─────────────────────────────────────────────────────────────
+[[rule]]
+item    = "EKMEK|PIDE|SIMIT|POĞAÇA|BÖREK|UN|İRMİK|MAKARNA|PIRINC|BULGUR|YULAF|GRANOLA|MÜSLİ"
+account = "Gider:Market:Ekmek-Tahıl"
+
+# ── Bakliyat ──────────────────────────────────────────────────────────────────
+[[rule]]
+item    = "MERCIMEK|NOHUT|FASULYE|BARBUNYA|BAKLA"
+account = "Gider:Market:Bakliyat"
+
+# ── İçecek ────────────────────────────────────────────────────────────────────
+[[rule]]
+item    = "SU |MADEN SUYU|SODA|COLA|PEPSI|FANTA|SPRITE|AYRAN|MEYVE SUYU|ÇAY|KAHVE|NESCAFE"
+account = "Gider:Market:İçecek"
+
+# ── Atıştırmalık & Şekerleme ──────────────────────────────────────────────────
+[[rule]]
+item    = "CIKOLATA|BISKUVI|KRAKER|CIPS|GOFRET|KEK|KURABIYE|SAKIZ|SEKER|LOKUM|HELVA|PINGUI|KEKC"
+account = "Gider:Market:Atistirmalik"
+
+# ── Kahvaltılık ───────────────────────────────────────────────────────────────
+[[rule]]
+item    = "RECEL|BAL|TAHIN|PEKMEZ|ZEYTİN|MARGARIN"
+account = "Gider:Market:Kahvaltilik"
+
+# ── Baharat & Kuru Gıda ───────────────────────────────────────────────────────
+[[rule]]
+item    = "TUZ|BIBER|PUL BIBER|KIMYON|KEKIK|NANE|TARÇIN|ZERDEÇAL|VANILIN|KABARTMA|MAYA|SIRKE|YAG |ZEYTINYAGI|AYCICEK"
+account = "Gider:Market:Kuru-Gıda"
+
+# ── Temizlik ──────────────────────────────────────────────────────────────────
+[[rule]]
+item    = "DETERJAN|CAMASIR|BULASIK|SABUN|SAMPUAN|DUŞJEL|DEZENFEKTAN|ÇAMAŞIR SUYU|WC|TUVALET KAGIDI|KAĞIT HAVLU|SELPAK|PED|TAMPON"
+account = "Gider:Market:Temizlik"
+
+# ── Kişisel Bakım ─────────────────────────────────────────────────────────────
+[[rule]]
+item    = "DİŞ MACUNU|DİŞ FIRÇASI|TIRAS|DEODORANT|PARFUM|KREM|LOSYON|MAKYAJ"
+account = "Gider:Market:Kozmetik"
+
+# ── Kitap & Kırtasiye ─────────────────────────────────────────────────────────
+[[rule]]
+item    = "KITAP|ROMAN|DERGI|GAZETE|HIKAYE|ANSIKLOPEDI"
+account = "Gider:Kitap"
+
+[[rule]]
+item    = "DEFTER|KALEM|SILGI|CETVEL|MAKAS|YAPISTIRICI|KLASOR"
+account = "Gider:Kırtasiye"
+
+# ── Poşet ─────────────────────────────────────────────────────────────────────
+[[rule]]
+item    = "POSET|TORBA|ALISVERIS POSETI"
+account = "Gider:Market:Poşet"
