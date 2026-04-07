@@ -3,3 +3,4 @@ rules_learned.toml
 *.hledger
 __pycache__/
 *.pyc
+.claude
