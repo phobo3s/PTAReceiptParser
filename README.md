@@ -85,6 +85,11 @@ PTAReceiptParser/
 python batch.py receipts/ budget.hledger
 ```
 
+### Test (After OCR testing of output)
+```bash
+python parser.py Receipt_File_Path --debug
+```
+
 ### With Claude API (auto-categorizes unknown items)
 ```bash
 python batch.py receipts/ budget.hledger --api-key sk-ant-...
