@@ -79,6 +79,8 @@ STORE_PROFILES = {
             r"^Ref\.No",
             r"^KDV\s+(MATRAH|TUTAR|DAHIL)",
             r"^(KDV|MATRAH|KOV TUTAR|KOV DAH)",
+            r"TOPKDV",
+            r"KRED[i|İ|I] KARTI",
             r"^POS:",
             r"^GS No",
             r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
@@ -160,9 +162,9 @@ STORE_PROFILES = {
         ],
         "layout": {
             "price_x_min": 450,
-            "y_tolerance": 45,  # Standart row tolerance
+            "y_tolerance": 25,  # Standart row tolerance
             "header_y_max": 630,  # Ürünler Y>650'de başlıyor
-            "footer_y_min": 1290,  # KDV Y~799 include et, TOPLAM Y=843 include et
+            "footer_y_min": 1590,  # KDV Y~799 include et, TOPLAM Y=843 include et
         },
         "price_pattern": r"^\*?([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",  # 2537.47, 250,00, 250 (3+ digit)
         "skip_patterns": [
@@ -197,12 +199,11 @@ STORE_PROFILES = {
             r"^BarkoP[O|0]S-2.0.14.70",  # Merge'de satır sonu farklı olabilir
             r"KD[VY]",  # KDV satırı (any position, X sorted footer'da)
             r"^\d+[\.,]\d{2}[A-Z]*$",  # Litraç (38,40LTX) veya sadece sayı + kısaltma
-            r"^K\.KARTI",  # Kredi kartı bilgisi
             r"^AFATOPLAM",  # Ara toplam (Tankar)
             r"^TOP$",  # Sadece "TOP" label'ı (TOPLAM label değil)
             r"^KDV$",  # KDV satırı (TOPLAM değil)
         ],
-        "total_pattern": r"TOPLAM|^TOP|\sTOP\s",  # TOPLAM, TOP satır başında, veya TOP ortada
+        "total_pattern": r"^TOPLAM|^TOP|^K.KARTI",  # TOPLAM, TOP satır başında, veya TOP ortada
         "date_pattern": r"(\d{2}-\d{2}-\d{4})",
         "name_cleanup": [],
     }
@@ -286,8 +287,9 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
     """
     cleaned = []
     for det in detections:
-        # 1. Çok düşük güvenli okumaları at (Örn: 0.45 olan '8')
-        if det.confidence < 0.60:
+        # 1. Çok düşük güvenli okumaları at (Örn: 0.45 olan '8' gibi tipikleri)
+        # %60 da emin değilsen gelme yani.
+        if det.confidence < 0.60: 
             continue
         cleaned.append(det)
     sorted_dets = sorted(cleaned, key=lambda d: d.y_center)
@@ -477,10 +479,10 @@ def parse_receipt(ocr_json: dict) -> Receipt:
         print(f"[PRODUCT_REGION] {len(product_dets)} detection secildi ({len(detections)} toplam)")
         if len(product_dets) == 0:
             print(f"  [*] Detayli check: Header altinda ({layout['header_y_max']}) ve footer ustunde ({layout['footer_y_min']}) olan detection yok")
-        elif len(product_dets) <= 35:
+        elif len(product_dets) != 0:
             # Product region'daki detection'lari listele (debug icin)
             for i, d in enumerate(product_dets[:15]):  # ilk 15'ini goster
-                print(f"    prod[{i:2d}] Y={d.y_center:7.1f} X={d.x_min:6.1f} | {repr(d.text[:25])}")
+                print(f"    prod[{i:2d}] XMax={d.x_max} YMax={d.y_max} Xmin={d.x_min} Ymin={d.y_min} | Y.Center={d.y_center:7.1f} X={d.x_min:6.1f} | {repr(d.text[:25])}")
 
     # Satırlara grupla
     rows = group_into_rows(product_dets, layout["y_tolerance"])
@@ -497,7 +499,7 @@ def parse_receipt(ocr_json: dict) -> Receipt:
         row_y = row[0].y_center if row else 0
 
         if DEBUG:
-            print(f"\n  [ROW #{row_idx}] Y~{row_y:.0f} | '{row_text[:60]}...'")
+            print(f"\n  [ROW #{row_idx}] Y~{row_y:.0f} | '{row_text}'")
 
         # Toplam satırı mı?
         if re.search(profile["total_pattern"], row_text, re.IGNORECASE):
@@ -508,7 +510,7 @@ def parse_receipt(ocr_json: dict) -> Receipt:
                 if price:
                     total = price
                     break
-            continue
+            break
 
         # Skip listesinde mi?
         skip_reason = None

@@ -24,6 +24,7 @@ import os
 import sys
 import re
 import logging
+import cv2
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
@@ -34,6 +35,7 @@ from update_journal import (
     parse_journal, find_matching_transaction,
     build_new_transaction, update_journal, preview,
 )
+#from preProcess import preProcessImage
 
 logging.basicConfig(level=logging.WARNING)  # PaddleOCR loglarını sustur
 
@@ -60,16 +62,14 @@ def get_ocr_engine():
         text_recognition_model_name="PP-OCRv5_mobile_rec",
         enable_mkldnn=False,  # prevents MKLDNN/PIR crash
         # Detection (DB) Parameters
-        det_db_unclip_ratio=1.8,   # Default is ~1.5. Increasing this expands the text bounding box. Highly useful for keeping "26.00" or "*250,00" in a single detection block.
+        det_db_unclip_ratio=1.7,   # Default is ~1.5. Increasing this expands the text bounding box. Highly useful for keeping "26.00" or "*250,00" in a single detection block.
         det_db_box_thresh=0.5,     # Default is ~0.6. Lowering this allows the model to detect fainter or slightly blurred text.
-        det_db_thresh=0.3,         # Binarization threshold. Lowering it helps with low-contrast print on thermal paper.
-        
+        det_db_thresh=0.3         # Binarization threshold. Lowering it helps with low-contrast print on thermal paper.
         # Recognition Parameters
         #unknown drop_score=0.7             # Filters out low-confidence random noise (like smudges recognized as characters).
     )
     print("✓ PaddleOCR hazır\n")
     return ocr
-
 
 def run_ocr(ocr_engine, image_path: Path) -> dict:
     import numpy as np
@@ -84,7 +84,12 @@ def run_ocr(ocr_engine, image_path: Path) -> dict:
     print(f"  DEBUG: predict çağrılıyor...")
     result = list(ocr_engine.predict(str(image_path)))
     print(f"  DEBUG: predict bitti, {len(result)} sonuç")
-
+    
+    guided_receipts_dir = Path(".guidedReceipts")
+    guided_receipts_dir.mkdir(exist_ok=True)
+    output_path = guided_receipts_dir / f"{image_path.name}"
+    result[0].img['ocr_res_img'].save(str(output_path))
+    
     detections = []
     for i, ocr_result in enumerate(result):
         print(f"  DEBUG: result[{i}] keys: {list(ocr_result.keys())}")
@@ -98,7 +103,7 @@ def run_ocr(ocr_engine, image_path: Path) -> dict:
             if hasattr(bbox, "tolist"):
                 bbox = bbox.tolist()
             detections.append([bbox, [text, float(conf)]])
-
+    
     print(f"  DEBUG: Toplam {len(detections)} detection")
     return {"status": "success", "image_width": w, "image_height": h, "detections": detections}
 
@@ -235,6 +240,7 @@ def process_receipt(
 
     # OCR
     try:
+        #processed_path = Path("ProcessedReceipts") / image_path.name
         ocr_json = ocr_with_cache(ocr_engine, image_path)
     except Exception as e:
         print(f"  ❌ OCR hatası: {e}")
@@ -332,17 +338,29 @@ def main():
         print(f"⚠️  Claude API yok — bilinmeyen ürünler manuel girilecek")
         print(f"   (ANTHROPIC_API_KEY env veya --api-key ile ekleyebilirsin)\n")
 
+    # Ön işleme
+    #print(f"⏳ {len(images)} fiş ön işleniyor...")
+    #for image_path in images:
+    #    preProcessImage(image_path)
+    #print(f"✓ Ön işleme tamamlandı\n")
+
+    # Processed Fişleri bul
+    #images = sorted([
+    #    p for p in Path("./.processedReceipts").iterdir()
+    #    if p.suffix.lower() in SUPPORTED_EXTS
+    #])
+
     # Kuralları yükle — öğrenilmiş kurallar önce
     rules = []
     if LEARNED_RULES_FILE.exists():
         rules += load_rules(LEARNED_RULES_FILE)
     rules += load_rules(RULES_FILE)
-
+    
     print(f"📋 {len(rules)} kural yüklendi")
-
+    
     # OCR engine
     ocr_engine = get_ocr_engine()
-
+    
     # İşle
     success, failed, skipped = 0, 0, 0
     for image_path in images:
@@ -351,7 +369,7 @@ def main():
             success += 1
         else:
             failed += 1
-
+    
     # Özet
     print(f"\n{'═' * 60}")
     print(f"  Tamamlandı: {success} güncellendi, {failed} başarısız")
