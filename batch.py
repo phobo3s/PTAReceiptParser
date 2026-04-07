@@ -62,7 +62,7 @@ def get_ocr_engine():
         text_recognition_model_name="PP-OCRv5_mobile_rec",
         enable_mkldnn=False,  # prevents MKLDNN/PIR crash
         # Detection (DB) Parameters
-        det_db_unclip_ratio=1.7,   # Default is ~1.5. Increasing this expands the text bounding box. Highly useful for keeping "26.00" or "*250,00" in a single detection block.
+        det_db_unclip_ratio=2.0,   # Default is ~1.5. Increasing this expands the text bounding box. Highly useful for keeping "26.00" or "*250,00" in a single detection block.
         det_db_box_thresh=0.5,     # Default is ~0.6. Lowering this allows the model to detect fainter or slightly blurred text.
         det_db_thresh=0.3         # Binarization threshold. Lowering it helps with low-contrast print on thermal paper.
         # Recognition Parameters
