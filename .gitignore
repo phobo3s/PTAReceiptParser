@@ -1,0 +1,5 @@
+.ocr_cache/
+rules_learned.toml
+*.hledger
+__pycache__/
+*.pyc
