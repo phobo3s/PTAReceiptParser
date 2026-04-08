@@ -1,6 +1,6 @@
-.ocr_cache/
 rules_learned.toml
 __pycache__/
 *.pyc
 .claude
 CLAUDE.md
+GEMINI.md

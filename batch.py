@@ -49,22 +49,22 @@ OCR_CACHE_DIR      = Path(".ocr_cache")  # işlenmiş json'ları sakla, tekrar O
 
 def get_ocr_engine():
     """PaddleOCR'ı bir kez yükle, tüm fişlerde kullan."""
-    from paddleocr import PaddleOCR
     import os
+    os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'
+    from paddleocr import PaddleOCR
     os.environ["FLAGS_use_mkldnn"] = "0"  # oneDNN disable
     print("⏳ PaddleOCR yükleniyor (ilk seferinde model indirilebilir)...")
     ocr = PaddleOCR(
         use_textline_orientation=True,
         #use_angle_cls=True,
-        lang="en",
         device='cpu',
         text_detection_model_name="PP-OCRv5_mobile_det",
         text_recognition_model_name="PP-OCRv5_mobile_rec",
         enable_mkldnn=False,  # prevents MKLDNN/PIR crash
         # Detection (DB) Parameters
-        det_db_unclip_ratio=2.0,   # Default is ~1.5. Increasing this expands the text bounding box. Highly useful for keeping "26.00" or "*250,00" in a single detection block.
-        det_db_box_thresh=0.5,     # Default is ~0.6. Lowering this allows the model to detect fainter or slightly blurred text.
-        det_db_thresh=0.3         # Binarization threshold. Lowering it helps with low-contrast print on thermal paper.
+        text_det_unclip_ratio=2.0,   # Default is ~1.5. Increasing this expands the text bounding box. Highly useful for keeping "26.00" or "*250,00" in a single detection block.
+        text_det_box_thresh=0.5,     # Default is ~0.6. Lowering this allows the model to detect fainter or slightly blurred text.
+        text_det_thresh=0.3         # Binarization threshold. Lowering it helps with low-contrast print on thermal paper.
         # Recognition Parameters
         #unknown drop_score=0.7             # Filters out low-confidence random noise (like smudges recognized as characters).
     )

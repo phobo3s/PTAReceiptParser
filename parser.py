@@ -8,6 +8,7 @@ import re
 import sys
 from dataclasses import dataclass, field
 from typing import Optional
+from shapely.geometry import Polygon
 
 # Global debug flag
 DEBUG = False
@@ -24,6 +25,7 @@ class Detection:
     y_min: float
     y_max: float
     y_center: float
+    bbox: list[list[float]]
 
 
 @dataclass
@@ -60,7 +62,7 @@ STORE_PROFILES = {
             # Header bölgesi: bu Y'nin altından itibaren ürünler başlar
             "header_y_max": 640,
             # Footer bölgesi: bu Y'den sonrası toplam/KDV/banka bilgisi
-            "footer_y_min": 1150,
+            "footer_y_min": 1550,
         },
         "price_pattern": r"^\*?(\d+[\.,]\d{2})$",
         "skip_patterns": [
@@ -80,7 +82,6 @@ STORE_PROFILES = {
             r"^KDV\s+(MATRAH|TUTAR|DAHIL)",
             r"^(KDV|MATRAH|KOV TUTAR|KOV DAH)",
             r"TOPKDV",
-            r"KRED[i|İ|I] KARTI",
             r"^POS:",
             r"^GS No",
             r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
@@ -94,7 +95,7 @@ STORE_PROFILES = {
             r"^\d+[\.,]\d{2}\s+\d+[\.,]\d{2}",  # KDV tablo satırı
             r"^\([\d）]+\)$",          # (1） gibi
         ],
-        "total_pattern": r"^(Odenecek KDV Dahil|TOPLAM(?!\s+KDV))",
+        "total_pattern": r"^(Odenecek KDV Dahil|TOPLAM(?!\s+KDV)|KRED[i|İ|I] KARTI)",
         "date_pattern": r"(\d{2}\.\d{2}\.\d{4})\s*\d{2}:\d{2}",  # boşluksuz da yakala
         # Ürün adı temizleme
         "name_cleanup": [
@@ -164,9 +165,9 @@ STORE_PROFILES = {
             "price_x_min": 450,
             "y_tolerance": 25,  # Standart row tolerance
             "header_y_max": 630,  # Ürünler Y>650'de başlıyor
-            "footer_y_min": 1590,  # KDV Y~799 include et, TOPLAM Y=843 include et
+            "footer_y_min": 1190,  # KDV Y~799 include et, TOPLAM Y=843 include et
         },
-        "price_pattern": r"^\*?([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",  # 2537.47, 250,00, 250 (3+ digit)
+        "price_pattern": r"^.*?\*?([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",  # 2537.47, 250,00, 250 (3+ digit)
         "skip_patterns": [
             r"^TCKN",
             r"^ETTN",
@@ -228,6 +229,7 @@ def load_detections(ocr_json: dict) -> list[Detection]:
             y_min=min(ys),
             y_max=max(ys),
             y_center=(min(ys) + max(ys)) / 2,
+            bbox=bbox
         ))
     return detections
 
@@ -294,25 +296,94 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
         cleaned.append(det)
     sorted_dets = sorted(cleaned, key=lambda d: d.y_center)
     rows = []
+    row_overlap_ratios = []
     current_row = []
     current_row_y = 0.0
-
+    current_row_min_y = float('inf')
+    current_row_max_y = float('-inf')
+    overlap_threshold = 0.40 # arbitrary number???
+    overlap_ratio = 0.0
     for det in sorted_dets:
+        if det.text == "Odenecek KDV Dahil Tutar":
+            print("bla")
         if not current_row:
             current_row.append(det)
-            current_row_y = det.y_center  # ilk detection anchor olarak kalır
-        elif abs(det.y_center - current_row_y) <= y_tolerance:
-            current_row.append(det)
-            # current_row_y güncellenmez — kayma olmasın
+            current_row_min_y = det.y_min
+            current_row_max_y = det.y_max
         else:
-            rows.append(sorted(current_row, key=lambda d: d.x_min))
-            current_row = [det]
-            current_row_y = det.y_center
+            """
+            # Mevcut detection ile current_row arasındaki dikey kesişimi hesapla
+            intersection_min_y = max(det.y_min, current_row_min_y)
+            intersection_max_y = min(det.y_max, current_row_max_y)
+            intersection_length = abs(intersection_max_y - intersection_min_y)
+            
+            det_height = det.y_max - det.y_min
+            current_row_height = current_row_max_y - current_row_min_y
 
+            # Kesişim oranını hem detection'ın yüksekliğine hem de mevcut satırın yüksekliğine göre kontrol et
+            # İkili kontrol, kısmen üst üste binen farklı boyutlardaki kutuları daha iyi yönetir
+            overlap_ratio_det = intersection_length / det_height if det_height > 0 else 0
+            overlap_ratio_row = intersection_length / current_row_height if current_row_height > 0 else 0
+            
+            # Y-center farkı tolerans içinde mi diye de kontrol edelim (opsiyonel ama faydalı olabilir)
+            y_center_diff = abs(det.y_center - (current_row_min_y + current_row_max_y) / 2)
+            if (overlap_ratio_det >= overlap_threshold or overlap_ratio_row >= overlap_threshold) and y_center_diff <= y_tolerance:
+                current_row.append(det)
+                current_row_min_y = min(current_row_min_y, det.y_min)
+                current_row_max_y = max(current_row_max_y, det.y_max)
+            else:
+                rows.append(sorted(current_row, key=lambda d: d.x_min))
+                current_row = [det]
+                current_row_min_y = det.y_min
+                current_row_max_y = det.y_max
+            """                
+                
+            m1,b1 = get_line_equation_from_two_points(det.bbox[0],det.bbox[1])
+            m2,b2 = get_line_equation_from_two_points(det.bbox[2],det.bbox[3])
+            overlap = check_detection(m1,b1,m2,b2, current_row[0].bbox)
+            if (overlap >= 30):
+                overlap_ratio = overlap
+                current_row.append(det)
+                current_row_min_y = min(current_row_min_y, det.y_min)
+                current_row_max_y = max(current_row_max_y, det.y_max)
+            else:
+                rows.append(sorted(current_row, key=lambda d: d.x_min))
+                current_row = [det]
+                current_row_min_y = det.y_min
+                current_row_max_y = det.y_max
+            
     if current_row:
         rows.append(sorted(current_row, key=lambda d: d.x_min))
-
+        row_overlap_ratios.append(overlap_ratio)
+        
     return rows
+
+def get_line_equation_from_two_points(p1: list[float], p2:list[float]) -> tuple[float, float]:
+    """Bounding box'ın alt kenarından (alt-sol ve alt-sağ noktaları) bir doğru denklemi (eğim, y-kesen) çıkarır."""
+    x1, y1 = p1 # -sol
+    x2, y2 = p2 # -sağ
+    if x2 == x1: # Dikey doğru durumu
+        return float('inf'), x1 # Eğim sonsuz, x-keseni x1
+    m = (y2 - y1) / (x2 - x1)
+    b = y1 - m * x1
+    return m, b
+
+def check_detection(m1: float, b1: float,  m2: float, b2:float, BsquareCoords: list[list[float]] ) -> float:
+    
+    # 1. Dikdörtgen koordinatları (x, y)
+    # Örnek: B dikdörtgeni
+    poly_b = Polygon(BsquareCoords)
+    # 2. A dikdörtgeninden türetilen devasa KANAL (Sonsuz Şerit Hilesi)
+    # Diyelim ki A'nın alt çizgisi y=1, üst çizgisi y=3'te. 
+    # x ekseninde -1 milyon ile +1 milyon arası uzatarak "sonsuz" hissi veriyoruz.
+    channel_coords = [(0, m1*0+b1), (2e3, m1*2e3+b1), (2e3, m2*2e3+b2), (0, m2*0+b2)]
+    poly_channel = Polygon(channel_coords)
+    # 3. Kesişim Alanını Hesapla
+    intersection_area = poly_b.intersection(poly_channel).area
+    total_b_area = poly_b.area
+    # 4. Yüzdeyi Bul
+    percentage = (intersection_area / total_b_area) * 100
+    return percentage
 
 # ── Ana parser ────────────────────────────────────────────────────────────────
 
@@ -404,6 +475,7 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
                         x_min=merged[0].x_min, x_max=merged[0].x_max,
                         y_min=merged[0].y_min, y_max=merged[0].y_max,
                         y_center=merged[0].y_center,
+                        bbox=merged[0].bbox
                     )
                     result.append(merged)
                     i += 2
@@ -419,6 +491,7 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
                         x_min=merged[0].x_min, x_max=merged[0].x_max,
                         y_min=merged[0].y_min, y_max=merged[0].y_max,
                         y_center=merged[0].y_center,
+                        bbox=merged[0].bbox
                     )
                     result.append(merged)
                     i += 3
@@ -436,6 +509,7 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
                         x_min=merged[0].x_min, x_max=merged[0].x_max,
                         y_min=merged[0].y_min, y_max=merged[0].y_max,
                         y_center=merged[0].y_center,
+                        bbox=merged[0].bbox
                     )
                     result.append(merged)
                     i += 2
@@ -481,7 +555,7 @@ def parse_receipt(ocr_json: dict) -> Receipt:
             print(f"  [*] Detayli check: Header altinda ({layout['header_y_max']}) ve footer ustunde ({layout['footer_y_min']}) olan detection yok")
         elif len(product_dets) != 0:
             # Product region'daki detection'lari listele (debug icin)
-            for i, d in enumerate(product_dets[:15]):  # ilk 15'ini goster
+            for i, d in enumerate(product_dets):  # ilk 15'ini goster
                 print(f"    prod[{i:2d}] XMax={d.x_max} YMax={d.y_max} Xmin={d.x_min} Ymin={d.y_min} | Y.Center={d.y_center:7.1f} X={d.x_min:6.1f} | {repr(d.text[:25])}")
 
     # Satırlara grupla
@@ -510,8 +584,11 @@ def parse_receipt(ocr_json: dict) -> Receipt:
                 if price:
                     total = price
                     break
-            break
-
+            if price:
+                break
+            else:
+                continue
+            
         # Skip listesinde mi?
         skip_reason = None
         for pattern in profile["skip_patterns"]:
