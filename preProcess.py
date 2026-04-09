@@ -127,6 +127,37 @@ def preProcessImage(image_path: Path):
     print(f"[DEBUG] Success! Saved to: {out_path}\n")
     return True 
 
+def unCruble(image_path: Path):
+    # 1. Görüntüyü gri tonlamalı (siyah-beyaz dengesi için) içeri alıyoruz
+    img = cv2.imread((str(image_path)), cv2.IMREAD_GRAYSCALE)
+
+    # 2. Arka Planı (Gölgeleri) Tahmin Etme (İşin sihri burada)
+    # Çok büyük bir fırça (kernel) alıyoruz. Bu fırça ince siyah yazıları ezer, 
+    # geriye sadece kağıdın kalın buruşukluk gölgeleri kalır.
+    kernel_size = 300 # Görüntü çözünürlüğün 1080p ise bunu 51 veya 71 yapabilirsin.
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
+    background = cv2.morphologyEx(img, cv2.MORPH_DILATE, kernel)
+
+    # 3. Bölme İşlemi (Gölgeleri Yok Et)
+    # Orijinal görüntüyü, bulduğumuz salt "gölge" haritasına bölüyoruz. 
+    # Böylece karanlık yerler aydınlanıyor, kağıt bembeyaz oluyor.
+    diff = cv2.divide(img, background, scale=255)
+
+    # 4. Adaptif Eşikleme (Keskinleştirme)
+    # Kağıt bembeyaz olduktan sonra, sadece yazıları jilet gibi siyah yapmak için:
+    thresh = cv2.adaptiveThreshold(
+        diff, 255, 
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+        cv2.THRESH_BINARY, 
+        21, # Blok boyutu (harflerin kalınlığına göre ayarlayabilirsin)
+        10  # Sabit çıkarım (kalan ufak kumlanmaları temizler)
+    )
+    # Sonucu kaydet
+    out_dir = Path(".processedReceipts")
+    out_path = out_dir / image_path.name
+    cv2.imwrite(str(out_path), thresh)
+    return True
+
 # --- EXECUTION ---
 if __name__ == "__main__":
     receipts_dir = Path("Receipts")  # Büyük R
@@ -135,4 +166,5 @@ if __name__ == "__main__":
     else:
         # Loop through all jpg/jpeg/png files in the directory
         for img_file in receipts_dir.glob("*.[jJpP]*"):
-            preProcessImage(img_file)
+            #preProcessImage(img_file)
+            unCruble(img_file)

@@ -108,7 +108,6 @@ STORE_PROFILES = {
             (r"\s{2,}", " "),                        # çift boşluk
         ],
     },
-
     "migros": {
         "name": "Migros",
         "identifiers": [
@@ -162,12 +161,12 @@ STORE_PROFILES = {
             r"TANKRR"
         ],
         "layout": {
-            "price_x_min": 450,
+            "price_x_min": 230,
             "y_tolerance": 25,  # Standart row tolerance
-            "header_y_max": 630,  # Ürünler Y>650'de başlıyor
+            "header_y_max": 330,  # Ürünler Y>650'de başlıyor
             "footer_y_min": 1190,  # KDV Y~799 include et, TOPLAM Y=843 include et
         },
-        "price_pattern": r"^.*?\*?([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",  # 2537.47, 250,00, 250 (3+ digit)
+        "price_pattern": r"^.*\*([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",  # 2537.47, 250,00, 250 (3+ digit)
         "skip_patterns": [
             r"^TCKN",
             r"^ETTN",
@@ -196,22 +195,35 @@ STORE_PROFILES = {
             r"^\d+[\.,]\d{2}$",       # sadece sayı (KDV tablo satırları)
             r"^\d+[\.,]\d{2}\s+\d+[\.,]\d{2}",  # KDV tablo satırı
             r"^\([\d）]+\)$",          # (1） gibi
-            r"^EFT-POS$",
             r"^BarkoP[O|0]S-2.0.14.70",  # Merge'de satır sonu farklı olabilir
             r"KD[VY]",  # KDV satırı (any position, X sorted footer'da)
             r"^\d+[\.,]\d{2}[A-Z]*$",  # Litraç (38,40LTX) veya sadece sayı + kısaltma
             r"^AFATOPLAM",  # Ara toplam (Tankar)
+            r"^ARATOPLAM",
             r"^TOP$",  # Sadece "TOP" label'ı (TOPLAM label değil)
             r"^KDV$",  # KDV satırı (TOPLAM değil)
             r"^SN:",
             
         ],
-        "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-POS",  # TOPLAM, TOP satır başında, veya TOP ortada
+        "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-[P|F]OS",  # TOPLAM, TOP satır başında, veya TOP ortada
         "date_pattern": r"(\d{2}-\d{2}-\d{4})",
         "name_cleanup": [],
     }
 }
 
+# TODO: Priceların başladığı bölge belli bir mesadefe sabit. price_x_min bu değerin yazılı olmaması gerekiyor.
+# Gerekirse fişin ortasından itibaren denebilir veya bütün aday kelimeler (dets) sondan başa doğru 1.si hariç olmak üzere test
+# edilebilir. Testten geçemeyenler Name_dets'e atılır. Price_dets uzunluğu sıfır ise price bulunamadı denebilir.
+# TODO: header_y_max ise bir noktadan sonra baş ağrıtacak gibi. Bunun da belli bir anahtar kelimeye bağlanması mükün mü?
+# Belki tarih detection ile başlatılabilir header sonu.
+# TODO: Genel olarak performans bence yeterli ancak preprocessing tamamen bilmediğim bir alan. Android'deki ClearScan uygulaması
+# bütün preprocessing adımlarını yapıyor. Tamamen otomatik. Eğer Whatsapp üzerinden gönderilecekse telefon çekimindense bu uygulama
+# üzerinden görsel alınırsa, bir ton ince ayara gerek kalmıyor. Bu preProcessing'leri ben yapana kadar bunları sözü edilen uygulamaya
+# yükledim.
+# TODO: Skip patternlerin biraz daha azaltılması lazım. Her saçmalığın skip olarak değil de farklı yöntemler ile 
+# yok edilmesi gerekiyor. header ve footer'da verinin bırakılması gibi.
+# TODO: Tüm bunları yaparken weight row ile birleşme olayı var ya. Onun patlamaması gerekiyor çünkü öyle bir şeyi 
+# nasıl yaptığımı veya bir daha denersem nasıl yapacağımı bilmiyorum.
 
 # ── OCR çıktısını parse et ────────────────────────────────────────────────────
 
@@ -306,8 +318,8 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
     overlap_threshold = 0.40 # arbitrary number???
     overlap_ratio = 0.0
     for det in sorted_dets:
-        if det.text == "0.45 kg X 89.00":
-            print("bla")
+        #if det.text == "0.45 kg X 89.00":
+        #    print("bla")
         if not current_row:
             current_row.append(det)
             current_row_min_y = det.y_min
@@ -600,13 +612,19 @@ def parse_receipt(ocr_json: dict) -> Receipt:
             if DEBUG:
                 print(f"    [-] SKIP (pattern: {skip_reason})")
             continue
+        
         # Fiyat ve isim detection'larını ayır
         price_dets = [d for d in row if d.x_min >= layout["price_x_min"]]
         name_dets  = [d for d in row if d.x_min <  layout["price_x_min"]]
+        #price_dets = [row[-1]] if row else []
+        #name_dets  = row[:-1] if len(row) > 1 else []
+
 
         if DEBUG:
             print(f"    [*] Price dets (x >= {layout['price_x_min']}): {[d.text for d in price_dets]}")
             print(f"    [*] Name dets (x < {layout['price_x_min']}): {[d.text for d in name_dets]}")
+            #print(f"    [*] Price dets (): {[d.text for d in price_dets]}")
+            #print(f"    [*] Name dets (): {[d.text for d in name_dets]}")
 
         if not price_dets or not name_dets:
             if DEBUG:
