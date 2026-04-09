@@ -203,8 +203,10 @@ STORE_PROFILES = {
             r"^AFATOPLAM",  # Ara toplam (Tankar)
             r"^TOP$",  # Sadece "TOP" label'ı (TOPLAM label değil)
             r"^KDV$",  # KDV satırı (TOPLAM değil)
+            r"^SN:",
+            
         ],
-        "total_pattern": r"^TOPLAM|^TOP|^K.KARTI",  # TOPLAM, TOP satır başında, veya TOP ortada
+        "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-POS",  # TOPLAM, TOP satır başında, veya TOP ortada
         "date_pattern": r"(\d{2}-\d{2}-\d{4})",
         "name_cleanup": [],
     }
@@ -304,7 +306,7 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
     overlap_threshold = 0.40 # arbitrary number???
     overlap_ratio = 0.0
     for det in sorted_dets:
-        if det.text == "Odenecek KDV Dahil Tutar":
+        if det.text == "0.45 kg X 89.00":
             print("bla")
         if not current_row:
             current_row.append(det)
@@ -338,9 +340,9 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
                 current_row_max_y = det.y_max
             """                
                 
-            m1,b1 = get_line_equation_from_two_points(det.bbox[0],det.bbox[1])
-            m2,b2 = get_line_equation_from_two_points(det.bbox[2],det.bbox[3])
-            overlap = check_detection(m1,b1,m2,b2, current_row[0].bbox)
+            m1,b1 = get_line_equation_from_two_points(current_row[0].bbox[0],current_row[0].bbox[1])
+            m2,b2 = get_line_equation_from_two_points(current_row[0].bbox[2],current_row[0].bbox[3])
+            overlap = check_detection(m1,b1,m2,b2, det.bbox)
             if (overlap >= 30):
                 overlap_ratio = overlap
                 current_row.append(det)
@@ -355,7 +357,7 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
     if current_row:
         rows.append(sorted(current_row, key=lambda d: d.x_min))
         row_overlap_ratios.append(overlap_ratio)
-        
+    
     return rows
 
 def get_line_equation_from_two_points(p1: list[float], p2:list[float]) -> tuple[float, float]:
@@ -374,8 +376,6 @@ def check_detection(m1: float, b1: float,  m2: float, b2:float, BsquareCoords: l
     # Örnek: B dikdörtgeni
     poly_b = Polygon(BsquareCoords)
     # 2. A dikdörtgeninden türetilen devasa KANAL (Sonsuz Şerit Hilesi)
-    # Diyelim ki A'nın alt çizgisi y=1, üst çizgisi y=3'te. 
-    # x ekseninde -1 milyon ile +1 milyon arası uzatarak "sonsuz" hissi veriyoruz.
     channel_coords = [(0, m1*0+b1), (2e3, m1*2e3+b1), (2e3, m2*2e3+b2), (0, m2*0+b2)]
     poly_channel = Polygon(channel_coords)
     # 3. Kesişim Alanını Hesapla
