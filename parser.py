@@ -10,7 +10,6 @@ import sys
 from dataclasses import dataclass, field
 from typing import Optional
 from shapely.geometry import Polygon
-from torch import layout
 
 # Global debug flag
 DEBUG = False

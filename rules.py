@@ -8,10 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-
-DEFAULT_ACCOUNT = "gider:market:diger"
+DEFAULT_ACCOUNT = "Gider:Bilinmeyen"
 LEARNED_RULES_FILE = Path("rules_learned.toml")
-
 
 @dataclass
 class Rule:
@@ -33,7 +31,6 @@ class Rule:
             return False
         return True
 
-
 def _parse_rule(d: dict) -> Rule:
     return Rule(
         account=d["account"],
@@ -44,7 +41,6 @@ def _parse_rule(d: dict) -> Rule:
         comment=d.get("comment"),
     )
 
-
 def load_rules(path: Path) -> list[Rule]:
     if not path.exists():
         return []
@@ -52,17 +48,16 @@ def load_rules(path: Path) -> list[Rule]:
         data = tomllib.load(f)
     return [_parse_rule(r) for r in data.get("rule", [])]
 
-
 def find_account(item_name: str, store: str, amount: float, rules: list[Rule]) -> Optional[str]:
     for rule in rules:
         if rule.matches(item_name, store, amount):
             return rule.account
     return None
 
-
 def append_learned_rule(item_name: str, account: str, path: Path = LEARNED_RULES_FILE):
     """Kullanıcının/Claude'un verdiği cevabı learned rules dosyasına ekle."""
-    words = item_name.upper().split()[:2]
+    base_name = re.sub(r'\s*\(.*\)\s*$', '', item_name)  # parantezi at
+    words = base_name.upper().split()[:2]
     pattern = ".*".join(re.escape(w) for w in words)
 
     entry = (
