@@ -7,6 +7,7 @@ from datetime import date
 import json
 import re
 import sys
+import os
 from dataclasses import dataclass, field
 from typing import Optional
 from shapely.geometry import Polygon
@@ -87,6 +88,10 @@ COMMON_NAME_CLEANUPS = [
     (r"\s{2,}", " "),                       # çift boşluk
 ]
 
+COMMON_DATE_PATTERNS = [
+    (r":?(\d{2}[\.\-]\d{2}[\.\-]\d{4})(\s*\d{2}:\d{2})?"), # 31.12.2026, 31-12-2026, :31.12.2026, :31-12-2026
+]
+
 STORE_PROFILES = {
     "bim": {
         "name": "BİM",
@@ -101,14 +106,14 @@ STORE_PROFILES = {
             # Header bölgesi: bu Y'nin altından itibaren ürünler başlar
             "header_y_max": 640,
             # Footer bölgesi: bu Y'den sonrası toplam/KDV/banka bilgisi
-            "footer_y_min": 1550,
+            "footer_y_min": 9999,
         },
         "price_pattern": r"^\*(\d+[\.,]\d{2})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^\([\d）]+\)$"          # (1） gibi
         ],
         "total_pattern": r"^(Odenecek KDV Dahil|TOPLAM(?!\s+KDV)|KRED[i|İ|I] KARTI)",
-        "date_pattern": r"(\d{2}\.\d{2}\.\d{4})\s*\d{2}:\d{2}",  # boşluksuz da yakala
+        "date_pattern": COMMON_DATE_PATTERNS,  # boşluksuz da yakala, arkasından saat de gelebilir.
         # Ürün adı temizleme
         "name_cleanup": COMMON_NAME_CLEANUPS + [
             (r"\s+[\$%]\d*\.?\s*$", ""),            # sondaki $0. %1. %0. %20
@@ -133,7 +138,7 @@ STORE_PROFILES = {
             r"^\([\d）]+\)$"          # (1） gibi
         ],
         "total_pattern": r"^TOPLAM",
-        "date_pattern": r"(\d{2}\.\d{2}\.\d{4})",
+        "date_pattern": COMMON_DATE_PATTERNS,
         "name_cleanup": COMMON_NAME_CLEANUPS + [],
     },
     "tankar": {
@@ -145,14 +150,14 @@ STORE_PROFILES = {
         "layout": {
             "y_tolerance": 25,  # Standart row tolerance
             "header_y_max": 330,  # Ürünler Y>650'de başlıyor
-            "footer_y_min": 1190,  # KDV Y~799 include et, TOPLAM Y=843 include et
+            "footer_y_min": 9999,  # KDV Y~799 include et, TOPLAM Y=843 include et
         },
         "price_pattern": r"^.*\*([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",  # 2537.47, 250,00, 250 (3+ digit)
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^SN:"
         ],
         "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-[P|F]OS",  # TOPLAM, TOP satır başında, veya TOP ortada
-        "date_pattern": r"(\d{2}-\d{2}-\d{4})",
+        "date_pattern": COMMON_DATE_PATTERNS,
         "name_cleanup": COMMON_NAME_CLEANUPS + [],
     }
 }
@@ -211,28 +216,27 @@ def detect_store(detections: list[Detection]) -> Optional[str]:
 # ── Tarih tespiti ─────────────────────────────────────────────────────────────
 
 def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[str], Optional[float]]:
-    pattern = profile.get("date_pattern")
-    if not pattern:
+    patterns = profile.get("date_pattern")
+    if not patterns:
         return None,None
     # Tum detections'da tarih ara (header bolgesine sinirlanma)
     for i, d in enumerate(detections):
         # Tarih pattern'iyle esleyen metinleri kontrol et
-        m = re.search(pattern, d.text)
-        if m:
-            date_str = m.group(1)
-
-            if DEBUG:
-                print(f"  [DATE_CHECK #{i}] '{d.text}' | Y:{d.y_center:.0f}")
-
-            # DD.MM.YYYY veya DD-MM-YYYY -> YYYY-MM-DD
-            parts = re.split(r'[-.]', date_str)
-            if len(parts) == 3:
-                result = f"{parts[2]}-{parts[1]}-{parts[0]}"
+        for pattern in patterns: 
+            m = re.search(pattern, d.text)
+            if m:
+                date_str = m.group(1)
                 if DEBUG:
-                    print(f"    [+] ACCEPT: '{date_str}' -> {result}")
-                return result, d.y_max
-            elif DEBUG:
-                print(f"    [-] SKIP: Split failed. Parts: {parts}")
+                    print(f"  [DATE_CHECK #{i}] '{d.text}' | Y:{d.y_center:.0f}")
+                # DD.MM.YYYY veya DD-MM-YYYY -> YYYY-MM-DD
+                parts = re.split(r'[-.]', date_str)
+                if len(parts) == 3:
+                    result = f"{parts[2]}-{parts[1]}-{parts[0]}"
+                    if DEBUG:
+                        print(f"    [+] ACCEPT: '{date_str}' -> {result}")
+                    return result, d.y_max
+                elif DEBUG:
+                    print(f"    [-] SKIP: Split failed. Parts: {parts}")
 
     if DEBUG:
         print(f"  [DATE_CHECK] No date found")
@@ -687,12 +691,19 @@ def main():
 
     DEBUG = "--debug" in sys.argv
 
-    with open(sys.argv[1], encoding="utf-8") as f:
-        ocr_json = json.load(f)
-
-    receipt = parse_receipt(ocr_json)
-    print_summary(receipt)
-
+    if os.path.isdir(sys.argv[1]):
+        for file in os.listdir(sys.argv[1]):
+            with open(os.path.join(sys.argv[1], file), encoding="utf-8") as f:
+                ocr_json = json.load(f)
+                receipt = parse_receipt(ocr_json)
+                print(file)
+                print_summary(receipt)
+    else:
+        with open(sys.argv[1], encoding="utf-8") as f:
+            ocr_json = json.load(f)
+            receipt = parse_receipt(ocr_json)
+            print_summary(receipt)
+        
     if "--hledger" in sys.argv:
         print("── hledger taslak ──────────────────────────────")
         print(to_hledger(receipt))
