@@ -667,30 +667,17 @@ def print_summary(receipt: Receipt):
             print(f"  [+] Tutarlar eşleşiyor")
     print(f"{'=' * 50}\n")
 
-
-def to_hledger(receipt: Receipt, account_prefix: str = "expenses:food") -> str:
-    """hledger journal formatında çıktı üret (taslak)."""
-    date = receipt.date or "0000-00-00"
-    lines = [f"{date} {receipt.store}"]
-    for item in receipt.items:
-        # Basit kategori tahmini - ileride kural tabanlı yapılabilir
-        account = f"{account_prefix}"
-        lines.append(f"    {account:<45}  {item.amount:.2f} TRY  ; {item.name}")
-    lines.append(f"    liabilities:creditcard")
-    return "\n".join(lines)
-
-
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main():
     global DEBUG
 
     if len(sys.argv) < 2:
-        print("Kullanım: python parser.py <ocr_output.json> [--hledger] [--debug]")
+        print("Kullanım: python parser.py <ocr_output.json> [--debug]")
         sys.exit(1)
 
     DEBUG = "--debug" in sys.argv
-
+    
     if os.path.isdir(sys.argv[1]):
         for file in os.listdir(sys.argv[1]):
             with open(os.path.join(sys.argv[1], file), encoding="utf-8") as f:
@@ -703,11 +690,6 @@ def main():
             ocr_json = json.load(f)
             receipt = parse_receipt(ocr_json)
             print_summary(receipt)
-        
-    if "--hledger" in sys.argv:
-        print("── hledger taslak ──────────────────────────────")
-        print(to_hledger(receipt))
-        print()
 
 if __name__ == "__main__":
     main()
