@@ -158,14 +158,12 @@ STORE_PROFILES = {
     }
 }
 
-# TODO: header_y_max ise bir noktadan sonra baş ağrıtacak gibi. Bunun da belli bir anahtar kelimeye bağlanması mükün mü?
-# Belki tarih detection ile başlatılabilir header sonu.
 # TODO: Genel olarak performans bence yeterli ancak preprocessing tamamen bilmediğim bir alan. Android'deki ClearScan uygulaması
 # bütün preprocessing adımlarını yapıyor. Tamamen otomatik. Eğer Whatsapp üzerinden gönderilecekse telefon çekimindense bu uygulama
 # üzerinden görsel alınırsa, bir ton ince ayara gerek kalmıyor. Bu preProcessing'leri ben yapana kadar bunları sözü edilen uygulamaya
 # yükledim.
 # TODO: Skip patternlerin biraz daha azaltılması lazım. Her saçmalığın skip olarak değil de farklı yöntemler ile 
-# yok edilmesi gerekiyor. header ve footer'da verinin bırakılması gibi.
+# yok edilmesi gerekiyor. header ve footer'da verinin bırakılması gibi. Header tarihten başlıyor.
 # TODO: Tüm bunları yaparken weight row ile birleşme olayı var ya. Onun patlamaması gerekiyor çünkü öyle bir şeyi 
 # nasıl yaptığımı veya bir daha denersem nasıl yapacağımı bilmiyorum.
 # TODO: Ya price'ın başında yıldız olmazsa??????? OCR artığı çok fazla sayı da var.
