@@ -45,7 +45,41 @@ class Receipt:
 
 
 # ── Market profilleri ──────────────────────────────────────────────────────────
-
+COMMON_SKIP_PATTERNS=[
+    r"^TCKN",
+    r"^ETTN",
+    r"^FATURA",
+    r"^E-Arsiv",
+    r"^Sira No",
+    r"^Buyuk Mukellef",
+    r"^\d{15,}$",              # barkod numaraları
+    r"^TOPLAM?\s+KDV",         # "TOPLAM KDV" satırı (asıl toplam değil)
+    r"^Odenecek",
+    r"^Banka",
+    r"^GARANTI",
+    r"^Onay",
+    r"^Ref\.No",
+    r"^KDV\s+(MATRAH|TUTAR|DAHIL)",
+    r"^(KDV|MATRAH|KOV TUTAR|KOV DAH)",
+    r"TOPKDV",
+    r"^POS:",
+    r"^GS No",
+    r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
+    r"^[BI]:[\d]+",            # B:706 S:9638 gibi
+    r"^\d{4,6}\*+\d{4}$",     # kart numarası
+    r"^%\d+\.?$",             # %1. ve %1 — KDV oranı (noktalı veya noktasız)
+    r"^\$\d*\.?$",            # $0. — mobile OCR gürültüsü
+    r"^[\$各\\]",           # 各1 $c}$ gibi saçma karakterler
+    r"^\d+\.$",               # sadece "1."
+    r"^\d+[\.,]\d{2}$",       # sadece sayı (KDV tablo satırları)
+    r"^\d+[\.,]\d{2}\s+\d+[\.,]\d{2}",  # KDV tablo satırı
+    r"^\([\d）]+\)$",
+    r"^AFATOPLAM",  # Ara toplam (Tankar)
+    r"^ARATOPLAM",
+    r"^TOP$",  # Sadece "TOP" label'ı (TOPLAM label değil)
+    r"^KDV$",  # KDV satırı (TOPLAM değil)
+    r"^SN:",
+]
 STORE_PROFILES = {
     "bim": {
         "name": "BİM",
@@ -55,8 +89,6 @@ STORE_PROFILES = {
             r"BIM A\.S",
         ],
         "layout": {
-            # Fiyat sütunu: X koordinatı bu değerin üzerindeyse fiyat
-            "price_x_min": 450,
             # Aynı satır toleransı (piksel)
             "y_tolerance": 18,
             # Header bölgesi: bu Y'nin altından itibaren ürünler başlar
@@ -65,35 +97,8 @@ STORE_PROFILES = {
             "footer_y_min": 1550,
         },
         "price_pattern": r"^\*?(\d+[\.,]\d{2})$",
-        "skip_patterns": [
-            r"^TCKN",
-            r"^ETTN",
-            r"^FATURA",
-            r"^E-Arsiv",
-            r"^Sira No",
-            r"^Buyuk Mukellef",
-            r"^\d{15,}$",              # barkod numaraları
-            r"^TOPLAM?\s+KDV",         # "TOPLAM KDV" satırı (asıl toplam değil)
-            r"^Odenecek",
-            r"^Banka",
-            r"^GARANTI",
-            r"^Onay",
-            r"^Ref\.No",
-            r"^KDV\s+(MATRAH|TUTAR|DAHIL)",
-            r"^(KDV|MATRAH|KOV TUTAR|KOV DAH)",
-            r"TOPKDV",
-            r"^POS:",
-            r"^GS No",
-            r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
-            r"^[BI]:[\d]+",            # B:706 S:9638 gibi
-            r"^\d{4,6}\*+\d{4}$",     # kart numarası
-            r"^%\d+\.?$",             # %1. ve %1 — KDV oranı (noktalı veya noktasız)
-            r"^\$\d*\.?$",            # $0. — mobile OCR gürültüsü
-            r"^[\$各\\]",           # 各1 $c}$ gibi saçma karakterler
-            r"^\d+\.$",               # sadece "1."
-            r"^\d+[\.,]\d{2}$",       # sadece sayı (KDV tablo satırları)
-            r"^\d+[\.,]\d{2}\s+\d+[\.,]\d{2}",  # KDV tablo satırı
-            r"^\([\d）]+\)$",          # (1） gibi
+        "skip_patterns": COMMON_SKIP_PATTERNS + [
+            r"^\([\d）]+\)$"          # (1） gibi
         ],
         "total_pattern": r"^(Odenecek KDV Dahil|TOPLAM(?!\s+KDV)|KRED[i|İ|I] KARTI)",
         "date_pattern": r"(\d{2}\.\d{2}\.\d{4})\s*\d{2}:\d{2}",  # boşluksuz da yakala
@@ -115,40 +120,13 @@ STORE_PROFILES = {
             r"MİGROS",
         ],
         "layout": {
-            "price_x_min": 450,
             "y_tolerance": 18,
             "header_y_max": 500,
             "footer_y_min": 9999,  # henüz bilinmiyor
         },
         "price_pattern": r"^\*?(\d+[\.,]\d{2})$",
-        "skip_patterns": [
-            r"^TCKN",
-            r"^ETTN",
-            r"^FATURA",
-            r"^E-Arsiv",
-            r"^Sira No",
-            r"^Buyuk Mukellef",
-            r"^\d{15,}$",              # barkod numaraları
-            r"^TOPLAM?\s+KDV",         # "TOPLAM KDV" satırı (asıl toplam değil)
-            r"^Odenecek",
-            r"^Banka",
-            r"^GARANTI",
-            r"^Onay",
-            r"^Ref\.No",
-            r"^KDV\s+(MATRAH|TUTAR|DAHIL)",
-            r"^(KDV|MATRAH|KOV TUTAR|KOV DAH)",
-            r"^POS:",
-            r"^GS No",
-            r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
-            r"^[BI]:[\d]+",            # B:706 S:9638 gibi
-            r"^\d{4,6}\*+\d{4}$",     # kart numarası
-            r"^%\d+\.?$",             # %1. ve %1 — KDV oranı (noktalı veya noktasız)
-            r"^\$\d*\.?$",            # $0. — mobile OCR gürültüsü
-            r"^[\$各\\]",           # 各1 $c}$ gibi saçma karakterler
-            r"^\d+\.$",               # sadece "1."
-            r"^\d+[\.,]\d{2}$",       # sadece sayı (KDV tablo satırları)
-            r"^\d+[\.,]\d{2}\s+\d+[\.,]\d{2}",  # KDV tablo satırı
-            r"^\([\d）]+\)$",          # (1） gibi
+        "skip_patterns": COMMON_SKIP_PATTERNS + [
+            r"^\([\d）]+\)$"          # (1） gibi
         ],
         "total_pattern": r"^TOPLAM",
         "date_pattern": r"(\d{2}\.\d{2}\.\d{4})",
@@ -161,49 +139,13 @@ STORE_PROFILES = {
             r"TANKRR"
         ],
         "layout": {
-            "price_x_min": 230,
             "y_tolerance": 25,  # Standart row tolerance
             "header_y_max": 330,  # Ürünler Y>650'de başlıyor
             "footer_y_min": 1190,  # KDV Y~799 include et, TOPLAM Y=843 include et
         },
         "price_pattern": r"^.*\*([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",  # 2537.47, 250,00, 250 (3+ digit)
-        "skip_patterns": [
-            r"^TCKN",
-            r"^ETTN",
-            r"^FATURA",
-            r"^E-Arsiv",
-            r"^Sira No",
-            r"^Buyuk Mukellef",
-            r"^\d{15,}$",              # barkod numaraları
-            r"^TOPLAM?\s+KDV",         # "TOPLAM KDV" satırı (asıl toplam değil)
-            r"^Odenecek",
-            r"^Banka",
-            r"^GARANTI",
-            r"^Onay",
-            r"^Ref\.No",
-            r"^KDV\s+(MATRAH|TUTAR|DAHIL)",
-            r"^(KDV|MATRAH|KOV TUTAR|KOV DAH)",
-            r"^POS:",
-            r"^GS No",
-            r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
-            r"^[BI]:[\d]+",            # B:706 S:9638 gibi
-            r"^\d{4,6}\*+\d{4}$",     # kart numarası
-            r"^%\d+\.?$",             # %1. ve %1 — KDV oranı (noktalı veya noktasız)
-            r"^\$\d*\.?$",            # $0. — mobile OCR gürültüsü
-            r"^[\$各\\]",           # 各1 $c}$ gibi saçma karakterler
-            r"^\d+\.$",               # sadece "1."
-            r"^\d+[\.,]\d{2}$",       # sadece sayı (KDV tablo satırları)
-            r"^\d+[\.,]\d{2}\s+\d+[\.,]\d{2}",  # KDV tablo satırı
-            r"^\([\d）]+\)$",          # (1） gibi
-            r"^BarkoP[O|0]S-2.0.14.70",  # Merge'de satır sonu farklı olabilir
-            r"KD[VY]",  # KDV satırı (any position, X sorted footer'da)
-            r"^\d+[\.,]\d{2}[A-Z]*$",  # Litraç (38,40LTX) veya sadece sayı + kısaltma
-            r"^AFATOPLAM",  # Ara toplam (Tankar)
-            r"^ARATOPLAM",
-            r"^TOP$",  # Sadece "TOP" label'ı (TOPLAM label değil)
-            r"^KDV$",  # KDV satırı (TOPLAM değil)
-            r"^SN:",
-            
+        "skip_patterns": COMMON_SKIP_PATTERNS + [
+            r"^SN:"
         ],
         "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-[P|F]OS",  # TOPLAM, TOP satır başında, veya TOP ortada
         "date_pattern": r"(\d{2}-\d{2}-\d{4})",
@@ -211,9 +153,6 @@ STORE_PROFILES = {
     }
 }
 
-# TODO: Priceların başladığı bölge belli bir mesadefe sabit. price_x_min bu değerin yazılı olmaması gerekiyor.
-# Gerekirse fişin ortasından itibaren denebilir veya bütün aday kelimeler (dets) sondan başa doğru 1.si hariç olmak üzere test
-# edilebilir. Testten geçemeyenler Name_dets'e atılır. Price_dets uzunluğu sıfır ise price bulunamadı denebilir.
 # TODO: header_y_max ise bir noktadan sonra baş ağrıtacak gibi. Bunun da belli bir anahtar kelimeye bağlanması mükün mü?
 # Belki tarih detection ile başlatılabilir header sonu.
 # TODO: Genel olarak performans bence yeterli ancak preprocessing tamamen bilmediğim bir alan. Android'deki ClearScan uygulaması
@@ -548,7 +487,7 @@ def parse_receipt(ocr_json: dict) -> Receipt:
     print(f"[OK] Market tespit edildi: {profile['name']}")
 
     if DEBUG:
-        print(f"\n[LAYOUT] header_y_max: {layout['header_y_max']}, footer_y_min: {layout['footer_y_min']}, price_x_min: {layout['price_x_min']}")
+        print(f"\n[LAYOUT] header_y_max: {layout['header_y_max']}, footer_y_min: {layout['footer_y_min']}")
 
     # Tarih çıkar
     date = extract_date(detections, profile)
@@ -614,17 +553,25 @@ def parse_receipt(ocr_json: dict) -> Receipt:
             continue
         
         # Fiyat ve isim detection'larını ayır
-        price_dets = [d for d in row if d.x_min >= layout["price_x_min"]]
-        name_dets  = [d for d in row if d.x_min <  layout["price_x_min"]]
-        #price_dets = [row[-1]] if row else []
-        #name_dets  = row[:-1] if len(row) > 1 else []
+        first_price_idx=None
+        # Listenin en sonundan (len-1) başına doğru (-1) adım adım (-1) gidiyoruz
+        for i in range(len(row) - 1, -1, -1):
+            if parse_price(row[i].text, profile["price_pattern"]) is not None:
+                first_price_idx = i
+                break 
+        if first_price_idx is not None:
+            # Bulduğumuz indekse kadar olanlar isim, o ve sonrası fiyattır
+            name_dets = row[:first_price_idx]
+            price_dets = row[first_price_idx:]
+        else:
+            # Hiç fiyat yoksa her şey isimdir
+            name_dets = row
+            price_dets = []
 
 
         if DEBUG:
-            print(f"    [*] Price dets (x >= {layout['price_x_min']}): {[d.text for d in price_dets]}")
-            print(f"    [*] Name dets (x < {layout['price_x_min']}): {[d.text for d in name_dets]}")
-            #print(f"    [*] Price dets (): {[d.text for d in price_dets]}")
-            #print(f"    [*] Name dets (): {[d.text for d in name_dets]}")
+            print(f"    [*] Price dets (): {[d.text for d in price_dets]}")
+            print(f"    [*] Name dets (): {[d.text for d in name_dets]}")
 
         if not price_dets or not name_dets:
             if DEBUG:
