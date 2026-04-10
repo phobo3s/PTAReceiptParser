@@ -3,12 +3,14 @@ Fiş Parser - Koordinat tabanlı, çoklu market desteği
 Kullanım: python parser.py ocr_output.json [--hledger] [--debug]
 """
 
+from datetime import date
 import json
 import re
 import sys
 from dataclasses import dataclass, field
 from typing import Optional
 from shapely.geometry import Polygon
+from torch import layout
 
 # Global debug flag
 DEBUG = False
@@ -80,6 +82,12 @@ COMMON_SKIP_PATTERNS=[
     r"^KDV$",  # KDV satırı (TOPLAM değil)
     r"^SN:",
 ]
+
+COMMON_NAME_CLEANUPS = [
+    (r"[\u4e00-\u9fff\u3400-\u4dbf]+",""), # Çince falan temizliği
+    (r"\s{2,}", " "),                       # çift boşluk
+]
+
 STORE_PROFILES = {
     "bim": {
         "name": "BİM",
@@ -96,21 +104,18 @@ STORE_PROFILES = {
             # Footer bölgesi: bu Y'den sonrası toplam/KDV/banka bilgisi
             "footer_y_min": 1550,
         },
-        "price_pattern": r"^\*?(\d+[\.,]\d{2})$",
+        "price_pattern": r"^\*(\d+[\.,]\d{2})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^\([\d）]+\)$"          # (1） gibi
         ],
         "total_pattern": r"^(Odenecek KDV Dahil|TOPLAM(?!\s+KDV)|KRED[i|İ|I] KARTI)",
         "date_pattern": r"(\d{2}\.\d{2}\.\d{4})\s*\d{2}:\d{2}",  # boşluksuz da yakala
         # Ürün adı temizleme
-        "name_cleanup": [
-            (r"\s+[\$%]\d*\.?\s*$", ""),        # sondaki $0. %1. %0. %20
-            (r"\s+\b\d{1}\b\s*$", ""),              # sondaki tek rakam: "PATATES 1" → "PATATES"
-            (r"\s+\$\\.*?\$\s*$", ""),          # $\1c}$ gibi LaTeX artığı
-            (r"\s+[各]\d*\s*$", ""),               # 各1 gibi Çince OCR gürültüsü
-            (r"\s+\\?\d+\.\s*$", ""),           # sondaki OCR artığı: \11. gibi
+        "name_cleanup": COMMON_NAME_CLEANUPS + [
+            (r"\s+[\$%]\d*\.?\s*$", ""),            # sondaki $0. %1. %0. %20
+            (r"\s+\$\\.*?\$\s*$", ""),              # $\1c}$ gibi LaTeX artığı
+            (r"\s+\\?\d+\.\s*$", ""),               # sondaki OCR artığı: \11. gibi
             (r"^(\d+[\.,]\d+)\s*kg\s*[Xx×]\s*(\d+[\.,]\d+)\s+", r"(\1kg × \2) "),  # öndeki kg bilgisi
-            (r"\s{2,}", " "),                        # çift boşluk
         ],
     },
     "migros": {
@@ -122,15 +127,15 @@ STORE_PROFILES = {
         "layout": {
             "y_tolerance": 18,
             "header_y_max": 500,
-            "footer_y_min": 9999,  # henüz bilinmiyor
+            "footer_y_min": 9999,
         },
-        "price_pattern": r"^\*?(\d+[\.,]\d{2})$",
+        "price_pattern": r"^\*(\d+[\.,]\d{2})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^\([\d）]+\)$"          # (1） gibi
         ],
         "total_pattern": r"^TOPLAM",
         "date_pattern": r"(\d{2}\.\d{2}\.\d{4})",
-        "name_cleanup": [],
+        "name_cleanup": COMMON_NAME_CLEANUPS + [],
     },
     "tankar": {
         "name": "Tankar",
@@ -149,7 +154,7 @@ STORE_PROFILES = {
         ],
         "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-[P|F]OS",  # TOPLAM, TOP satır başında, veya TOP ortada
         "date_pattern": r"(\d{2}-\d{2}-\d{4})",
-        "name_cleanup": [],
+        "name_cleanup": COMMON_NAME_CLEANUPS + [],
     }
 }
 
@@ -163,6 +168,7 @@ STORE_PROFILES = {
 # yok edilmesi gerekiyor. header ve footer'da verinin bırakılması gibi.
 # TODO: Tüm bunları yaparken weight row ile birleşme olayı var ya. Onun patlamaması gerekiyor çünkü öyle bir şeyi 
 # nasıl yaptığımı veya bir daha denersem nasıl yapacağımı bilmiyorum.
+# TODO: Ya price'ın başında yıldız olmazsa??????? OCR artığı çok fazla sayı da var.
 
 # ── OCR çıktısını parse et ────────────────────────────────────────────────────
 
@@ -191,7 +197,9 @@ def load_detections(ocr_json: dict) -> list[Detection]:
 
 def detect_store(detections: list[Detection]) -> Optional[str]:
     """Header bölgesindeki metinden marketi tespit et."""
-    # Sadece üst %20'ye bak (header)
+    # Sadece üst %25'e bak (header)
+    # Aslında ymax ile çelişiyor gibi ancak ymax'ın belirlenebilmesi için profilin, onun için de store isminin belirlenmesi lazım
+    # yani ilk %25'e bakmadan header'in neresi olduğu bile belli değil.
     max_y = max(d.y_max for d in detections)
     header_texts = [d.text for d in detections if d.y_center < max_y * 0.25]
 
@@ -205,10 +213,10 @@ def detect_store(detections: list[Detection]) -> Optional[str]:
 
 # ── Tarih tespiti ─────────────────────────────────────────────────────────────
 
-def extract_date(detections: list[Detection], profile: dict) -> Optional[str]:
+def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[str], Optional[float]]:
     pattern = profile.get("date_pattern")
     if not pattern:
-        return None
+        return None,None
     # Tum detections'da tarih ara (header bolgesine sinirlanma)
     for i, d in enumerate(detections):
         # Tarih pattern'iyle esleyen metinleri kontrol et
@@ -225,13 +233,13 @@ def extract_date(detections: list[Detection], profile: dict) -> Optional[str]:
                 result = f"{parts[2]}-{parts[1]}-{parts[0]}"
                 if DEBUG:
                     print(f"    [+] ACCEPT: '{date_str}' -> {result}")
-                return result
+                return result, d.y_max
             elif DEBUG:
                 print(f"    [-] SKIP: Split failed. Parts: {parts}")
 
     if DEBUG:
         print(f"  [DATE_CHECK] No date found")
-    return None
+    return None,None
 
 
 # ── Satır gruplama ────────────────────────────────────────────────────────────
@@ -242,8 +250,7 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
     """
     cleaned = []
     for det in detections:
-        # 1. Çok düşük güvenli okumaları at (Örn: 0.45 olan '8' gibi tipikleri)
-        # %60 da emin değilsen gelme yani.
+        # 1. Çok düşük güvenli okumaları at %60 da emin değilsen gelme yani.
         if det.confidence < 0.60: 
             continue
         cleaned.append(det)
@@ -251,50 +258,20 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
     rows = []
     row_overlap_ratios = []
     current_row = []
-    current_row_y = 0.0
     current_row_min_y = float('inf')
     current_row_max_y = float('-inf')
-    overlap_threshold = 0.40 # arbitrary number???
+    overlap_threshold = 30 # arbitrary number???
     overlap_ratio = 0.0
     for det in sorted_dets:
-        #if det.text == "0.45 kg X 89.00":
-        #    print("bla")
         if not current_row:
             current_row.append(det)
             current_row_min_y = det.y_min
             current_row_max_y = det.y_max
         else:
-            """
-            # Mevcut detection ile current_row arasındaki dikey kesişimi hesapla
-            intersection_min_y = max(det.y_min, current_row_min_y)
-            intersection_max_y = min(det.y_max, current_row_max_y)
-            intersection_length = abs(intersection_max_y - intersection_min_y)
-            
-            det_height = det.y_max - det.y_min
-            current_row_height = current_row_max_y - current_row_min_y
-
-            # Kesişim oranını hem detection'ın yüksekliğine hem de mevcut satırın yüksekliğine göre kontrol et
-            # İkili kontrol, kısmen üst üste binen farklı boyutlardaki kutuları daha iyi yönetir
-            overlap_ratio_det = intersection_length / det_height if det_height > 0 else 0
-            overlap_ratio_row = intersection_length / current_row_height if current_row_height > 0 else 0
-            
-            # Y-center farkı tolerans içinde mi diye de kontrol edelim (opsiyonel ama faydalı olabilir)
-            y_center_diff = abs(det.y_center - (current_row_min_y + current_row_max_y) / 2)
-            if (overlap_ratio_det >= overlap_threshold or overlap_ratio_row >= overlap_threshold) and y_center_diff <= y_tolerance:
-                current_row.append(det)
-                current_row_min_y = min(current_row_min_y, det.y_min)
-                current_row_max_y = max(current_row_max_y, det.y_max)
-            else:
-                rows.append(sorted(current_row, key=lambda d: d.x_min))
-                current_row = [det]
-                current_row_min_y = det.y_min
-                current_row_max_y = det.y_max
-            """                
-                
             m1,b1 = get_line_equation_from_two_points(current_row[0].bbox[0],current_row[0].bbox[1])
             m2,b2 = get_line_equation_from_two_points(current_row[0].bbox[2],current_row[0].bbox[3])
             overlap = check_detection(m1,b1,m2,b2, det.bbox)
-            if (overlap >= 30):
+            if (overlap >= overlap_threshold):
                 overlap_ratio = overlap
                 current_row.append(det)
                 current_row_min_y = min(current_row_min_y, det.y_min)
@@ -490,20 +467,25 @@ def parse_receipt(ocr_json: dict) -> Receipt:
         print(f"\n[LAYOUT] header_y_max: {layout['header_y_max']}, footer_y_min: {layout['footer_y_min']}")
 
     # Tarih çıkar
-    date = extract_date(detections, profile)
+    date, date_y = extract_date(detections, profile)
     if DEBUG:
         print(f"[DATE] Çıkarılan: {date}")
+        
+    # header_y_max: profildeki sabit değer yerine tarih detection'ından al
+    header_y_max = date_y if date_y is not None else layout["header_y_max"]
 
     # Ürün bölgesindeki detection'ları filtrele
     product_dets = [
         d for d in detections
-        if layout["header_y_max"] < d.y_center < layout["footer_y_min"]
+        if header_y_max < d.y_center < layout["footer_y_min"]
     ]
-
+    if DEBUG:
+        print(f"\n[YENİ LAYOUT] header_y_max: {header_y_max}, footer_y_min: {layout['footer_y_min']}")
+        
     if DEBUG:
         print(f"[PRODUCT_REGION] {len(product_dets)} detection secildi ({len(detections)} toplam)")
         if len(product_dets) == 0:
-            print(f"  [*] Detayli check: Header altinda ({layout['header_y_max']}) ve footer ustunde ({layout['footer_y_min']}) olan detection yok")
+            print(f"  [*] Detayli check: Header altinda ({header_y_max}) ve footer ustunde ({layout['footer_y_min']}) olan detection yok")
         elif len(product_dets) != 0:
             # Product region'daki detection'lari listele (debug icin)
             for i, d in enumerate(product_dets):  # ilk 15'ini goster

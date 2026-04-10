@@ -24,7 +24,6 @@ import os
 import sys
 import re
 import logging
-import cv2
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional

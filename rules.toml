@@ -13,7 +13,7 @@
 [[rule]]
 store      = "TANKAR|OPET|SHELL|BP|TOTAL|PO|PETROL OFISI|TURKPETROL"
 amount_min = 500.0
-account    = "Gider:ulasim:yakit"
+account    = "Gider:Otomobil:Yakıt"
 comment    = "Akaryakıt istasyonu yüksek tutar → yakıt"
 
 [[rule]]

@@ -51,14 +51,16 @@ def parse_journal(journal_path: Path) -> list[Transaction]:
             end = i - 1
 
             # Transaction'ın toplam tutarını bul (negatif olan liabilities satırı)
-            total = None
+            total = 0
             for tl in tx_lines:
-                m2 = re.search(r"([\d,]+\.?\d*)\s+TRY", tl)
+                m2 = re.search(r"(-[\d,]+\.?\d*)\s+TRY", tl)
                 if m2:
                     val = float(m2.group(1).replace(".","").replace(",", "."))
-                    if total is None or val > total:
-                        total = val
-
+                    total = total + val
+                    #if total == 0 or val > total:
+                    #    total = val
+            total=abs(total)
+            
             transactions.append(Transaction(
                 start_line=start,
                 end_line=end,
@@ -159,7 +161,8 @@ def build_new_transaction(
     # liabilities satırını bul (negatif veya liabilities içeren)
     liabilities_line = None
     for line in tx.raw_lines[1:]:
-        if "borçlar" in line.lower() or "liabilit" in line.lower(): #TODO: Buraya negatif çıkan satırlar liability satırıdır diyebiliriz belki? ama birden çok satır olursa patlar.
+        if re.search(r"-\s*\d+[\.,]\d{2}\s+TRY", line): # negatif olan satır Liabilities satırıdır. #TODO: birden çok çıkarsa?
+        #if "borçlar" in line.lower() or "liabilit" in line.lower(): #TODO: Buraya negatif çıkan satırlar liability satırıdır diyebiliriz belki? ama birden çok satır olursa patlar.
             liabilities_line = line
             break
 
