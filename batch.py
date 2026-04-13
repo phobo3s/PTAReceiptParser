@@ -57,11 +57,13 @@ def get_ocr_engine():
         use_textline_orientation=True,
         #use_angle_cls=True,
         device='cpu',
+        lang='tr',
+        #character_dict_path='./customKeys.txt', # custom keyler. saçma sapan asci karakterleri ile uğraşmayalım diye
         text_detection_model_name="PP-OCRv5_mobile_det",
         text_recognition_model_name="PP-OCRv5_mobile_rec",
         enable_mkldnn=False,  # prevents MKLDNN/PIR crash
         # Detection (DB) Parameters
-        text_det_unclip_ratio=2.0,   # Default is ~1.5. Increasing this expands the text bounding box. Highly useful for keeping "26.00" or "*250,00" in a single detection block.
+        text_det_unclip_ratio=1.9,   # Default is ~1.5. Increasing this expands the text bounding box. Highly useful for keeping "26.00" or "*250,00" in a single detection block.
         text_det_box_thresh=0.5,     # Default is ~0.6. Lowering this allows the model to detect fainter or slightly blurred text.
         text_det_thresh=0.3,         # Binarization threshold. Lowering it helps with low-contrast print on thermal paper.
         use_doc_unwarping=True

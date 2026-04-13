@@ -89,7 +89,7 @@ COMMON_NAME_CLEANUPS = [
 ]
 
 COMMON_DATE_PATTERNS = [
-    (r":?(\d{2}[\.\-]\d{2}[\.\-]\d{4})(\s*\d{2}:\d{2})?"), # 31.12.2026, 31-12-2026, :31.12.2026, :31-12-2026
+    (r"^.*:?(\d{2}[\.\-\\\/]\d{2}[\.\-\\\/]\d{4})(\s*\d{2}:\d{2})?"), # 31.12.2026, 31-12-2026, :31.12.2026, :31-12-2026
 ]
 
 STORE_PROFILES = {
@@ -102,7 +102,7 @@ STORE_PROFILES = {
         ],
         "layout": {
             # Aynı satır toleransı (piksel)
-            "y_tolerance": 18,
+            "y_tolerance": 20,
             # Header bölgesi: bu Y'nin altından itibaren ürünler başlar
             "header_y_max": 640,
             # Footer bölgesi: bu Y'den sonrası toplam/KDV/banka bilgisi
@@ -122,6 +122,25 @@ STORE_PROFILES = {
             (r"^(\d+[\.,]\d+)\s*kg\s*[Xx×]\s*(\d+[\.,]\d+)\s+", r"(\1kg × \2) "),  # öndeki kg bilgisi
         ],
     },
+    "market": {
+        "name": "Çeşitli Marketler",
+        "identifiers": [
+            r"HAKAN KARACA",
+            r"CAN MARKET"
+        ],
+        "layout": {
+            "y_tolerance": 15,
+            "header_y_max": 500,
+            "footer_y_min": 9999,
+        },
+        "price_pattern": r"^[\*x×](-?[\d]+.+[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
+        "skip_patterns": COMMON_SKIP_PATTERNS + [
+            r"^\([\d）]+\)$"          # (1） gibi
+        ],
+        "total_pattern": r"^TOPLAM",
+        "date_pattern": COMMON_DATE_PATTERNS,
+        "name_cleanup": COMMON_NAME_CLEANUPS + [],
+    },
     "migros": {
         "name": "Migros",
         "identifiers": [
@@ -129,11 +148,11 @@ STORE_PROFILES = {
             r"MİGROS",
         ],
         "layout": {
-            "y_tolerance": 18,
+            "y_tolerance": 20,
             "header_y_max": 500,
             "footer_y_min": 9999,
         },
-        "price_pattern": r"^\*(\d+[\.,]\d{2})$",
+        "price_pattern": r"^[\*x×]([\d]+.+[\d]+,\d{2}|[\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^\([\d）]+\)$"          # (1） gibi
         ],
@@ -148,7 +167,7 @@ STORE_PROFILES = {
             r"TANKRR"
         ],
         "layout": {
-            "y_tolerance": 25,  # Standart row tolerance
+            "y_tolerance": 20,  # Standart row tolerance
             "header_y_max": 330,  # Ürünler Y>650'de başlıyor
             "footer_y_min": 9999,  # KDV Y~799 include et, TOPLAM Y=843 include et
         },
@@ -229,7 +248,7 @@ def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[s
                 if DEBUG:
                     print(f"  [DATE_CHECK #{i}] '{d.text}' | Y:{d.y_center:.0f}")
                 # DD.MM.YYYY veya DD-MM-YYYY -> YYYY-MM-DD
-                parts = re.split(r'[-.]', date_str)
+                parts = re.split(r'[-./]', date_str)
                 if len(parts) == 3:
                     result = f"{parts[2]}-{parts[1]}-{parts[0]}"
                     if DEBUG:
@@ -256,6 +275,7 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
             continue
         cleaned.append(det)
     sorted_dets = sorted(cleaned, key=lambda d: d.y_center)
+    #sorted_dets = sorted(sorted_dets, key=lambda d: d.x_min)
     rows = []
     row_overlap_ratios = []
     current_row = []
@@ -263,6 +283,7 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
     current_row_max_y = float('-inf')
     overlap_threshold = 30 # arbitrary number???
     overlap_ratio = 0.0
+    y_AdaptiveTolerance = y_tolerance
     for det in sorted_dets:
         if not current_row:
             current_row.append(det)
@@ -272,7 +293,7 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
             m1,b1 = get_line_equation_from_two_points(current_row[0].bbox[0],current_row[0].bbox[1])
             m2,b2 = get_line_equation_from_two_points(current_row[0].bbox[2],current_row[0].bbox[3])
             overlap = check_detection(m1,b1,m2,b2, det.bbox)
-            if (overlap >= overlap_threshold):
+            if (overlap >= overlap_threshold) and (det.y_center - current_row[-1].y_center <=   y_AdaptiveTolerance): # and (not row_has_price([current_row[0]])): # and (current_row[0].bbox[1][0] > det.bbox[0][0]):
                 overlap_ratio = overlap
                 current_row.append(det)
                 current_row_min_y = min(current_row_min_y, det.y_min)
@@ -304,8 +325,8 @@ def check_detection(m1: float, b1: float,  m2: float, b2:float, BsquareCoords: l
     # 1. Dikdörtgen koordinatları (x, y)
     # Örnek: B dikdörtgeni
     poly_b = Polygon(BsquareCoords)
-    # 2. A dikdörtgeninden türetilen devasa KANAL (Sonsuz Şerit Hilesi)
-    channel_coords = [(0, m1*0+b1), (2e3, m1*2e3+b1), (2e3, m2*2e3+b2), (0, m2*0+b2)]
+    # 2. A dikdörtgeninden türetilen devasa KANAL (sağı Sonsuz Şerit Hilesi)
+    channel_coords = [(0, (m1*0)+b1), (2e3, m1*2e3+b1), (2e3, m2*2e3+b2), (0, (m2*0+b2))]
     poly_channel = Polygon(channel_coords)
     # 3. Kesişim Alanını Hesapla
     intersection_area = poly_b.intersection(poly_channel).area
@@ -355,6 +376,8 @@ def parse_weight_line(text: str) -> Optional[tuple[float, float]]:
     (miktar, birim_fiyat) döndür, değilse None.
     """
     m = re.search(r"(\d+[\.,]\d+)\s*kg\s*[Xx×]\s*(\d+[\.,]\d+)", text, re.IGNORECASE)
+    if not m:
+        m = re.search(r"(\d+)\s*AD\s*[Xx×]\s*(\d+[\.,]?\d*)TL/AD", text, re.IGNORECASE)
     if m:
         qty   = float(m.group(1).replace(",", "."))
         price = float(m.group(2).replace(",", "."))
@@ -378,6 +401,9 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
       Satır 1: "0.74 kg X 19.75"
       Satır 2: "PATATES"
       Satır 3: *14.62
+      
+      Satır1:3ADX144,00TL/AD
+      Bira 3 adet
 
     Her iki durumu da yakala, isim = "PATATES (0.74kg × 19.75)"
     """
@@ -458,7 +484,9 @@ def parse_receipt(ocr_json: dict) -> Receipt:
     # Market tespit et
     store_key = detect_store(detections)
     if store_key is None:
-        raise ValueError("Market tespit edilemedi! Desteklenen marketler: " + ", ".join(STORE_PROFILES.keys()))
+        #raise ValueError("Market tespit edilemedi! Desteklenen marketler: " + ", ".join(STORE_PROFILES.keys()))
+        print("Market tespit edilemedi! Desteklenen marketler: " + ", ".join(STORE_PROFILES.keys()))
+        store_key = "market"
 
     profile = STORE_PROFILES[store_key]
     layout = profile["layout"]
