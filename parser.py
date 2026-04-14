@@ -705,19 +705,42 @@ def main():
         sys.exit(1)
 
     DEBUG = "--debug" in sys.argv
-    
-    if os.path.isdir(sys.argv[1]):
-        for file in os.listdir(sys.argv[1]):
-            with open(os.path.join(sys.argv[1], file), encoding="utf-8") as f:
-                ocr_json = json.load(f)
-                receipt = parse_receipt(ocr_json)
-                print(file)
-                print_summary(receipt)
-    else:
-        with open(sys.argv[1], encoding="utf-8") as f:
+
+    from snapshots import save_snapshot, check_snapshot
+    from pathlib import Path
+
+    def _process(ocr_path: Path):
+        with open(ocr_path, encoding="utf-8") as f:
             ocr_json = json.load(f)
-            receipt = parse_receipt(ocr_json)
-            print_summary(receipt)
+        receipt = parse_receipt(ocr_json)
+        print_summary(receipt)
+
+        snap_diffs = check_snapshot(ocr_path, receipt)
+        if snap_diffs:
+            print("  [!] SNAPSHOT FARKI TESPIT EDILDI:")
+            for diff in snap_diffs:
+                print(f"      - {diff}")
+            print("  Snapshot guncellensin mi? [e/H] ", end="", flush=True)
+            try:
+                answer = input().strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                answer = "h"
+            if answer == "e":
+                save_snapshot(ocr_path, receipt)
+                print(f"  [snapshot] Guncellendi: {ocr_path.name}")
+            else:
+                print(f"  [snapshot] Korundu.")
+        else:
+            saved = save_snapshot(ocr_path, receipt)
+            if saved:
+                print(f"  [snapshot] Kaydedildi: {ocr_path.name}")
+
+    if os.path.isdir(sys.argv[1]):
+        for file in sorted(os.listdir(sys.argv[1])):
+            print(file)
+            _process(Path(sys.argv[1]) / file)
+    else:
+        _process(Path(sys.argv[1]))
 
 if __name__ == "__main__":
     main()
