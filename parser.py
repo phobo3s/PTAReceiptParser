@@ -373,11 +373,12 @@ def parse_price(text: str, price_pattern: str) -> Optional[float]:
 def parse_weight_line(text: str) -> Optional[tuple[float, float]]:
     """
     '0.74 kg X 19.75' veya '0.24 kg X 199.00' gibi satırları parse et.
+    3 ADx125,40 TL/AD
     (miktar, birim_fiyat) döndür, değilse None.
     """
     m = re.search(r"(\d+[\.,]\d+)\s*kg\s*[Xx×]\s*(\d+[\.,]\d+)", text, re.IGNORECASE)
     if not m:
-        m = re.search(r"(\d+)\s*AD\s*[Xx×]\s*(\d+[\.,]?\d*)TL/AD", text, re.IGNORECASE)
+        m = re.search(r"(\d+)\s*AD\s*[Xx×]\s*(\d+[\.,]?\d*)\s*TL/AD", text, re.IGNORECASE)
     if m:
         qty   = float(m.group(1).replace(",", "."))
         price = float(m.group(2).replace(",", "."))
@@ -510,9 +511,7 @@ def merge_weight_rows(rows: list[list[Detection]], price_pattern: str) -> list[l
                     if freed_dets and i + 2 < len(rows):
                         rows[i + 2] = rows[i + 2] + freed_dets
                         if DEBUG:
-                            print(f"  [DURUM C] Serbest birakilan fiyat {[d.text for d in freed_dets]} "
-                                  f"-> rows[{i+2}] e enjekte edildi")
-
+                            print(f"  [DURUM C] Serbest birakilan fiyat {[d.text for d in freed_dets]} " f"-> rows[{i+2}] e enjekte edildi")
                     i += 2
                     continue
 
