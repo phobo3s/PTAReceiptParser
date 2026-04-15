@@ -116,6 +116,7 @@ STORE_PROFILES = {
         "date_pattern": COMMON_DATE_PATTERNS,  # boşluksuz da yakala, arkasından saat de gelebilir.
         # Ürün adı temizleme
         "name_cleanup": COMMON_NAME_CLEANUPS + [
+            (r"^[=\-]+\s*", ""),                    # baştaki = veya - OCR kalıntısı
             (r"\s+[\$%]\d*\.?\s*$", ""),            # sondaki $0. %1. %0. %20
             (r"\s+\$\\.*?\$\s*$", ""),              # $\1c}$ gibi LaTeX artığı
             (r"\s+\\?\d+\.\s*$", ""),               # sondaki OCR artığı: \11. gibi
@@ -503,6 +504,46 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
                         bbox=merged[0].bbox
                     )
                     result.append(merged)
+                    i += 2
+                    continue
+
+                elif i + 1 < len(rows) and row_has_price(rows[i + 1]):
+                    # Durum C (mobile, stranded price): kg+fiyat aynı satırda,
+                    # sonraki satırda hem isim hem de fiyat var — ama o fiyat
+                    # aslında bir sonraki ürüne ait (OCR'ın satır gruplandırma
+                    # hatası sonucu sürüklendi).
+                    #
+                    # Örnek:
+                    #   ROW i  : "3ADx144,00TL/AD  *432,00"
+                    #   ROW i+1: "=ESLGUTENSIZ BIRA  *199,90"  ← *199,90 sürüklendi
+                    #   ROW i+2: "KOCAMAN MARINEHAMSI"         ← fiyatsız kaldı
+                    #
+                    # Çözüm:
+                    #   - Bu ürün: tag + sonraki satırın ismi, fiyat = kg satırının fiyatı
+                    #   - Sürüklenen *199,90'ı rows[i+2]'ye enjekte et
+                    PRICE_PAT = re.compile(r"^\*?\d+[\.,]\d{2}$")
+                    name_dets  = [d for d in rows[i + 1] if not PRICE_PAT.match(d.text)]
+                    freed_dets = [d for d in rows[i + 1] if     PRICE_PAT.match(d.text)]
+                    name_text  = " ".join(d.text for d in name_dets).strip()
+
+                    merged = row.copy()
+                    merged[0] = Detection(
+                        text=tag + (" " + name_text if name_text else ""),
+                        confidence=merged[0].confidence,
+                        x_min=merged[0].x_min, x_max=merged[0].x_max,
+                        y_min=merged[0].y_min, y_max=merged[0].y_max,
+                        y_center=merged[0].y_center,
+                        bbox=merged[0].bbox
+                    )
+                    result.append(merged)
+
+                    # Sürüklenen fiyat detection'larını bir sonraki satıra enjekte et
+                    if freed_dets and i + 2 < len(rows):
+                        rows[i + 2] = rows[i + 2] + freed_dets
+                        if DEBUG:
+                            print(f"  [DURUM C] Serbest birakilan fiyat {[d.text for d in freed_dets]} "
+                                  f"-> rows[{i+2}] e enjekte edildi")
+
                     i += 2
                     continue
 
