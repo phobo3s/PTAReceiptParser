@@ -46,7 +46,7 @@
         "amount": 40.05
       }
     ],
-    "saved_at": "2026-04-15T09:26:13"
+    "saved_at": "2026-04-15T11:43:18"
   },
   "WhatsApp Image 2026-04-07 at 08.45.16.json": {
     "store": "BİM",
@@ -59,11 +59,11 @@
         "amount": 87.5
       }
     ],
-    "saved_at": "2026-04-15T09:26:13"
+    "saved_at": "2026-04-15T11:43:18"
   },
   "WhatsApp Image 2026-04-09 at 15.28.49.json": {
     "store": "Tankar",
-    "date": "3554-82-39",
+    "date": "2026-03-09",
     "total": 2537.47,
     "items_sum": 2537.47,
     "items": [
@@ -72,7 +72,7 @@
         "amount": 2537.47
       }
     ],
-    "saved_at": "2026-04-15T09:26:13"
+    "saved_at": "2026-04-15T11:43:18"
   },
   "WhatsApp Image 2026-04-09 at 15.52.24.json": {
     "store": "Tankar",
@@ -85,10 +85,10 @@
         "amount": 250.0
       }
     ],
-    "saved_at": "2026-04-15T09:26:13"
+    "saved_at": "2026-04-15T11:43:18"
   },
   "WhatsApp Image 2026-04-13 at 13.20.46 (1).json": {
-    "store": "Çeşitli Marketler",
+    "store": "Migros / Market",
     "date": "2026-04-12",
     "total": 480.0,
     "items_sum": 480.0,
@@ -98,10 +98,10 @@
         "amount": 480.0
       }
     ],
-    "saved_at": "2026-04-15T09:26:13"
+    "saved_at": "2026-04-15T11:43:18"
   },
   "WhatsApp Image 2026-04-13 at 13.20.46.json": {
-    "store": "Çeşitli Marketler",
+    "store": "Migros / Market",
     "date": "2025-04-11",
     "total": 1760.67,
     "items_sum": 1760.67,
@@ -135,7 +135,7 @@
         "amount": 360.0
       },
       {
-        "name": "-ES PILSEN BOS SISE",
+        "name": "-ES PILSEN BOS SISE (4.0kg × 2.00)",
         "amount": 8.0
       },
       {
@@ -151,10 +151,10 @@
         "amount": 100.0
       }
     ],
-    "saved_at": "2026-04-15T09:59:48"
+    "saved_at": "2026-04-15T11:43:18"
   },
   "WhatsApp Image 2026-04-13 at 13.20.47 (1).json": {
-    "store": "Migros",
+    "store": "Migros / Market",
     "date": "2026-04-12",
     "total": 500.92,
     "items_sum": 500.92,
@@ -168,7 +168,7 @@
         "amount": 144.0
       },
       {
-        "name": "DOMATESSALKIMKG %1",
+        "name": "DOMATESSALKIMKG %1 (0.68kg × 149.95)",
         "amount": 101.97
       },
       {
@@ -180,10 +180,10 @@
         "amount": 1.0
       }
     ],
-    "saved_at": "2026-04-15T09:26:13"
+    "saved_at": "2026-04-15T11:43:18"
   },
   "WhatsApp Image 2026-04-13 at 13.20.47.json": {
-    "store": "Çeşitli Marketler",
+    "store": "Migros / Market",
     "date": "2026-04-12",
     "total": 1580.0,
     "items_sum": 1580.0,
@@ -193,6 +193,6 @@
         "amount": 1580.0
       }
     ],
-    "saved_at": "2026-04-15T09:26:13"
+    "saved_at": "2026-04-15T11:43:18"
   }
 }

@@ -3,12 +3,11 @@ Fiş Parser - Koordinat tabanlı, çoklu market desteği
 Kullanım: python parser.py ocr_output.json [--hledger] [--debug]
 """
 
-from datetime import date
 import json
 import re
 import sys
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 from shapely.geometry import Polygon
 
@@ -55,7 +54,7 @@ COMMON_SKIP_PATTERNS=[
     r"^Sira No",
     r"^Buyuk Mukellef",
     r"^\d{15,}$",              # barkod numaraları
-    r"^TOPLAM?\s+KDV",         # "TOPLAM KDV" satırı (asıl toplam değil)
+    r"^TOPLAM\s+KDV",          # "TOPLAM KDV" satırı (asıl toplam değil)
     r"^Odenecek",
     r"^Banka",
     r"^GARANTI",
@@ -89,7 +88,7 @@ COMMON_NAME_CLEANUPS = [
 ]
 
 COMMON_DATE_PATTERNS = [
-    (r"^.*:?(\d{2}[\.\-\\\/]\d{2}[\.\-\\\/]\d{4})(\s*\d{2}:\d{2})?"), # 31.12.2026, 31-12-2026, :31.12.2026, :31-12-2026
+    (r"^.*:?(\d{2}([\.\-\/\\])\d{2}\2\d{4})(\s*\d{2}:\d{2})?"), # 31.12.2026, 31-12-2026, :31.12.2026, :31-12-2026 — delimiter backreference ile tutarlı olmalı
 ]
 
 STORE_PROFILES = {
@@ -123,43 +122,26 @@ STORE_PROFILES = {
             (r"^(\d+[\.,]\d+)\s*kg\s*[Xx×]\s*(\d+[\.,]\d+)\s+", r"(\1kg × \2) "),  # öndeki kg bilgisi
         ],
     },
-    "market": {
-        "name": "Çeşitli Marketler",
+    "migros": {
+        "name": "Migros / Market",
         "identifiers": [
+            r"MIGROS",
+            r"MİGROS",
             r"HAKAN KARACA",
-            r"CAN MARKET"
+            r"CAN MARKET",
         ],
         "layout": {
             "y_tolerance": 15,
             "header_y_max": 500,
             "footer_y_min": 9999,
         },
-        "price_pattern": r"^[\*x×](-?[\d]+.+[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
+        "price_pattern": r"^[\*x×](-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^\([\d）]+\)$"          # (1） gibi
         ],
         "total_pattern": r"^TOPLAM",
         "date_pattern": COMMON_DATE_PATTERNS,
-        "name_cleanup": COMMON_NAME_CLEANUPS + [],
-    },
-    "migros": {
-        "name": "Migros",
-        "identifiers": [
-            r"MIGROS",
-            r"MİGROS",
-        ],
-        "layout": {
-            "y_tolerance": 20,
-            "header_y_max": 500,
-            "footer_y_min": 9999,
-        },
-        "price_pattern": r"^[\*x×]([\d]+.+[\d]+,\d{2}|[\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",
-        "skip_patterns": COMMON_SKIP_PATTERNS + [
-            r"^\([\d）]+\)$"          # (1） gibi
-        ],
-        "total_pattern": r"^TOPLAM",
-        "date_pattern": COMMON_DATE_PATTERNS,
-        "name_cleanup": COMMON_NAME_CLEANUPS + [],
+        "name_cleanup": COMMON_NAME_CLEANUPS,
     },
     "tankar": {
         "name": "Tankar",
@@ -173,10 +155,8 @@ STORE_PROFILES = {
             "footer_y_min": 9999,  # KDV Y~799 include et, TOPLAM Y=843 include et
         },
         "price_pattern": r"^.*\*([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",  # 2537.47, 250,00, 250 (3+ digit)
-        "skip_patterns": COMMON_SKIP_PATTERNS + [
-            r"^SN:"
-        ],
-        "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-[P|F]OS",  # TOPLAM, TOP satır başında, veya TOP ortada
+        "skip_patterns": COMMON_SKIP_PATTERNS,
+        "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-[PF]OS",  # TOPLAM, TOP satır başında, veya TOP ortada
         "date_pattern": COMMON_DATE_PATTERNS,
         "name_cleanup": COMMON_NAME_CLEANUPS + [],
     }
@@ -264,23 +244,6 @@ def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[s
 
 
 # ── Satır gruplama ────────────────────────────────────────────────────────────
-
-def _middle_third_lines(bbox: list[list[float]]) -> tuple[float, float, float, float]:
-    """
-    bbox = [TL, TR, BR, BL] (saat yönünde).
-    Her iki kenarın (sol ve sağ) 1/3 ve 2/3 noktalarını interpolasyonla bulur,
-    böylece bbox'ın orta 1/3'lük bandını tanımlayan iki doğru denklemi döndürür.
-    Döndürür: (m1, b1, m2, b2) — üst çizgi ve alt çizgi.
-    """
-    tl, tr, br, bl = bbox
-    p_top_left  = [tl[0] + (bl[0] - tl[0]) / 3,     tl[1] + (bl[1] - tl[1]) / 3]
-    p_top_right = [tr[0] + (br[0] - tr[0]) / 3,     tr[1] + (br[1] - tr[1]) / 3]
-    p_bot_left  = [tl[0] + 2 * (bl[0] - tl[0]) / 3, tl[1] + 2 * (bl[1] - tl[1]) / 3]
-    p_bot_right = [tr[0] + 2 * (br[0] - tr[0]) / 3, tr[1] + 2 * (br[1] - tr[1]) / 3]
-    m1, b1 = get_line_equation_from_two_points(p_top_left,  p_top_right)
-    m2, b2 = get_line_equation_from_two_points(p_bot_left,  p_bot_right)
-    return m1, b1, m2, b2
-
 
 def _middle_third_bbox(bbox: list[list[float]]) -> list[list[float]]:
     """
@@ -422,27 +385,34 @@ def parse_weight_line(text: str) -> Optional[tuple[float, float]]:
     return None
 
 
-def row_has_price(row):
-    return any(re.match(r"^\*?\d+[\.,]\d{2}$", d.text) for d in row)
+def row_has_price(row, price_pattern: str) -> bool:
+    return any(parse_price(d.text, price_pattern) is not None for d in row)
 
 
-def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
+def merge_weight_rows(rows: list[list[Detection]], price_pattern: str) -> list[list[Detection]]:
     """
-    BİM'de tartılı ürünler 2 veya 3 satır olarak gelebilir:
+    Tartılı/çok birimli ürünler 2 veya 3 satır olarak gelebilir.
 
-    2 satır (server OCR):
-      Satır 1: "0.74 kg X 19.75"
-      Satır 2: "PATATES %1."  *14.62
+    Durum A — kg satırında fiyat YOK:
+      2 satır (server OCR):
+        Satır 1: "0.74 kg X 19.75"
+        Satır 2: "PATATES %1."  *14.62  veya  ×101,97
 
-    3 satır (mobile OCR):
-      Satır 1: "0.74 kg X 19.75"
-      Satır 2: "PATATES"
-      Satır 3: *14.62
-      
-      Satır1:3ADX144,00TL/AD
-      Bira 3 adet
+      3 satır (mobile OCR):
+        Satır 1: "0.74 kg X 19.75"
+        Satır 2: "PATATES"
+        Satır 3: *14.62
 
-    Her iki durumu da yakala, isim = "PATATES (0.74kg × 19.75)"
+    Durum B — kg+fiyat AYNI satırda, isim sonraki satırda:
+        Satır 1: "3ADX144,00TL/AD  *432,00"
+        Satır 2: "Bira 3 adet"
+
+    Durum C — kg+fiyat AYNI satırda, sonraki satırda isim+sürüklenmiş fiyat:
+        Satır 1: "3ADX144,00TL/AD  *432,00"
+        Satır 2: "=ESLGUTENSIZ BIRA  *199,90"  ← *199,90 bir sonraki ürüne ait
+        Satır 3: "KOCAMAN MARINEHAMSI"          ← fiyatsız kaldı → enjekte edilir
+
+    Fiyat prefix'i: *, × veya x (tüm market profilleri için)
     """
     result = []
     i = 0
@@ -455,10 +425,10 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
             qty, unit_price = weight_info
             tag = f"__WEIGHT__{qty}×{unit_price}__"
 
-            if not row_has_price(row):
+            if not row_has_price(row, price_pattern):
                 # Durum A: kg satırında fiyat yok
                 # Sonraki satırda fiyat var mı?
-                if i + 1 < len(rows) and row_has_price(rows[i + 1]):
+                if i + 1 < len(rows) and row_has_price(rows[i + 1], price_pattern):
                     # 2 satır: kg | isim+fiyat
                     merged = rows[i + 1].copy()
                     merged[0] = Detection(
@@ -472,7 +442,7 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
                     result.append(merged)
                     i += 2
                     continue
-                elif i + 2 < len(rows) and row_has_price(rows[i + 2]):
+                elif i + 2 < len(rows) and row_has_price(rows[i + 2], price_pattern):
                     # 3 satır: kg | isim | fiyat
                     name_text = " ".join(d.text for d in rows[i + 1]).strip()
                     combined = (tag + " " + name_text) if name_text else tag
@@ -491,7 +461,7 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
 
             else:
                 # Durum B (mobile): kg+fiyat aynı satırda, isim sonraki satırda
-                if i + 1 < len(rows) and not row_has_price(rows[i + 1]):
+                if i + 1 < len(rows) and not row_has_price(rows[i + 1], price_pattern):
                     name_text = " ".join(d.text for d in rows[i + 1]).strip()
                     # kg satırındaki fiyat detection'ını koru, ismi ekle
                     merged = row.copy()
@@ -507,7 +477,7 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
                     i += 2
                     continue
 
-                elif i + 1 < len(rows) and row_has_price(rows[i + 1]):
+                elif i + 1 < len(rows) and row_has_price(rows[i + 1], price_pattern):
                     # Durum C (mobile, stranded price): kg+fiyat aynı satırda,
                     # sonraki satırda hem isim hem de fiyat var — ama o fiyat
                     # aslında bir sonraki ürüne ait (OCR'ın satır gruplandırma
@@ -521,9 +491,8 @@ def merge_weight_rows(rows: list[list[Detection]]) -> list[list[Detection]]:
                     # Çözüm:
                     #   - Bu ürün: tag + sonraki satırın ismi, fiyat = kg satırının fiyatı
                     #   - Sürüklenen *199,90'ı rows[i+2]'ye enjekte et
-                    PRICE_PAT = re.compile(r"^\*?\d+[\.,]\d{2}$")
-                    name_dets  = [d for d in rows[i + 1] if not PRICE_PAT.match(d.text)]
-                    freed_dets = [d for d in rows[i + 1] if     PRICE_PAT.match(d.text)]
+                    name_dets  = [d for d in rows[i + 1] if parse_price(d.text, price_pattern) is None]
+                    freed_dets = [d for d in rows[i + 1] if parse_price(d.text, price_pattern) is not None]
                     name_text  = " ".join(d.text for d in name_dets).strip()
 
                     merged = row.copy()
@@ -563,7 +532,7 @@ def parse_receipt(ocr_json: dict) -> Receipt:
     if store_key is None:
         #raise ValueError("Market tespit edilemedi! Desteklenen marketler: " + ", ".join(STORE_PROFILES.keys()))
         print("Market tespit edilemedi! Desteklenen marketler: " + ", ".join(STORE_PROFILES.keys()))
-        store_key = "market"
+        store_key = "migros"
 
     profile = STORE_PROFILES[store_key]
     layout = profile["layout"]
@@ -603,7 +572,7 @@ def parse_receipt(ocr_json: dict) -> Receipt:
         print(f"[ROWS] {len(rows)} satıra gruplandırıldı")
 
     # Tartılı ürün satırlarını birleştir
-    rows = merge_weight_rows(rows)
+    rows = merge_weight_rows(rows, profile["price_pattern"])
 
     items = []
     total = None
