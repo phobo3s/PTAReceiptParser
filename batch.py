@@ -21,6 +21,7 @@ Dosya yapısı:
 
 import json
 import os
+import platform
 import sys
 import re
 import logging
@@ -62,14 +63,15 @@ def get_ocr_engine():
         #character_dict_path='./customKeys.txt', # custom keyler. saçma sapan asci karakterleri ile uğraşmayalım diye
         text_detection_model_name="PP-OCRv5_mobile_det",
         text_recognition_model_name="PP-OCRv5_mobile_rec",
-        enable_mkldnn=False,  # prevents MKLDNN/PIR crash
+        enable_mkldnn=(platform.system() == "Linux"),  # Linux'ta aktif; Windows'ta MKLDNN/PIR crash yapar
         # Detection (DB) Parameters
-        text_det_unclip_ratio=1.9,   # Default is ~1.5. Increasing this expands the text bounding box. Highly useful for keeping "26.00" or "*250,00" in a single detection block.
-        text_det_box_thresh=0.5,     # Default is ~0.6. Lowering this allows the model to detect fainter or slightly blurred text.
-        text_det_thresh=0.3,         # Binarization threshold. Lowering it helps with low-contrast print on thermal paper.
-        use_doc_unwarping=True
+        det_limit_side_len=1920,     # Default 960. Telefon fotoğrafları 2000-4000px uzun taraf içerebilir; küçültme küçük yazıları kaybettirir.
+        text_det_unclip_ratio=1.6,   # Default ~1.5. "26.00" veya "*250,00" gibi değerlerin tek blok kalması için yeterli; 1.9 yoğun satırlarda komşu kutuları birleştiriyordu.
+        text_det_box_thresh=0.5,     # Default ~0.6. Düşürülmüş: soluk/bulanık metni de yakalar.
+        text_det_thresh=0.3,         # Binarization threshold. Düşürülmüş: düşük kontrastlı termal kağıt için.
         # Recognition Parameters
-        #unknown drop_score=0.7             # Filters out low-confidence random noise (like smudges recognized as characters).
+        drop_score=0.5,              # OCR seviyesinde noise filtresi; parser'daki 0.60 eşiğiyle tutarlı.
+        use_doc_unwarping=True,
     )
     print("+ PaddleOCR hazır\n")
     return ocr
