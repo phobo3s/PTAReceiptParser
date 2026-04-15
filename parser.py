@@ -264,51 +264,87 @@ def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[s
 
 # ── Satır gruplama ────────────────────────────────────────────────────────────
 
-def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[list[Detection]]:
-    """Yakın Y koordinatlı detection'ları aynı satıra grupla.
-    Karşılaştırma için satırın ortalama y'sini kullan — zincirleme birleşmeyi önler.
+def _middle_third_lines(bbox: list[list[float]]) -> tuple[float, float, float, float]:
     """
-    cleaned = []
-    for det in detections:
-        # 1. Çok düşük güvenli okumaları at %60 da emin değilsen gelme yani.
-        if det.confidence < 0.60: 
-            continue
-        cleaned.append(det)
+    bbox = [TL, TR, BR, BL] (saat yönünde).
+    Her iki kenarın (sol ve sağ) 1/3 ve 2/3 noktalarını interpolasyonla bulur,
+    böylece bbox'ın orta 1/3'lük bandını tanımlayan iki doğru denklemi döndürür.
+    Döndürür: (m1, b1, m2, b2) — üst çizgi ve alt çizgi.
+    """
+    tl, tr, br, bl = bbox
+    p_top_left  = [tl[0] + (bl[0] - tl[0]) / 3,     tl[1] + (bl[1] - tl[1]) / 3]
+    p_top_right = [tr[0] + (br[0] - tr[0]) / 3,     tr[1] + (br[1] - tr[1]) / 3]
+    p_bot_left  = [tl[0] + 2 * (bl[0] - tl[0]) / 3, tl[1] + 2 * (bl[1] - tl[1]) / 3]
+    p_bot_right = [tr[0] + 2 * (br[0] - tr[0]) / 3, tr[1] + 2 * (br[1] - tr[1]) / 3]
+    m1, b1 = get_line_equation_from_two_points(p_top_left,  p_top_right)
+    m2, b2 = get_line_equation_from_two_points(p_bot_left,  p_bot_right)
+    return m1, b1, m2, b2
+
+
+def _middle_third_bbox(bbox: list[list[float]]) -> list[list[float]]:
+    """
+    bbox = [TL, TR, BR, BL].
+    Orta 1/3 bölgesinin 4 köşesini döndürür — check_detection'a geçmek için.
+    """
+    tl, tr, br, bl = bbox
+    p_top_left  = [tl[0] + (bl[0] - tl[0]) / 3,     tl[1] + (bl[1] - tl[1]) / 3]
+    p_top_right = [tr[0] + (br[0] - tr[0]) / 3,     tr[1] + (br[1] - tr[1]) / 3]
+    p_bot_right = [tr[0] + 2 * (br[0] - tr[0]) / 3, tr[1] + 2 * (br[1] - tr[1]) / 3]
+    p_bot_left  = [tl[0] + 2 * (bl[0] - tl[0]) / 3, tl[1] + 2 * (bl[1] - tl[1]) / 3]
+    return [p_top_left, p_top_right, p_bot_right, p_bot_left]
+
+
+def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[list[Detection]]:
+    """
+    Yakın Y koordinatlı detection'ları aynı satıra grupla.
+
+    Bant, ilk detection'ın tam yüksekliğinden oluşturulur; yeni detection'ların
+    orta 1/3'ü bu bantla karşılaştırılır. Böylece:
+      - Tam yükseklik bant: farklı boyutlu detection'ları (ör. fiyat vs. ürün adı) yakalar.
+      - Orta 1/3 kontrol: bitişik satırların kaymasını önler.
+    y_tolerance kesin kesim noktasıdır (>= ile).
+    """
+    cleaned = [d for d in detections if d.confidence >= 0.60]
     sorted_dets = sorted(cleaned, key=lambda d: d.y_center)
-    #sorted_dets = sorted(sorted_dets, key=lambda d: d.x_min)
+
     rows = []
-    row_overlap_ratios = []
-    current_row = []
-    current_row_min_y = float('inf')
-    current_row_max_y = float('-inf')
-    overlap_threshold = 30 # arbitrary number???
-    overlap_ratio = 0.0
-    y_AdaptiveTolerance = y_tolerance
+    current_row: list[Detection] = []
+    band_m1 = band_b1 = band_m2 = band_b2 = 0.0
+    overlap_threshold = 30
+
     for det in sorted_dets:
         if not current_row:
             current_row.append(det)
-            current_row_min_y = det.y_min
-            current_row_max_y = det.y_max
+            tl, tr, br, bl = det.bbox
+            band_m1, band_b1 = get_line_equation_from_two_points(tl, tr)
+            band_m2, band_b2 = get_line_equation_from_two_points(bl, br)
+            continue
+
+        # Kesin y mesafesi kesimi (>= ile, = durumunda da yeni satır)
+        if det.y_center - current_row[-1].y_center >= y_tolerance:
+            rows.append(sorted(current_row, key=lambda d: d.x_min))
+            current_row = [det]
+            tl, tr, br, bl = det.bbox
+            band_m1, band_b1 = get_line_equation_from_two_points(tl, tr)
+            band_m2, band_b2 = get_line_equation_from_two_points(bl, br)
+            continue
+
+        # Orta 1/3 overlap kontrolü: bitişik satır sızmasını önler
+        overlap = check_detection(band_m1, band_b1, band_m2, band_b2, _middle_third_bbox(det.bbox))
+        if overlap >= overlap_threshold:
+            current_row.append(det)
         else:
-            m1,b1 = get_line_equation_from_two_points(current_row[0].bbox[0],current_row[0].bbox[1])
-            m2,b2 = get_line_equation_from_two_points(current_row[0].bbox[2],current_row[0].bbox[3])
-            overlap = check_detection(m1,b1,m2,b2, det.bbox)
-            if (overlap >= overlap_threshold) and (det.y_center - current_row[-1].y_center <=   y_AdaptiveTolerance): # and (not row_has_price([current_row[0]])): # and (current_row[0].bbox[1][0] > det.bbox[0][0]):
-                overlap_ratio = overlap
-                current_row.append(det)
-                current_row_min_y = min(current_row_min_y, det.y_min)
-                current_row_max_y = max(current_row_max_y, det.y_max)
-            else:
-                rows.append(sorted(current_row, key=lambda d: d.x_min))
-                current_row = [det]
-                current_row_min_y = det.y_min
-                current_row_max_y = det.y_max
-            
+            rows.append(sorted(current_row, key=lambda d: d.x_min))
+            current_row = [det]
+            tl, tr, br, bl = det.bbox
+            band_m1, band_b1 = get_line_equation_from_two_points(tl, tr)
+            band_m2, band_b2 = get_line_equation_from_two_points(bl, br)
+
     if current_row:
         rows.append(sorted(current_row, key=lambda d: d.x_min))
-        row_overlap_ratios.append(overlap_ratio)
-    
+
     return rows
+
 
 def get_line_equation_from_two_points(p1: list[float], p2:list[float]) -> tuple[float, float]:
     """Bounding box'ın alt kenarından (alt-sol ve alt-sağ noktaları) bir doğru denklemi (eğim, y-kesen) çıkarır."""
