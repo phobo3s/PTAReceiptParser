@@ -34,6 +34,7 @@ from update_journal import (
     parse_journal, find_matching_transaction,
     build_new_transaction, update_journal, preview,
 )
+from snapshots import save_snapshot, check_snapshot
 #from preProcess import preProcessImage
 
 logging.basicConfig(level=logging.WARNING)  # PaddleOCR loglarını sustur
@@ -70,7 +71,7 @@ def get_ocr_engine():
         # Recognition Parameters
         #unknown drop_score=0.7             # Filters out low-confidence random noise (like smudges recognized as characters).
     )
-    print("✓ PaddleOCR hazır\n")
+    print("+ PaddleOCR hazır\n")
     return ocr
 
 def run_ocr(ocr_engine, image_path: Path) -> dict:
@@ -255,6 +256,29 @@ def process_receipt(
     except ValueError as e:
         print(f"  ❌ Parse hatası: {e}")
         return False
+
+    # Snapshot kontrol — journal güncellemeden önce
+    ocr_path = OCR_CACHE_DIR / (image_path.stem + ".json")
+    snap_diffs = check_snapshot(ocr_path, receipt)
+    if snap_diffs:
+        print(f"  [!] SNAPSHOT FARKI TESPIT EDILDI:")
+        for diff in snap_diffs:
+            print(f"      - {diff}")
+        print(f"  Snapshot guncellensin mi? [e/H] ", end="", flush=True)
+        try:
+            answer = input().strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            answer = "h"
+        if answer == "e":
+            save_snapshot(ocr_path, receipt)
+            print(f"  [snapshot] Guncellendi: {ocr_path.name}")
+        else:
+            print(f"  [snapshot] Korundu -- fis atlandi.")
+            return False
+    else:
+        saved = save_snapshot(ocr_path, receipt)
+        if saved:
+            print(f"  [snapshot] Kaydedildi: {ocr_path.name}")
 
     # Journal eşleştirme
     transactions = parse_journal(journal_path)
