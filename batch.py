@@ -235,6 +235,8 @@ def process_receipt(
     ocr_engine,
     rules: list,
     api_key: Optional[str],
+    excel_path: Optional[Path] = None,
+    excel_sheet: Optional[str] = None,
 ) -> bool:
     """Bir fişi işle. Başarılıysa True döndür."""
     print(f"\n{'═' * 60}")
@@ -308,23 +310,49 @@ def process_receipt(
     except (EOFError, KeyboardInterrupt):
         answer = "h"
 
+    journal_updated = False
     if answer == "e":
         update_journal(journal_path, tx, new_lines)
         print(f"  ✓ Journal güncellendi")
-        return True
+        journal_updated = True
     else:
-        print("  Atlandı.")
-        return False
+        print("  Journal atlandı.")
+
+    # ── Excel güncelleme (opsiyonel, journal'dan bağımsız) ─────────────────────
+    if excel_path:
+        from update_excel import update_excel, preview_excel
+        preview_excel(tx.start_line + 1, categorized, receipt)
+        print("  Excel güncellensin mi? [e/H] ", end="", flush=True)
+        try:
+            excel_answer = input().strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            excel_answer = "h"
+        if excel_answer == "e":
+            ok = update_excel(excel_path, receipt, categorized, excel_sheet)
+            if ok:
+                print(f"  ✓ Excel güncellendi: {excel_path.name}")
+            else:
+                print(f"  ❌ Excel güncellenemedi")
+        else:
+            print("  Excel atlandı.")
+
+    return journal_updated
 
 
 # ── Ana akış ───────────────────────────────────────────────────────────────────
 
 def main():
     if len(sys.argv) < 3:
-        print("Kullanım: python batch.py <fis_klasoru> <journal.hledger> [--api-key sk-ant-...]")
-        print("\nörnekler:")
+        print("Kullanım: python batch.py <fis_klasoru> <journal.hledger> [seçenekler]")
+        print("\nSeçenekler:")
+        print("  --api-key sk-ant-...   Anthropic API anahtarı")
+        print("  --excel butce.xlsx     Excel dosyası (opsiyonel, journal'dan bağımsız)")
+        print("  --sheet SheetName      Excel sheet adı (default: ilk sheet)")
+        print("\nÖrnekler:")
         print("  python batch.py fisler/ butce.hledger")
         print("  python batch.py fisler/ butce.hledger --api-key sk-ant-xxxx")
+        print("  python batch.py fisler/ butce.hledger --excel butce.xlsx")
+        print("  python batch.py fisler/ butce.hledger --excel butce.xlsx --sheet Harcamalar")
         sys.exit(1)
 
     fis_dir      = Path(sys.argv[1])
@@ -339,6 +367,22 @@ def main():
     # Ya da environment variable'dan
     if not api_key:
         api_key = os.environ.get("ANTHROPIC_API_KEY")
+
+    # Excel opsiyonel
+    excel_path = None
+    if "--excel" in sys.argv:
+        idx = sys.argv.index("--excel")
+        if idx + 1 < len(sys.argv):
+            excel_path = Path(sys.argv[idx + 1])
+            if not excel_path.exists():
+                print(f"❌ Excel dosyası bulunamadı: {excel_path}")
+                sys.exit(1)
+
+    excel_sheet = None
+    if "--sheet" in sys.argv:
+        idx = sys.argv.index("--sheet")
+        if idx + 1 < len(sys.argv):
+            excel_sheet = sys.argv[idx + 1]
 
     if not fis_dir.is_dir():
         print(f"❌ Klasör bulunamadı: {fis_dir}")
@@ -362,7 +406,11 @@ def main():
         print(f"🤖 Claude API aktif (bilinmeyen ürünler otomatik kategorilenir)")
     else:
         print(f"⚠️  Claude API yok — bilinmeyen ürünler manuel girilecek")
-        print(f"   (ANTHROPIC_API_KEY env veya --api-key ile ekleyebilirsin)\n")
+        print(f"   (ANTHROPIC_API_KEY env veya --api-key ile ekleyebilirsin)")
+    if excel_path:
+        sheet_info = f" (sheet: {excel_sheet})" if excel_sheet else " (ilk sheet)"
+        print(f"📊 Excel aktif: {excel_path}{sheet_info}")
+    print()
 
     # Ön işleme
     #print(f"⏳ {len(images)} fiş ön işleniyor...")
@@ -390,7 +438,8 @@ def main():
     # İşle
     success, failed, skipped = 0, 0, 0
     for image_path in images:
-        ok = process_receipt(image_path, journal_path, ocr_engine, rules, api_key)
+        ok = process_receipt(image_path, journal_path, ocr_engine, rules, api_key,
+                             excel_path=excel_path, excel_sheet=excel_sheet)
         if ok:
             success += 1
         else:
