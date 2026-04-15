@@ -161,7 +161,7 @@ def build_new_transaction(
     # liabilities satırını bul (negatif veya liabilities içeren)
     liabilities_line = None
     for line in tx.raw_lines[1:]:
-        if re.search(r"-\s*\d+[\.,]\d{2}\s+TRY", line): # negatif olan satır Liabilities satırıdır. #TODO: birden çok çıkarsa?
+        if re.search(r"-\d{0,3}[\.]?\d{1,3}[,]?\d{0,2}\sTRY", line): # negatif olan satır Liabilities satırıdır. #TODO: birden çok çıkarsa?
         #if "borçlar" in line.lower() or "liabilit" in line.lower(): #TODO: Buraya negatif çıkan satırlar liability satırıdır diyebiliriz belki? ama birden çok satır olursa patlar.
             liabilities_line = line
             break
