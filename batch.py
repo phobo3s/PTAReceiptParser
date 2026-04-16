@@ -316,22 +316,29 @@ def process_receipt(
 
     # ── Excel güncelleme ───────────────────────────────────────────────────────
     if excel_path:
-        from update_excel import update_excel, preview_excel
-        preview_excel(categorized, receipt)
-        print("  Excel güncellensin mi? [e/H] ", end="", flush=True)
-        try:
-            answer = input().strip().lower()
-        except (EOFError, KeyboardInterrupt):
-            answer = "h"
-        if answer == "e":
-            ok = update_excel(excel_path, receipt, categorized, excel_sheet)
-            if ok:
-                print(f"  ✓ Excel güncellendi: {excel_path.name}")
-                any_updated = True
-            else:
-                print(f"  ❌ Excel güncellenemedi")
+        from update_excel import find_excel_match, update_excel, preview_excel
+        from_row, account = find_excel_match(excel_path, receipt, excel_sheet)
+
+        if from_row is None:
+            print(f"\n  ❌ Excel: eşleşme bulunamadı!")
+            print(f"     Aranan: {receipt.date}  {receipt.total:.2f} TL")
         else:
-            print("  Excel atlandı.")
+            print(f"  ✓ Excel: satır {from_row} → {account}")
+            preview_excel(categorized, receipt)
+            print("  Excel güncellensin mi? [e/H] ", end="", flush=True)
+            try:
+                answer = input().strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                answer = "h"
+            if answer == "e":
+                ok = update_excel(excel_path, receipt, categorized, excel_sheet)
+                if ok:
+                    print(f"  ✓ Excel güncellendi: {excel_path.name}")
+                    any_updated = True
+                else:
+                    print(f"  ❌ Excel güncellenemedi")
+            else:
+                print("  Excel atlandı.")
 
     return any_updated
 
