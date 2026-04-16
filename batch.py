@@ -231,21 +231,20 @@ def categorize_items(
 
 def process_receipt(
     image_path: Path,
-    journal_path: Path,
     ocr_engine,
     rules: list,
     api_key: Optional[str],
+    journal_path: Optional[Path] = None,
     excel_path: Optional[Path] = None,
     excel_sheet: Optional[str] = None,
 ) -> bool:
-    """Bir fişi işle. Başarılıysa True döndür."""
+    """Bir fişi işle. En az bir kanal güncellendiyse True döndür."""
     print(f"\n{'═' * 60}")
     print(f"  📄 {image_path.name}")
     print(f"{'═' * 60}")
 
     # OCR
     try:
-        #processed_path = Path("ProcessedReceipts") / image_path.name
         ocr_json = ocr_with_cache(ocr_engine, image_path)
     except Exception as e:
         print(f"  ❌ OCR hatası: {e}")
@@ -259,7 +258,7 @@ def process_receipt(
         print(f"  ❌ Parse hatası: {e}")
         return False
 
-    # Snapshot kontrol — journal güncellemeden önce
+    # Snapshot kontrol
     ocr_path = OCR_CACHE_DIR / (image_path.stem + ".json")
     snap_diffs = check_snapshot(ocr_path, receipt)
     if snap_diffs:
@@ -282,81 +281,79 @@ def process_receipt(
         if saved:
             print(f"  [snapshot] Kaydedildi: {ocr_path.name}")
 
-    # Journal eşleştirme
-    transactions = parse_journal(journal_path)
-    tx = find_matching_transaction(receipt, transactions)
-
-    if tx is None:
-        print(f"  ❌ Journal'da eşleşme bulunamadı!")
-        print(f"     Aranan: {receipt.date}  {receipt.total:.2f} TL  ({receipt.store})")
-        return False
-
-    print(f"  ✓ Eşleşen transaction: satır {tx.start_line + 1} → {tx.raw_lines[0].strip()}")
-
-    # Kategorile
+    # Kategorile — her iki kanal için de gerekli
     categorized = categorize_items(receipt, rules, api_key)
 
     print("\n  Kategoriler:")
     for item, account in categorized:
         print(f"    {item.name:<40} → {account}")
 
-    # Önizleme + onay
-    new_lines = build_new_transaction(tx, categorized, receipt)
-    preview(new_lines)
+    any_updated = False
 
-    print("  Journal güncellensin mi? [e/H] ", end="", flush=True)
-    try:
-        answer = input().strip().lower()
-    except (EOFError, KeyboardInterrupt):
-        answer = "h"
+    # ── hledger güncelleme ─────────────────────────────────────────────────────
+    if journal_path:
+        transactions = parse_journal(journal_path)
+        tx = find_matching_transaction(receipt, transactions)
 
-    journal_updated = False
-    if answer == "e":
-        update_journal(journal_path, tx, new_lines)
-        print(f"  ✓ Journal güncellendi")
-        journal_updated = True
-    else:
-        print("  Journal atlandı.")
+        if tx is None:
+            print(f"\n  ❌ hledger: eşleşme bulunamadı!")
+            print(f"     Aranan: {receipt.date}  {receipt.total:.2f} TL  ({receipt.store})")
+        else:
+            print(f"  ✓ hledger: satır {tx.start_line + 1} → {tx.raw_lines[0].strip()}")
+            new_lines = build_new_transaction(tx, categorized, receipt)
+            preview(new_lines)
+            print("  hledger güncellensin mi? [e/H] ", end="", flush=True)
+            try:
+                answer = input().strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                answer = "h"
+            if answer == "e":
+                update_journal(journal_path, tx, new_lines)
+                print(f"  ✓ hledger güncellendi")
+                any_updated = True
+            else:
+                print("  hledger atlandı.")
 
-    # ── Excel güncelleme (opsiyonel, journal'dan bağımsız) ─────────────────────
+    # ── Excel güncelleme ───────────────────────────────────────────────────────
     if excel_path:
         from update_excel import update_excel, preview_excel
-        preview_excel(tx.start_line + 1, categorized, receipt)
+        preview_excel(categorized, receipt)
         print("  Excel güncellensin mi? [e/H] ", end="", flush=True)
         try:
-            excel_answer = input().strip().lower()
+            answer = input().strip().lower()
         except (EOFError, KeyboardInterrupt):
-            excel_answer = "h"
-        if excel_answer == "e":
+            answer = "h"
+        if answer == "e":
             ok = update_excel(excel_path, receipt, categorized, excel_sheet)
             if ok:
                 print(f"  ✓ Excel güncellendi: {excel_path.name}")
+                any_updated = True
             else:
                 print(f"  ❌ Excel güncellenemedi")
         else:
             print("  Excel atlandı.")
 
-    return journal_updated
+    return any_updated
 
 
 # ── Ana akış ───────────────────────────────────────────────────────────────────
 
 def main():
-    if len(sys.argv) < 3:
-        print("Kullanım: python batch.py <fis_klasoru> <journal.hledger> [seçenekler]")
+    if len(sys.argv) < 2:
+        print("Kullanım: python batch.py <fis_klasoru> [seçenekler]")
         print("\nSeçenekler:")
-        print("  --api-key sk-ant-...   Anthropic API anahtarı")
-        print("  --excel butce.xlsx     Excel dosyası (opsiyonel, journal'dan bağımsız)")
-        print("  --sheet SheetName      Excel sheet adı (default: ilk sheet)")
+        print("  --hledger butce.hledger  hledger journal güncelle")
+        print("  --excel   butce.xlsx     Excel defteri güncelle")
+        print("  --sheet   SheetName      Excel sheet adı (default: ilk sheet)")
+        print("  --api-key sk-ant-...     Anthropic API anahtarı")
         print("\nÖrnekler:")
-        print("  python batch.py fisler/ butce.hledger")
-        print("  python batch.py fisler/ butce.hledger --api-key sk-ant-xxxx")
-        print("  python batch.py fisler/ butce.hledger --excel butce.xlsx")
-        print("  python batch.py fisler/ butce.hledger --excel butce.xlsx --sheet Harcamalar")
+        print("  python batch.py fisler/ --hledger butce.hledger")
+        print("  python batch.py fisler/ --excel butce.xlsx")
+        print("  python batch.py fisler/ --hledger butce.hledger --excel butce.xlsx")
+        print("  python batch.py fisler/ --excel butce.xlsx --sheet Harcamalar")
         sys.exit(1)
 
-    fis_dir      = Path(sys.argv[1])
-    journal_path = Path(sys.argv[2])
+    fis_dir = Path(sys.argv[1])
 
     # API key opsiyonel
     api_key = None
@@ -364,9 +361,18 @@ def main():
         idx = sys.argv.index("--api-key")
         if idx + 1 < len(sys.argv):
             api_key = sys.argv[idx + 1]
-    # Ya da environment variable'dan
     if not api_key:
         api_key = os.environ.get("ANTHROPIC_API_KEY")
+
+    # hledger opsiyonel
+    journal_path = None
+    if "--hledger" in sys.argv:
+        idx = sys.argv.index("--hledger")
+        if idx + 1 < len(sys.argv):
+            journal_path = Path(sys.argv[idx + 1])
+            if not journal_path.exists():
+                print(f"❌ hledger dosyası bulunamadı: {journal_path}")
+                sys.exit(1)
 
     # Excel opsiyonel
     excel_path = None
@@ -387,9 +393,10 @@ def main():
     if not fis_dir.is_dir():
         print(f"❌ Klasör bulunamadı: {fis_dir}")
         sys.exit(1)
-    if not journal_path.exists():
-        print(f"❌ Journal bulunamadı: {journal_path}")
-        sys.exit(1)
+
+    if not journal_path and not excel_path:
+        print("⚠️  Güncelleme kanalı seçilmedi — sadece OCR + kategorize yapılacak.")
+        print("   Güncelleme için --hledger ve/veya --excel ekle.\n")
 
     # Fişleri bul
     images = sorted([
@@ -407,6 +414,8 @@ def main():
     else:
         print(f"⚠️  Claude API yok — bilinmeyen ürünler manuel girilecek")
         print(f"   (ANTHROPIC_API_KEY env veya --api-key ile ekleyebilirsin)")
+    if journal_path:
+        print(f"📒 hledger aktif: {journal_path}")
     if excel_path:
         sheet_info = f" (sheet: {excel_sheet})" if excel_sheet else " (ilk sheet)"
         print(f"📊 Excel aktif: {excel_path}{sheet_info}")
@@ -438,7 +447,8 @@ def main():
     # İşle
     success, failed, skipped = 0, 0, 0
     for image_path in images:
-        ok = process_receipt(image_path, journal_path, ocr_engine, rules, api_key,
+        ok = process_receipt(image_path, ocr_engine, rules, api_key,
+                             journal_path=journal_path,
                              excel_path=excel_path, excel_sheet=excel_sheet)
         if ok:
             success += 1

@@ -163,11 +163,11 @@ def get_to_account_rows(ws, from_row: int) -> tuple[int, int]:
 
 # ── Önizleme ──────────────────────────────────────────────────────────────────
 
-def preview_excel(from_row: int, categorized: list[tuple[ReceiptItem, str]], receipt: Receipt):
+def preview_excel(categorized: list[tuple[ReceiptItem, str]], receipt: Receipt):
     print("\n" + "═" * 60)
     print("  Önizleme — Excel'e yazılacak to-account satırları:")
     print("═" * 60)
-    print(f"  (from-account satırı {from_row} korunuyor)")
+    print(f"  Fiş: {receipt.store}  {receipt.date}  {format_excel_amount(receipt.total)} TRY")
     print()
     for item, account in categorized:
         amount_str = format_excel_amount(item.amount)
