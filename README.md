@@ -1,38 +1,38 @@
 # PTAReceiptParser
 
-**Plain Text Accounting Receipt Parser** — Türkçe market fişlerini OCR ile okuyup hledger journal ve/veya Excel muhasebe defterine kalem kalem yazar.
+**Plain Text Accounting Receipt Parser** — OCR-based tool that reads Turkish market receipts and writes itemized entries into an hledger journal and/or an Excel double-entry ledger.
 
 ```
-Fotoğraf → PaddleOCR → Parse → Kategorize → hledger ve/veya Excel güncelle
+Photo → PaddleOCR → Parse → Categorize → Update hledger and/or Excel
 ```
 
 ---
 
-## Özellikler
+## Features
 
-- **Local-first** — bulut OCR yok, abonelik yok; modeller ilk çalıştırmada indirilir
-- **Çift çıktı** — aynı fişi hem hledger journal hem de Excel double-entry defterine yazabilir; kanallar bağımsız seçilir
-- **Kural motoru** — regex tabanlı, önce öğrenilmiş kurallar, sonra `rules.toml`
-- **Oto-öğrenme** — bilinmeyen ürünler için verilen cevaplar `rules_learned.toml`'a kaydedilir, bir daha sorulmaz
-- **Claude API** — bilinmeyen ürünler Claude'a gönderilebilir (opsiyonel)
-- **Ağırlık satırları** — `0.74kg × 19.75` formatını doğru parçalar
-- **OCR önbellek** — `.ocr_cache/` klasörüne yazılır; aynı fiş tekrar taranmaz
-- **Snapshot** — parse sonucu kaydedilir; ileride yeniden çalıştırıldığında fark varsa uyarır
+- **Local-first** — no cloud OCR, no subscriptions; models are downloaded on first run
+- **Dual output** — the same receipt can update both an hledger journal and an Excel ledger independently
+- **Rule engine** — regex-based, learned rules are applied before `rules.toml`
+- **Auto-learning** — answers for unknown items are saved to `rules_learned.toml` and never asked again
+- **Claude API fallback** — unknown items can be sent to Claude for automatic categorization (optional)
+- **Weight-aware** — correctly parses `0.74kg × 19.75` style produce lines
+- **OCR cache** — results are stored in `.ocr_cache/`; the same receipt is never re-scanned
+- **Snapshot** — parse results are saved; a warning is shown if the output changes on a re-run
 
 ---
 
-## Nasıl Çalışır
+## How It Works
 
-### hledger — Önce / Sonra
+### hledger — Before / After
 
+**Before:**
 ```
 2026-03-26 BİM
     gider:market                              333.07 TRY
     Borçlar:kart                             -333.07 TRY
 ```
 
-↓
-
+**After:**
 ```
 2026-03-26 BİM
     gider:market:gida:atistirmalik            26.00 TRY  ; KEKÇİK PİNGUİ
@@ -47,101 +47,101 @@ Fotoğraf → PaddleOCR → Parse → Kategorize → hledger ve/veya Excel günc
     Borçlar:kart                            -333.07 TRY
 ```
 
-### Excel — Double-Entry Defteri
+### Excel — Double-Entry Ledger
 
-Excel'de her transaction iki bölümden oluşur:
+Each transaction in Excel consists of two parts:
 
-| Satır | A | H (Hesap) | I (Tutar) | L (Not) |
-|-------|---|-----------|-----------|---------|
-| 1. (from) | 26.03.2026 | `Borçlar:kart` | `-333,07` | — |
-| 2. (to) | — | `gider:market:gida:meyve` | `23,14` | ELMA GOLDEN |
-| 3. (to) | — | `gider:market:gida:sebze` | `14,62` | PATATES |
+| Row | A (Date) | G (Tag/Note) | H (Account) | I (Amount) |
+|-----|----------|--------------|-------------|------------|
+| 1st (from) | 26.03.2026 | — | `Borçlar:kart` | `-333,07` |
+| 2nd (to) | — | ELMA GOLDEN | `gider:market:gida:meyve` | `23,14` |
+| 3rd (to) | — | PATATES | `gider:market:gida:sebze` | `14,62` |
 | … | — | … | … | … |
 
-Eşleştirme tarih + tutar (±0,02 TL) ile yapılır. Mevcut to-account satırları silinip yenileri eklenir; from-account satırı dokunulmadan korunur.
+Matching is done by date + amount (±0.02 TRY tolerance). Existing to-account rows are deleted and replaced with the itemized lines; the from-account row is left untouched.
 
 ---
 
-## Kurulum
+## Installation
 
 ```bash
 pip install paddleocr pillow numpy anthropic openpyxl
 ```
 
-> PaddleOCR ilk çalıştırmada model dosyalarını indirir (~300 MB).
+> PaddleOCR downloads model files (~300 MB) on first run.
 
-Gereksinimler:
+Requirements:
 - Python 3.12+
 - Windows 11 / Linux
 
 ---
 
-## Dosya Yapısı
+## File Structure
 
 ```
 PTAReceiptParser/
-├── batch.py            # Ana giriş noktası — klasördeki fişleri toplu işler
-├── parser.py           # OCR JSON → Receipt nesnesi (mağaza profilleri burada)
-├── rules.py            # Kural motoru + oto-öğrenme
-├── update_journal.py   # hledger journal eşleştirme ve yerinde güncelleme
-├── update_excel.py     # Excel double-entry defteri eşleştirme ve güncelleme
-├── snapshots.py        # OCR snapshot kayıt/karşılaştırma
-├── rules.toml          # Kategori kuralları (elle düzenlenir)
-└── rules_learned.toml  # Claude/manuel cevaplardan otomatik üretilir
+├── batch.py            # Main entry point — processes a folder of receipt photos
+├── parser.py           # OCR JSON → Receipt object (store profiles live here)
+├── rules.py            # Rule engine + auto-learning
+├── update_journal.py   # hledger journal matching and in-place update
+├── update_excel.py     # Excel double-entry ledger matching and update
+├── snapshots.py        # OCR snapshot save/compare
+├── rules.toml          # Category rules (hand-edited)
+└── rules_learned.toml  # Auto-generated from Claude/manual answers
 ```
 
 ---
 
-## Kullanım
+## Usage
 
-### Sadece OCR + kategorize (güncelleme yok)
+### OCR + categorize only (no updates)
 ```bash
-python batch.py fisler/
+python batch.py receipts/
 ```
 
-### hledger güncelle
+### Update hledger
 ```bash
-python batch.py fisler/ --hledger butce.hledger
+python batch.py receipts/ --hledger budget.hledger
 ```
 
-### Excel güncelle
+### Update Excel
 ```bash
-python batch.py fisler/ --excel butce.xlsx
-python batch.py fisler/ --excel butce.xlsx --sheet Harcamalar
+python batch.py receipts/ --excel budget.xlsx
+python batch.py receipts/ --excel budget.xlsx --sheet Expenses
 ```
 
-### Her ikisini birden güncelle
+### Update both
 ```bash
-python batch.py fisler/ --hledger butce.hledger --excel butce.xlsx
+python batch.py receipts/ --hledger budget.hledger --excel budget.xlsx
 ```
 
-### Claude API ile (bilinmeyen ürünler otomatik kategorilenir)
+### With Claude API (auto-categorizes unknown items)
 ```bash
-python batch.py fisler/ --hledger butce.hledger --api-key sk-ant-...
-# veya
+python batch.py receipts/ --hledger budget.hledger --api-key sk-ant-...
+# or via environment variable
 export ANTHROPIC_API_KEY=sk-ant-...
-python batch.py fisler/ --hledger butce.hledger
+python batch.py receipts/ --hledger budget.hledger
 ```
 
-### Tek fiş parse testi
+### Test a single receipt
 ```bash
-python parser.py fisler/bim_20260326.jpg --debug
+python parser.py receipts/bim_20260326.jpg --debug
 ```
 
-Seçenekler özeti:
+All flags:
 
-| Bayrak | Açıklama |
-|--------|----------|
-| `--hledger <dosya>` | hledger journal dosyası |
-| `--excel <dosya>` | Excel dosyası (`.xlsx` / `.xlsm`) |
-| `--sheet <ad>` | Excel sheet adı (default: ilk sheet) |
-| `--api-key <key>` | Anthropic API anahtarı |
+| Flag | Description |
+|------|-------------|
+| `--hledger <file>` | hledger journal file |
+| `--excel <file>` | Excel file (`.xlsx` / `.xlsm`) |
+| `--sheet <name>` | Excel sheet name (default: first sheet) |
+| `--api-key <key>` | Anthropic API key |
 
 ---
 
-## Kategori Kuralları
+## Category Rules
 
-Kurallar yukarıdan aşağıya işlenir; ilk eşleşen kazanır. Tüm kriterler AND'dir.
+Rules are evaluated top-to-bottom; first match wins. All criteria are AND.
 
 ```toml
 # rules.toml
@@ -161,25 +161,25 @@ amount_max = 499.99
 account    = "gider:market:diger"
 ```
 
-Kullanılabilir kriterler: `item`, `store`, `amount_min`, `amount_max`.
+Available criteria: `item`, `store`, `amount_min`, `amount_max`.
 
-Bilinmeyen ürünler interaktif olarak sorulur (veya Claude API varsa otomatik gönderilir). Cevaplar `rules_learned.toml`'a kaydedilir ve `rules.toml`'dan önce yüklenir.
+Unknown items are asked interactively (or sent to Claude if an API key is configured). Answers are saved to `rules_learned.toml` and loaded before `rules.toml` so learned rules always take priority.
 
 ---
 
-## Yeni Mağaza Ekleme
+## Adding a New Store
 
-`parser.py` içindeki `STORE_PROFILES` sözlüğüne profil ekle:
+Add a profile to `STORE_PROFILES` in `parser.py`:
 
 ```python
 "mystore": {
     "name": "MyStore",
     "identifiers": [r"MYSTORE A\.S"],
     "layout": {
-        "price_x_min": 450,   # isim sütunu ile fiyat sütununu ayıran x eşiği
-        "y_tolerance": 18,    # aynı satır gruplaması için piksel toleransı
-        "header_y_max": 640,  # ürünlerin başladığı y değeri
-        "footer_y_min": 1150, # toplamların başladığı y değeri
+        "price_x_min": 450,   # x threshold separating the name and price columns
+        "y_tolerance": 18,    # pixel tolerance for same-row grouping
+        "header_y_max": 640,  # y below which products start
+        "footer_y_min": 1150, # y above which totals/bank info starts
     },
     "price_pattern": r"^\*?(\d+[\.,]\d{2})$",
     "skip_patterns": [r"^KDV", r"^TOPLAM KDV"],
@@ -189,22 +189,22 @@ Bilinmeyen ürünler interaktif olarak sorulur (veya Claude API varsa otomatik g
 },
 ```
 
-Yeni profil kalibre etmenin en kolay yolu: örnek bir fişe OCR çalıştırıp `.ocr_cache/` içindeki JSON'ı incelemek.
+The easiest way to calibrate a new profile is to run OCR on a sample receipt and inspect the JSON in `.ocr_cache/`.
 
 ---
 
-## Desteklenen Mağazalar
+## Supported Stores
 
-| Mağaza | Tür | Durum |
-|--------|-----|-------|
-| BİM | Market | ✅ |
-| Migros | Market | ✅ |
-| TANKAR | Yakıt / Oto yıkama | ✅ |
+| Store | Type | Status |
+|-------|------|--------|
+| BİM | Grocery | ✅ |
+| Migros | Grocery | ✅ |
+| TANKAR | Fuel / Car wash | ✅ |
 
-Yeni mağaza profilleriyle PR'lar memnuniyetle karşılanır.
+PRs with new store profiles are welcome.
 
 ---
 
-## Lisans
+## License
 
 MIT
