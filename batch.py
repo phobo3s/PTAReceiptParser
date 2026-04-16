@@ -70,7 +70,7 @@ def get_ocr_engine():
         text_det_box_thresh=0.5,     # Default ~0.6. Düşürülmüş: soluk/bulanık metni de yakalar.
         text_det_thresh=0.3,         # Binarization threshold. Düşürülmüş: düşük kontrastlı termal kağıt için.
         # Recognition Parameters
-        drop_score=0.5,              # OCR seviyesinde noise filtresi; parser'daki 0.60 eşiğiyle tutarlı.
+        #drop_score=0.5,              # OCR seviyesinde noise filtresi; parser'daki 0.60 eşiğiyle tutarlı.
         use_doc_unwarping=True,
     )
     print("+ PaddleOCR hazır\n")
