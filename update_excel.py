@@ -22,7 +22,7 @@ Excel sütun yapısı:
 
 Transaction yapısı:
     1. satır  → A=tarih, B=txcode, C=payee, E=currency, H=from_hesap, I=tutar(neg)
-    n. satır  → A=boş, H=to_hesap, I=tutar(pos), L=ürün_adı
+    n. satır  → A=boş, H=to_hesap, I=tutar(pos), G=ürün_adı
     (sonraki A dolu satıra kadar devam eder)
 """
 
@@ -209,7 +209,7 @@ def preview_excel(categorized: list[tuple[ReceiptItem, str]], receipt: Receipt):
     print()
     for item, account in categorized:
         amount_str = format_excel_amount(item.amount)
-        print(f"  H: {account:<45}  I: {amount_str:>12}  L: {item.name}")
+        print(f"  H: {account:<45}  I: {amount_str:>12}  G: {item.name}")
     print(f"\n  Toplam: {format_excel_amount(receipt.total)}")
     print("═" * 60)
 
@@ -286,17 +286,14 @@ def update_excel(
     # 5. Yeni satırları doldur
     for idx, (item, account) in enumerate(categorized):
         r = first_to + idx
-        # E: CURRENCY::TRY (from-row'dan kopyala)
-        if currency_val:
-            ws.cell(row=r, column=5).value = currency_val
         # H: hesap adı
         ws.cell(row=r, column=8).value = account
         # I: tutar (pozitif, Türk formatı string olarak)
         ws.cell(row=r, column=9).value = format_excel_amount(item.amount)
         # J: rate
-        ws.cell(row=r, column=10).value = "1,0000000"
-        # L: ürün adı (yorum/not olarak)
-        ws.cell(row=r, column=12).value = item.name
+        ws.cell(row=r, column=10).value = "1"
+        # G: ürün adı (yorum/not olarak)
+        ws.cell(row=r, column=7).value = item.name
 
     wb.save(str(excel_path))
     return True
