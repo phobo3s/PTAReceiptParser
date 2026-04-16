@@ -161,6 +161,44 @@ def get_to_account_rows(ws, from_row: int) -> tuple[int, int]:
     return first_to, last_to
 
 
+# ── Eşleşme kontrolü (process_receipt'ten çağrılır) ──────────────────────────
+
+def find_excel_match(
+    excel_path: Path,
+    receipt: Receipt,
+    sheet_name: Optional[str] = None,
+) -> tuple[Optional[int], Optional[str]]:
+    """
+    Excel dosyasında eşleşen from-account satırını bul.
+    Döndürür: (row_number, account_name) — bulunamazsa (None, None).
+    """
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        print("  ❌ openpyxl kurulu değil. Kurmak için: pip install openpyxl")
+        return None, None
+
+    if not excel_path.exists():
+        print(f"  ❌ Excel dosyası bulunamadı: {excel_path}")
+        return None, None
+
+    wb = load_workbook(str(excel_path))
+    if sheet_name:
+        if sheet_name not in wb.sheetnames:
+            print(f"  ❌ Sheet bulunamadı: '{sheet_name}'")
+            return None, None
+        ws = wb[sheet_name]
+    else:
+        ws = wb.active
+
+    from_row = find_excel_transaction(ws, receipt)
+    if from_row is None:
+        return None, None
+
+    account = ws.cell(row=from_row, column=8).value  # H sütunu
+    return from_row, str(account) if account else ""
+
+
 # ── Önizleme ──────────────────────────────────────────────────────────────────
 
 def preview_excel(categorized: list[tuple[ReceiptItem, str]], receipt: Receipt):
