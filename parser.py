@@ -327,6 +327,14 @@ def check_detection(m1: float, b1: float,  m2: float, b2:float, BsquareCoords: l
     poly_b = Polygon(BsquareCoords)
     # 2. A dikdörtgeninden türetilen devasa KANAL (sağı Sonsuz Şerit Hilesi)
     channel_coords = [(0, (m1*0)+b1), (2e3, m1*2e3+b1), (2e3, m2*2e3+b2), (0, (m2*0+b2))]
+    if channel_coords[0][1] > channel_coords[3][1]:
+        temp = channel_coords[0] 
+        channel_coords[0] = channel_coords[3]
+        channel_coords[3] = temp
+    if channel_coords[1][1] > channel_coords[2][1]:
+        temp = channel_coords[1] 
+        channel_coords[1] = channel_coords[2]
+        channel_coords[2] = temp
     poly_channel = Polygon(channel_coords)
     # 3. Kesişim Alanını Hesapla
     intersection_area = poly_b.intersection(poly_channel).area

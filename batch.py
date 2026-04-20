@@ -65,7 +65,7 @@ def get_ocr_engine():
         text_recognition_model_name="PP-OCRv5_mobile_rec",
         enable_mkldnn=(platform.system() == "Linux"),  # Linux'ta aktif; Windows'ta MKLDNN/PIR crash yapar
         # Detection (DB) Parameters
-        det_limit_side_len=1920,     # Default 960. Telefon fotoğrafları 2000-4000px uzun taraf içerebilir; küçültme küçük yazıları kaybettirir.
+        #det_limit_side_len=1920,     # Default 960. Telefon fotoğrafları 2000-4000px uzun taraf içerebilir; küçültme küçük yazıları kaybettirir.
         text_det_unclip_ratio=1.6,   # Default ~1.5. "26.00" veya "*250,00" gibi değerlerin tek blok kalması için yeterli; 1.9 yoğun satırlarda komşu kutuları birleştiriyordu.
         text_det_box_thresh=0.5,     # Default ~0.6. Düşürülmüş: soluk/bulanık metni de yakalar.
         text_det_thresh=0.3,         # Binarization threshold. Düşürülmüş: düşük kontrastlı termal kağıt için.
