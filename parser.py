@@ -80,11 +80,19 @@ COMMON_SKIP_PATTERNS=[
     r"^TOP$",  # Sadece "TOP" label'ı (TOPLAM label değil)
     r"^KDV$",  # KDV satırı (TOPLAM değil)
     r"^SN:",
+    r"^EFT-[PF]OS",  # ödeme yöntemi satırı (toplam değil)
+    r"^BROT\s+GIDA",  # gıda-dışı KDV özet satırı
 ]
 
 COMMON_NAME_CLEANUPS = [
     (r"[\u4e00-\u9fff\u3400-\u4dbf]+",""), # Çince falan temizliği
     (r"\s{2,}", " "),                       # çift boşluk
+    # OCR, büyük İ'yi küçük i olarak okuyabiliyor; tamamen büyük harf tokenlerinde düzelt
+    (r'\S+', lambda m: m.group().replace('i', 'İ')
+             if not re.search(r'[a-zçğşüö]', m.group().replace('i', ''))
+             else m.group()),
+    # OCR, harf bağlamında 0 (sıfır) ile O (harf) karıştırıyor: T0ZU → TOZU
+    (r'(?<=[A-ZÇĞŞÜÖİ])0(?=[A-ZÇĞŞÜÖİ])', 'O'),
 ]
 
 COMMON_DATE_PATTERNS = [
@@ -116,7 +124,7 @@ STORE_PROFILES = {
         # Ürün adı temizleme
         "name_cleanup": COMMON_NAME_CLEANUPS + [
             (r"^[=\-]+\s*", ""),                    # baştaki = veya - OCR kalıntısı
-            (r"\s+[\$%]\d*\.?\s*$", ""),            # sondaki $0. %1. %0. %20
+            (r"\s*(?:\d+%|[\$%]\d*\.?)\s*$", ""),      # sondaki KDV kodu: 10% veya %20 veya $0.
             (r"\s+\$\\.*?\$\s*$", ""),              # $\1c}$ gibi LaTeX artığı
             (r"\s+\\?\d+\.\s*$", ""),               # sondaki OCR artığı: \11. gibi
             (r"^(\d+[\.,]\d+)\s*kg\s*[Xx×]\s*(\d+[\.,]\d+)\s+", r"(\1kg × \2) "),  # öndeki kg bilgisi
@@ -137,17 +145,24 @@ STORE_PROFILES = {
         },
         "price_pattern": r"^[\*x×](-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
-            r"^\([\d）]+\)$"          # (1） gibi
+            r"^\([\d）]+\)$",         # (1） gibi
+            r"^(?:TEMEL\s+)?GIDA\s*%", # KDV bant özeti: GIDA %01, TEMEL GIDA %01
+            r"^KOV\s+Z",              # KOV Z20 metadata
+            r"^%\d+\s+%",            # %25 % iNDiRiM gürültüsü
         ],
-        "total_pattern": r"^TOPLAM",
+        "total_pattern": r"^TOPLAM|^EFT-[PF]OS",
         "date_pattern": COMMON_DATE_PATTERNS,
-        "name_cleanup": COMMON_NAME_CLEANUPS,
+        "name_cleanup": COMMON_NAME_CLEANUPS + [
+            (r"^[=\-]+\s*", ""),                        # baştaki = veya - OCR kalıntısı
+            (r"\s*(?:\d+%|%\d+)\s*$", ""),           # sondaki KDV kodu: %20 %1 %01 veya 10%
+        ],
     },
     "tankar": {
         "name": "Tankar",
         "identifiers": [
             r"TANKAR",
-            r"TANKRR"
+            r"TANKRR",
+            r"\bANKAR\b",            # OCR bazen baştaki T'yi düşürüyor
         ],
         "layout": {
             "y_tolerance": 20,  # Standart row tolerance
@@ -666,6 +681,10 @@ def parse_receipt(ocr_json: dict) -> Receipt:
             qty        = float(weight_tag.group(1))
             unit_price = float(weight_tag.group(2))
             base_name  = weight_tag.group(3).strip()
+            if should_skip(base_name, profile["skip_patterns"]):
+                if DEBUG:
+                    print(f"    [-] SKIP: Weight item ismi skip edildi: {base_name!r}")
+                continue
             base_name  = clean_name(base_name, profile["name_cleanup"])
             display    = f"{base_name} ({qty}kg × {unit_price:.2f})"
             if DEBUG:
