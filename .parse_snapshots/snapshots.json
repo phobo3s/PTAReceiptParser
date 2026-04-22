@@ -198,5 +198,94 @@
       }
     ],
     "saved_at": "2026-04-21T20:21:01"
+  },
+  "WhatsApp Image 2026-04-13 at 13.20.46 (1).json": {
+    "store": "Migros / Market",
+    "date": "2026-04-12",
+    "total": 480.0,
+    "items_sum": 480.0,
+    "items": [
+      {
+        "name": "GIDA",
+        "amount": 480.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
+  },
+  "WhatsApp Image 2026-04-13 at 13.20.47.json": {
+    "store": "Migros / Market",
+    "date": "2026-04-12",
+    "total": 1580.0,
+    "items_sum": 1580.0,
+    "items": [
+      {
+        "name": "TEMEL GIDA",
+        "amount": 1580.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
+  },
+  "WhatsApp Image 2026-04-20 at 17.35.07.json": {
+    "store": "FSREF CAN GIDA",
+    "date": "2026-04-18",
+    "total": 390.0,
+    "items_sum": 390.0,
+    "items": [
+      {
+        "name": "ICECEK",
+        "amount": 390.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
+  },
+  "WhatsApp Image 2026-04-20 at 17.35.08 (1).json": {
+    "store": "BİM",
+    "date": "2025-12-13",
+    "total": 509.0,
+    "items_sum": 509.0,
+    "items": [
+      {
+        "name": "2×26,00",
+        "amount": 52.0
+      },
+      {
+        "name": "SU5L",
+        "amount": 0.5
+      },
+      {
+        "name": "TEREYAG250GPERVIN",
+        "amount": 114.5
+      },
+      {
+        "name": "YUMURTA63-72G 15Lİ",
+        "amount": 79.0
+      },
+      {
+        "name": "KAPIRUZGARONLEYİCİ",
+        "amount": 45.0
+      },
+      {
+        "name": "ZENCEFİL250G 2",
+        "amount": 59.0
+      },
+      {
+        "name": "KAGIT HAVLU16LI",
+        "amount": 159.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
+  },
+  "WhatsApp Image 2026-04-20 at 17.35.10.json": {
+    "store": "BİM",
+    "date": "2025-12-15",
+    "total": 539.0,
+    "items_sum": 539.0,
+    "items": [
+      {
+        "name": "LEGO KAMP VE OKCULUK",
+        "amount": 539.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
   }
 }

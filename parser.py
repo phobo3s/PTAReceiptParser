@@ -54,7 +54,7 @@ COMMON_SKIP_PATTERNS=[
     r"^Sira No",
     r"^Buyuk Mukellef",
     r"^\d{15,}$",              # barkod numaraları
-    r"^TOPLAM\s+KDV",          # "TOPLAM KDV" satırı (asıl toplam değil)
+    r"^TOPLAM\s*K[OD]V",        # "TOPLAM KDV" / "TOPLAMKDV" / "TOPLAMKOV" (KDV özeti, asıl toplam değil)
     r"^Odenecek",
     r"^Banka",
     r"^GARANTI",
@@ -96,7 +96,8 @@ COMMON_NAME_CLEANUPS = [
 ]
 
 COMMON_DATE_PATTERNS = [
-    (r"^.*:?(\d{2}([\.\-\/\\])\d{2}\2\d{4})(\s*\d{2}:\d{2})?"), # 31.12.2026, 31-12-2026, :31.12.2026, :31-12-2026 — delimiter backreference ile tutarlı olmalı
+    (r"^.*:?(\d{2}([\.\-\/\\])\d{2}\2\d{4})(\s*\d{2}:\d{2})?"),  # 31.12.2026, 31-12-2026
+    (r"^.*?(\d{2}\.(\d{2})\d{4})\b"),                              # 31.122026 (iki delimiter yok, OCR birleştirmiş)
 ]
 
 STORE_PROFILES = {
@@ -105,6 +106,8 @@ STORE_PROFILES = {
         "identifiers": [
             r"BIM BIRLESIK",
             r"BİM BİRLEŞİK",
+            r"BiM\s+Bi[Rr]",   # OCR bozukluğu: BiM BiRIESiK / BiRLESiK
+            r"SIM BIRLESIK",    # S↔B OCR karışması
             r"BIM A\.S",
         ],
         "layout": {
@@ -119,7 +122,7 @@ STORE_PROFILES = {
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^\([\d）]+\)$"          # (1） gibi
         ],
-        "total_pattern": r"^(Odenecek KDV Dahil|TOPLAM(?!\s+KDV)|KRED[i|İ|I] KARTI)",
+        "total_pattern": r"^(Odenecek K[OD]V Dahil|TOPLAM(?!\s*K[OD]V)|KRED[iİI] KARTI)",
         "date_pattern": COMMON_DATE_PATTERNS,  # boşluksuz da yakala, arkasından saat de gelebilir.
         # Ürün adı temizleme
         "name_cleanup": COMMON_NAME_CLEANUPS + [
@@ -146,7 +149,6 @@ STORE_PROFILES = {
         "price_pattern": r"^[\*x×](-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^\([\d）]+\)$",         # (1） gibi
-            r"^(?:TEMEL\s+)?GIDA\s*%", # KDV bant özeti: GIDA %01, TEMEL GIDA %01
             r"^KOV\s+Z",              # KOV Z20 metadata
             r"^%\d+\s+%",            # %25 % iNDiRiM gürültüsü
         ],
@@ -174,7 +176,48 @@ STORE_PROFILES = {
         "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-[PF]OS",  # TOPLAM, TOP satır başında, veya TOP ortada
         "date_pattern": COMMON_DATE_PATTERNS,
         "name_cleanup": COMMON_NAME_CLEANUPS + [],
-    }
+    },
+    "metro": {
+        "name": "METRO / ETRD GrosMarket",
+        "identifiers": [
+            r"METRO",
+            r"ETRD",
+            r"ETRDGROSMARET",
+        ],
+        "layout": {
+            "y_tolerance": 15,
+            "header_y_max": 500,
+            "footer_y_min": 9999,
+        },
+        "price_pattern": r"^[\*x×](-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2})$",
+        "skip_patterns": COMMON_SKIP_PATTERNS + [
+            r"^[0-9]{8,}[A-Z]",
+        ],
+        "total_pattern": r"^(NET\s+TOPLAM|ODENE|[ÖO]DENE|TOPLAM(?!\s+K[DO]V))",
+        "date_pattern": COMMON_DATE_PATTERNS,
+        "name_cleanup": COMMON_NAME_CLEANUPS + [
+            (r"^[0-9]{8,}[A-Z]?", ""),
+        ],
+    },
+    "fsref": {
+        "name": "FSREF CAN GIDA",
+        "identifiers": [
+            r"FSREF",
+            r"CAN\s+GIDA",
+        ],
+        "layout": {
+            "y_tolerance": 18,
+            "header_y_max": 400,
+            "footer_y_min": 9999,
+        },
+        "price_pattern": r"^.*\*([\d\.]+,\d{2}|[\d]+[\.,]\d{2})$",
+        "skip_patterns": COMMON_SKIP_PATTERNS,
+        "total_pattern": r"^(TOPLAM|TOP|EFT-[PF]OS)",
+        "date_pattern": COMMON_DATE_PATTERNS,
+        "name_cleanup": COMMON_NAME_CLEANUPS + [
+            (r"^[=\-]+\s*", ""),
+        ],
+    },
 }
 
 # TODO: Genel olarak performans bence yeterli ancak preprocessing tamamen bilmediğim bir alan. Android'deki ClearScan uygulaması
@@ -245,6 +288,9 @@ def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[s
                     print(f"  [DATE_CHECK #{i}] '{d.text}' | Y:{d.y_center:.0f}")
                 # DD.MM.YYYY veya DD-MM-YYYY -> YYYY-MM-DD
                 parts = re.split(r'[-./]', date_str)
+                if len(parts) == 2 and len(parts[1]) == 6:
+                    # DD.MMYYYY (ayırıcı yok, ör. 13.122025) → ayır
+                    parts = [parts[0], parts[1][:2], parts[1][2:]]
                 if len(parts) == 3:
                     result = f"{parts[2]}-{parts[1]}-{parts[0]}"
                     if DEBUG:
@@ -568,8 +614,13 @@ def parse_receipt(ocr_json: dict) -> Receipt:
     if DEBUG:
         print(f"[DATE] Çıkarılan: {date}")
         
-    # header_y_max: profildeki sabit değer yerine tarih detection'ından al
-    header_y_max = date_y if date_y is not None else layout["header_y_max"]
+    # header_y_max: tarih profilin beklenen header bölgesindeyse kullan.
+    # Ödeme bloğundaki ikinci tarih damgası (footer) header sınırını bozmamalı.
+    profile_header = layout["header_y_max"]
+    if date_y is not None and date_y <= profile_header:
+        header_y_max = date_y
+    else:
+        header_y_max = profile_header
 
     # Ürün bölgesindeki detection'ları filtrele
     product_dets = [
