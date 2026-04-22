@@ -7,23 +7,25 @@ Kullanım:
     python preprocess.py <klasor>
     python preprocess.py Receipts/
     python preprocess.py fiş.jpg        ← tek dosya da desteklenir
+    python preprocess.py Receipts/ --engine tesseract  ← binary adımı etkin
 
 Adımlar (sırayla):
-    1. Dönme düzeltme     — Hough çizgileriyle eğim tespiti
-    2. Perspektif düzeltme — 4 köşe tespiti + warpPerspective
-    3. Kontrast normalize  — CLAHE ile adaptif histogram eşitleme
-    4. Adaptif binary      — Termal kağıt için adaptif threshold
-    5. Crop               — Fiş dışı boşlukları kırp
+    0. Upscale          — dar görüntüleri (< MIN_WIDTH) büyüt
+    1. Dönme düzeltme   — Hough çizgileriyle eğim tespiti
+    2. Perspektif       — 4 köşe tespiti + warpPerspective
+    3. Bg normalizasyon — gölge/eşitsiz ışık giderme (büyük Gaussian bölme)
+    4. CLAHE kontrast   — adaptif histogram eşitleme (parlaklığa göre ayarlı)
+    5. Denoise          — bilateral filtre ile ince gürültü bastırma
+    6. Binary (opsiyonel) — Tesseract için; PaddleOCR için atlanır
+    7. Crop             — fiş dışı boşlukları kırp
 
 Çıktılar:
     .processedReceipts/
         fiş.jpg                  ← final (tüm adımlar uygulanmış)
         debug/
+            fiş_0_upscale.jpg
             fiş_1_rotated.jpg
-            fiş_2_perspective.jpg
-            fiş_3_contrast.jpg
-            fiş_4_binary.jpg
-            fiş_5_crop.jpg
+            ...
 
 Bağımlılıklar:
     pip install opencv-python numpy Pillow
@@ -32,13 +34,32 @@ Bağımlılıklar:
 import cv2
 import numpy as np
 from pathlib import Path
-from PIL import Image
 import sys
 import traceback
 
 SUPPORTED_EXTS = {".jpg", ".jpeg", ".png"}
 OUTPUT_DIR     = Path(".processedReceipts")
 DEBUG_DIR      = OUTPUT_DIR / "debug"
+
+MIN_WIDTH = 800   # px — dar görüntüleri bu genişliğe büyüt
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ADIM 0 — MİNİMUM GENİŞLİK
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def enforce_min_width(img: np.ndarray, min_width: int = MIN_WIDTH) -> np.ndarray:
+    """
+    Görüntü MIN_WIDTH'ten dardsa orantılı olarak büyüt.
+    PaddleOCR dar görüntülerde karakter sınırlarını yanlış tespit ediyor.
+    """
+    h, w = img.shape[:2]
+    if w >= min_width:
+        return img
+    scale = min_width / w
+    new_w = min_width
+    new_h = int(h * scale)
+    return cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_LANCZOS4)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -49,53 +70,42 @@ def correct_rotation(img: np.ndarray) -> tuple[np.ndarray, float]:
     """
     Hough line detection ile fişin eğimini tespit eder ve düzeltir.
     Fişlerin baskın yatay çizgilerini (metin satırları) kullanır.
-    Döndürülen açı derece cinsindendir.
     """
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # Kenar tespiti
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
 
-    # Hough line transform — sadece belirli uzunluktaki çizgileri al
     lines = cv2.HoughLinesP(
         edges,
         rho=1,
         theta=np.pi / 180,
         threshold=100,
-        minLineLength=img.shape[1] * 0.3,  # görüntü genişliğinin %30'u kadar uzun
+        minLineLength=img.shape[1] * 0.3,
         maxLineGap=20
     )
 
     if lines is None or len(lines) == 0:
         return img, 0.0
 
-    # Her çizginin açısını hesapla
     angles = []
     for line in lines:
         x1, y1, x2, y2 = line[0]
         if x2 - x1 == 0:
-            continue  # dikey çizgi, atla
+            continue
         angle = np.degrees(np.arctan2(y2 - y1, x2 - x1))
-        # Sadece yataya yakın çizgileri kullan (-30 ile +30 derece arası)
         if -30 < angle < 30:
             angles.append(angle)
 
     if not angles:
         return img, 0.0
 
-    # Medyan açı — outlier'lara karşı dayanıklı
     median_angle = np.median(angles)
-
-    # Çok küçük açıları düzeltmeye gerek yok (0.3° altı)
     if abs(median_angle) < 0.3:
         return img, 0.0
 
-    # Görüntüyü döndür
     h, w = img.shape[:2]
     center = (w // 2, h // 2)
     M = cv2.getRotationMatrix2D(center, median_angle, 1.0)
 
-    # Döndürme sonrası köşe kaymasını önlemek için yeni boyutu hesapla
     cos = abs(M[0, 0])
     sin = abs(M[0, 1])
     new_w = int(h * sin + w * cos)
@@ -108,7 +118,6 @@ def correct_rotation(img: np.ndarray) -> tuple[np.ndarray, float]:
         flags=cv2.INTER_CUBIC,
         borderMode=cv2.BORDER_REPLICATE
     )
-
     return rotated, median_angle
 
 
@@ -122,189 +131,191 @@ def correct_perspective(img: np.ndarray) -> np.ndarray:
     Köşe tespiti başarısız olursa orijinal görüntüyü döndürür.
     """
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # Blur + threshold ile arka planı temizle
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-    # Morfolojik işlemler — delikleri kapat
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=3)
 
-    # Kontur bul
     contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
     if not contours:
         return img
 
-    # En büyük konturu al (fiş olmalı)
     largest = max(contours, key=cv2.contourArea)
     area = cv2.contourArea(largest)
-
-    # Görüntü alanının en az %20'si kadar olmalı (gürültü filtresi)
     img_area = img.shape[0] * img.shape[1]
     if area < img_area * 0.20:
         return img
 
-    # Kontur yaklaşımı — 4 köşeye indir
     peri = cv2.arcLength(largest, True)
     approx = cv2.approxPolyDP(largest, 0.02 * peri, True)
 
     if len(approx) != 4:
-        # 4 köşe bulunamadı — bounding rect ile fallback
         x, y, w, h = cv2.boundingRect(largest)
-        # Görüntünün büyük kısmı zaten fiş ise perspective işlemi gereksiz
         if w > img.shape[1] * 0.85 and h > img.shape[0] * 0.85:
             return img
-        # Bounding rect köşelerini kullan
         approx = np.array([
             [[x, y]], [[x + w, y]], [[x + w, y + h]], [[x, y + h]]
         ], dtype=np.float32)
-    
-    # 4 köşeyi sırala: sol-üst, sağ-üst, sağ-alt, sol-alt
+
     pts = approx.reshape(4, 2).astype(np.float32)
     rect = order_points(pts)
-
     tl, tr, br, bl = rect
 
-    # Hedef genişlik ve yüksekliği hesapla
-    width_top    = np.linalg.norm(tr - tl)
-    width_bottom = np.linalg.norm(br - bl)
-    max_width    = int(max(width_top, width_bottom))
+    max_width  = int(max(np.linalg.norm(tr - tl), np.linalg.norm(br - bl)))
+    max_height = int(max(np.linalg.norm(bl - tl), np.linalg.norm(br - tr)))
 
-    height_left  = np.linalg.norm(bl - tl)
-    height_right = np.linalg.norm(br - tr)
-    max_height   = int(max(height_left, height_right))
-
-    # Hedef köşeler (düz dikdörtgen)
     dst = np.array([
-        [0, 0],
-        [max_width - 1, 0],
-        [max_width - 1, max_height - 1],
-        [0, max_height - 1]
+        [0, 0], [max_width - 1, 0],
+        [max_width - 1, max_height - 1], [0, max_height - 1]
     ], dtype=np.float32)
 
     M = cv2.getPerspectiveTransform(rect, dst)
-    warped = cv2.warpPerspective(img, M, (max_width, max_height))
-
-    return warped
+    return cv2.warpPerspective(img, M, (max_width, max_height))
 
 
 def order_points(pts: np.ndarray) -> np.ndarray:
-    """4 noktayı sol-üst, sağ-üst, sağ-alt, sol-alt sırasına koy."""
     rect = np.zeros((4, 2), dtype=np.float32)
-
     s = pts.sum(axis=1)
-    rect[0] = pts[np.argmin(s)]   # sol-üst: en küçük toplam
-    rect[2] = pts[np.argmax(s)]   # sağ-alt: en büyük toplam
-
+    rect[0] = pts[np.argmin(s)]
+    rect[2] = pts[np.argmax(s)]
     diff = np.diff(pts, axis=1)
-    rect[1] = pts[np.argmin(diff)]  # sağ-üst: en küçük fark
-    rect[3] = pts[np.argmax(diff)]  # sol-alt: en büyük fark
-
+    rect[1] = pts[np.argmin(diff)]
+    rect[3] = pts[np.argmax(diff)]
     return rect
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ADIM 3 — KONTRAST NORMALİZASYON
+# ADIM 3 — ARKA PLAN NORMALİZASYONU (YENİ)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def normalize_background(img: np.ndarray) -> np.ndarray:
+    """
+    Gölge ve eşitsiz aydınlatmayı giderir.
+
+    Yöntem: büyük bir Gaussian bulanıklaştırma ile arka plan tahmin edilir,
+    sonra orijinal görüntü bu arka plana bölünür. Telefon flaşının yarattığı
+    parlak merkez / karanlık kenar etkisini ortadan kaldırır.
+
+    Sadece düşük parlaklıklı veya yüksek yerel varyansa sahip görüntülere
+    uygulanır; zaten temiz tarayıcı görüntülerine dokunulmaz.
+    """
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    brightness = gray.mean()
+
+    # Parlak ve düzgün görüntüler için atla (tarayıcı çıktısı gibi)
+    if brightness > 200:
+        return img
+
+    # Büyük kernel ile arka plan tahmini
+    bg = cv2.GaussianBlur(gray, (55, 55), 0)
+    # Bölme: arka plan etkisini kaldır, ölçekle [0,255]'e geri çek
+    normalized = cv2.divide(gray.astype(np.float32), bg.astype(np.float32))
+    normalized = np.clip(normalized * 200, 0, 255).astype(np.uint8)
+
+    return cv2.cvtColor(normalized, cv2.COLOR_GRAY2BGR)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ADIM 4 — KONTRAST NORMALİZASYON (CLAHE)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def enhance_contrast(img: np.ndarray) -> np.ndarray:
     """
-    CLAHE (Contrast Limited Adaptive Histogram Equalization) ile
-    yerel kontrast artırımı. Termal fişlerin soluk baskısı için etkili.
-    Global histogram eşitlemenin aksine, aşırı parlak/karanlık bölgeleri
-    bozmadan sadece düşük kontrastlı alanları iyileştirir.
+    CLAHE ile yerel kontrast artırımı.
+    Parlaklığa göre clipLimit otomatik ayarlanır:
+    - Koyu görüntü (brightness < 150) → agresif (clipLimit=3.0)
+    - Orta (150-200)                  → orta  (clipLimit=2.0)
+    - Parlak (> 200)                  → hafif (clipLimit=1.5)
     """
-    # LAB renk uzayına çevir (L kanalına CLAHE uygula, rengi koru)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    brightness = gray.mean()
+
+    if brightness < 150:
+        clip = 3.0
+    elif brightness < 200:
+        clip = 2.0
+    else:
+        clip = 1.5
+
     lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
-
-    # clipLimit: kontrast sınırı (yüksek → daha agresif ama gürültü ekler)
-    # tileGridSize: yerel bölge boyutu
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(clipLimit=clip, tileGridSize=(8, 8))
     l_enhanced = clahe.apply(l)
-
     enhanced = cv2.merge([l_enhanced, a, b])
-    result = cv2.cvtColor(enhanced, cv2.COLOR_LAB2BGR)
-
-    return result
+    return cv2.cvtColor(enhanced, cv2.COLOR_LAB2BGR)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ADIM 4 — ADAPTİF BINARY
+# ADIM 5 — DENOISE (YENİ)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def denoise(img: np.ndarray) -> np.ndarray:
+    """
+    Bilateral filtre ile gürültü bastırma.
+    Kenarları korurken düz alanlardaki piksel gürültüsünü giderir.
+    Çok net tarayıcı görüntülerinde etkisiz ama zararı da yok.
+    """
+    return cv2.bilateralFilter(img, d=5, sigmaColor=30, sigmaSpace=30)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ADIM 6 — ADAPTİF BINARY (SADECE TESSERACT İÇİN)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def to_binary(img: np.ndarray) -> np.ndarray:
     """
-    Adaptif threshold ile görüntüyü binary'e çevirir.
-    Global threshold yerine adaptif kullanılır çünkü fiş fotoğraflarında
-    aydınlatma genellikle eşit değil (cep telefonu flaşı, gölge vs.).
+    Adaptif threshold ile binary'e çevir + küçük gürültü noktalarını temizle.
 
-    NOT: Binary görüntü BGR formatında döndürülür (3 kanal) — 
-    PaddleOCR ve diğer adımlarla uyumluluk için.
+    UYARI: PaddleOCR için bu adımı ATLAYINIZ.
+    PaddleOCR derin öğrenme tabanlı; gradient bilgisini kullanır.
+    Binary dönüşüm bu bilgiyi yok eder ve accuracy'yi düşürür.
+    Tesseract gibi geleneksel OCR motorları için uygundur.
     """
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # Hafif blur — ince gürültüyü bastır
     blurred = cv2.GaussianBlur(gray, (3, 3), 0)
 
-    # Adaptif Gaussian threshold
-    # blockSize: yerel bölge boyutu (tek sayı olmalı)
-    # C: mean'den çıkarılan sabit (negatif → daha fazla siyah)
     binary = cv2.adaptiveThreshold(
-        blurred,
-        255,
+        blurred, 255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY,
         blockSize=15,
         C=8
     )
 
-    # Tek kanallı → 3 kanallı (BGR)
+    # Küçük gürültü noktalarını sil (1-2 piksel izole nokta)
+    kernel = np.ones((2, 2), np.uint8)
+    binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+
     return cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ADIM 5 — CROP
+# ADIM 7 — CROP
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def crop_receipt(img: np.ndarray, padding: int = 10) -> np.ndarray:
-    """
-    Fiş içeriğinin etrafındaki boş/beyaz alanları kırpar.
-    Binary görüntüde (siyah metin, beyaz arka plan) siyah piksel
-    olmayan satır/sütunları kenar olarak tespit eder.
-    
-    padding: kenar etrafında bırakılacak piksel boşluğu
-    """
+    """Fiş içeriğinin etrafındaki boş alanları kırp."""
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # Beyaz olmayan pikselleri bul
-    # binary görüntüde metin siyah (0), arka plan beyaz (255)
-    # invertlediğimizde metin beyaz olur, sum ile satır/sütun içeriği ölçülür
     inverted = cv2.bitwise_not(gray)
-    
-    row_sums = inverted.sum(axis=1)   # her satırdaki siyah piksel sayısı
-    col_sums = inverted.sum(axis=0)   # her sütundaki siyah piksel sayısı
 
-    # İçerik olan satır/sütunları bul (threshold: en az 5 piksel)
+    row_sums = inverted.sum(axis=1)
+    col_sums = inverted.sum(axis=0)
+
     threshold = 5 * 255
     rows_with_content = np.where(row_sums > threshold)[0]
     cols_with_content = np.where(col_sums > threshold)[0]
 
     if len(rows_with_content) == 0 or len(cols_with_content) == 0:
-        return img  # içerik bulunamadı, orijinali döndür
+        return img
 
-    # Sınırları belirle
     top    = max(0, rows_with_content[0]  - padding)
     bottom = min(img.shape[0], rows_with_content[-1]  + padding + 1)
     left   = max(0, cols_with_content[0] - padding)
     right  = min(img.shape[1], cols_with_content[-1] + padding + 1)
 
-    # Çok küçük crop sonuçlarını reddet (orijinalin %30'undan küçükse)
     cropped_area = (bottom - top) * (right - left)
-    original_area = img.shape[0] * img.shape[1]
-    if cropped_area < original_area * 0.30:
+    if cropped_area < img.shape[0] * img.shape[1] * 0.30:
         return img
 
     return img[top:bottom, left:right]
@@ -315,133 +326,172 @@ def crop_receipt(img: np.ndarray, padding: int = 10) -> np.ndarray:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def save_debug(img: np.ndarray, stem: str, step: int, name: str):
-    """Debug görüntüsünü kaydet."""
     DEBUG_DIR.mkdir(parents=True, exist_ok=True)
     path = DEBUG_DIR / f"{stem}_{step}_{name}.jpg"
     cv2.imwrite(str(path), img, [cv2.IMWRITE_JPEG_QUALITY, 92])
     return path
 
 
-def process_image(image_path: Path) -> bool:
+def process_image(image_path: Path, engine: str = "paddle", debug: bool = True) -> bool:
     """
     Tek bir görüntüyü işle.
-    Başarılıysa True, hata varsa False döndür.
-    """
-    print(f"\n  📄 {image_path.name}")
 
-    # Görüntüyü oku
+    engine: "paddle" (default) veya "tesseract".
+            "tesseract" seçildiğinde binary adımı da uygulanır.
+    """
+    print(f"\n  {image_path.name}")
+
     img = cv2.imread(str(image_path))
     if img is None:
-        print(f"    ❌ Görüntü okunamadı: {image_path}")
+        print(f"    HATA: Goruntu okunamaді: {image_path}")
         return False
 
     h, w = img.shape[:2]
-    print(f"    📐 Boyut: {w}×{h}px")
+    print(f"    Boyut: {w}x{h}px  engine={engine}")
     stem = image_path.stem
 
+    # ── Adım 0: Minimum genişlik ──────────────────────────────────────────────
+    h0, w0 = img.shape[:2]
+    upscaled = enforce_min_width(img)
+    h1, w1 = upscaled.shape[:2]
+    if w1 != w0:
+        print(f"    [0/7] Upscale: {w0}x{h0} -> {w1}x{h1}")
+    else:
+        print(f"    [0/7] Upscale: gereksiz ({w0}px >= {MIN_WIDTH}px)")
+    if debug:
+        save_debug(upscaled, stem, 0, "upscale")
+
     # ── Adım 1: Dönme düzeltme ────────────────────────────────────────────────
-    print(f"    [1/5] Dönme düzeltme...", end=" ", flush=True)
     try:
-        rotated, angle = correct_rotation(img)
+        rotated, angle = correct_rotation(upscaled)
         if abs(angle) >= 0.3:
-            print(f"✓  ({angle:+.1f}°)")
+            print(f"    [1/7] Donme: {angle:+.1f} derece duzeltildi")
         else:
-            print(f"–  (düzeltme gerekmedi)")
-        save_debug(rotated, stem, 1, "rotated")
+            print(f"    [1/7] Donme: gereksiz")
+        if debug:
+            save_debug(rotated, stem, 1, "rotated")
     except Exception as e:
-        print(f"⚠️  hata, atlandı: {e}")
-        rotated = img
+        print(f"    [1/7] Donme: HATA, atlandı ({e})")
+        rotated = upscaled
 
     # ── Adım 2: Perspektif düzeltme ───────────────────────────────────────────
-    print(f"    [2/5] Perspektif düzeltme...", end=" ", flush=True)
     try:
         warped = correct_perspective(rotated)
         h2, w2 = warped.shape[:2]
         if (h2, w2) != (rotated.shape[0], rotated.shape[1]):
-            print(f"✓  ({rotated.shape[1]}×{rotated.shape[0]} → {w2}×{h2})")
+            print(f"    [2/7] Perspektif: {rotated.shape[1]}x{rotated.shape[0]} -> {w2}x{h2}")
         else:
-            print(f"–  (köşe tespiti yapılamadı, orijinal korundu)")
-        save_debug(warped, stem, 2, "perspective")
+            print(f"    [2/7] Perspektif: kose tespiti yapilamadi, atlandı")
+        if debug:
+            save_debug(warped, stem, 2, "perspective")
     except Exception as e:
-        print(f"⚠️  hata, atlandı: {e}")
+        print(f"    [2/7] Perspektif: HATA, atlandı ({e})")
         warped = rotated
 
-    # ── Adım 3: Kontrast normalizasyon ────────────────────────────────────────
-    print(f"    [3/5] Kontrast normalizasyon...", end=" ", flush=True)
-    try:
-        contrasted = enhance_contrast(warped)
-        print(f"✓")
-        save_debug(contrasted, stem, 3, "contrast")
-    except Exception as e:
-        print(f"⚠️  hata, atlandı: {e}")
-        contrasted = warped
+    # Perspektif sonrası genişlik kontrolü (köşe tespiti görüntüyü daraltabilir)
+    warped = enforce_min_width(warped)
+    hw, ww = warped.shape[:2]
+    if ww != w2:
+        print(f"    [2/7] Post-perspektif upscale: {w2}px -> {ww}px")
 
-    # ── Adım 4: Binary ────────────────────────────────────────────────────────
-    print(f"    [4/5] Adaptif binary...", end=" ", flush=True)
+    # ── Adım 3: Arka plan normalizasyonu ──────────────────────────────────────
     try:
-        binary = to_binary(contrasted)
-        print(f"✓")
-        save_debug(binary, stem, 4, "binary")
+        gray_check = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
+        brightness = gray_check.mean()
+        normalized = normalize_background(warped)
+        if brightness <= 200:
+            print(f"    [3/7] Bg normaliz: uygulandı (parlaklik={brightness:.0f})")
+        else:
+            print(f"    [3/7] Bg normaliz: atlandı (parlaklik={brightness:.0f} > 200)")
+        if debug:
+            save_debug(normalized, stem, 3, "bg_normalized")
     except Exception as e:
-        print(f"⚠️  hata, atlandı: {e}")
-        binary = contrasted
+        print(f"    [3/7] Bg normaliz: HATA, atlandı ({e})")
+        normalized = warped
 
-    # ── Adım 5: Crop ──────────────────────────────────────────────────────────
-    print(f"    [5/5] Crop...", end=" ", flush=True)
+    # ── Adım 4: Kontrast (CLAHE) ──────────────────────────────────────────────
     try:
-        cropped = crop_receipt(binary)
+        contrasted = enhance_contrast(normalized)
+        print(f"    [4/7] CLAHE kontrast: tamamlandı")
+        if debug:
+            save_debug(contrasted, stem, 4, "contrast")
+    except Exception as e:
+        print(f"    [4/7] CLAHE kontrast: HATA, atlandı ({e})")
+        contrasted = normalized
+
+    # ── Adım 5: Denoise ───────────────────────────────────────────────────────
+    try:
+        denoised = denoise(contrasted)
+        print(f"    [5/7] Denoise: tamamlandı")
+        if debug:
+            save_debug(denoised, stem, 5, "denoised")
+    except Exception as e:
+        print(f"    [5/7] Denoise: HATA, atlandı ({e})")
+        denoised = contrasted
+
+    # ── Adım 6: Binary (sadece Tesseract) ─────────────────────────────────────
+    if engine == "tesseract":
+        try:
+            binarized = to_binary(denoised)
+            print(f"    [6/7] Binary: uygulandı (Tesseract modu)")
+            if debug:
+                save_debug(binarized, stem, 6, "binary")
+        except Exception as e:
+            print(f"    [6/7] Binary: HATA, atlandı ({e})")
+            binarized = denoised
+    else:
+        print(f"    [6/7] Binary: atlandı (PaddleOCR grayscale tercih eder)")
+        binarized = denoised
+
+    # ── Adım 7: Crop ──────────────────────────────────────────────────────────
+    try:
+        cropped = crop_receipt(binarized)
         h3, w3 = cropped.shape[:2]
-        print(f"✓  (final: {w3}×{h3}px)")
-        save_debug(cropped, stem, 5, "crop")
+        print(f"    [7/7] Crop: final {w3}x{h3}px")
+        if debug:
+            save_debug(cropped, stem, 7, "crop")
     except Exception as e:
-        print(f"⚠️  hata, atlandı: {e}")
-        cropped = binary
+        print(f"    [7/7] Crop: HATA, atlandı ({e})")
+        cropped = binarized
 
     # ── Final kayıt ───────────────────────────────────────────────────────────
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUTPUT_DIR / image_path.name
     cv2.imwrite(str(out_path), cropped, [cv2.IMWRITE_JPEG_QUALITY, 95])
-    print(f"    ✅ Kaydedildi: {out_path}")
-
+    print(f"    => {out_path}")
     return True
 
 
-def process_folder(folder: Path):
-    """Klasördeki tüm desteklenen görüntüleri işle."""
+def process_folder(folder: Path, engine: str = "paddle"):
     images = sorted([
         p for p in folder.iterdir()
         if p.suffix.lower() in SUPPORTED_EXTS
     ])
 
     if not images:
-        print(f"❌ {folder} içinde jpg/png bulunamadı")
+        print(f"HATA: {folder} icinde jpg/png bulunamadi")
         return
 
-    print(f"\n{'═' * 60}")
-    print(f"  📁 {len(images)} görüntü bulundu: {folder}")
-    print(f"  📂 Çıktı: {OUTPUT_DIR}/")
-    print(f"  🔍 Debug: {DEBUG_DIR}/")
-    print(f"{'═' * 60}")
+    print(f"\n{'='*60}")
+    print(f"  {len(images)} goruntu: {folder}  (engine={engine})")
+    print(f"  Cikti: {OUTPUT_DIR}/")
+    print(f"  Debug: {DEBUG_DIR}/")
+    print(f"{'='*60}")
 
-    success = 0
-    failed  = 0
+    success = failed = 0
     for img_path in images:
         try:
-            ok = process_image(img_path)
-            if ok:
-                success += 1
-            else:
-                failed += 1
+            ok = process_image(img_path, engine=engine)
+            success += 1 if ok else 0
+            failed  += 0 if ok else 1
         except Exception as e:
-            print(f"    ❌ Beklenmeyen hata: {e}")
+            print(f"    HATA: {e}")
             traceback.print_exc()
             failed += 1
 
-    print(f"\n{'═' * 60}")
-    print(f"  Tamamlandı: {success} başarılı, {failed} başarısız")
-    print(f"  Final görüntüler : {OUTPUT_DIR}/")
-    print(f"  Debug görüntüler : {DEBUG_DIR}/")
-    print(f"{'═' * 60}\n")
+    print(f"\n{'='*60}")
+    print(f"  Tamamlandi: {success} basarili, {failed} basarisiz")
+    print(f"{'='*60}\n")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -449,26 +499,26 @@ def process_folder(folder: Path):
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def main():
-    if len(sys.argv) < 2:
-        print("Kullanım: python preprocess.py <klasor_veya_dosya>")
-        print("Örnek:    python preprocess.py Receipts/")
-        print("Örnek:    python preprocess.py fiş.jpg")
-        sys.exit(1)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("target", help="Klasör veya tek görüntü")
+    ap.add_argument("--engine", choices=["paddle", "tesseract"], default="paddle",
+                    help="OCR motoru (binary adımını etkiler, varsayılan: paddle)")
+    ap.add_argument("--no-debug", action="store_true", help="Debug görüntülerini kaydetme")
+    args = ap.parse_args()
 
-    target = Path(sys.argv[1])
-
+    target = Path(args.target)
     if not target.exists():
-        print(f"❌ Bulunamadı: {target}")
+        print(f"HATA: Bulunamadi: {target}")
         sys.exit(1)
 
     if target.is_dir():
-        process_folder(target)
+        process_folder(target, engine=args.engine)
     elif target.suffix.lower() in SUPPORTED_EXTS:
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        process_image(target)
+        process_image(target, engine=args.engine, debug=not args.no_debug)
     else:
-        print(f"❌ Desteklenmeyen dosya türü: {target.suffix}")
-        print(f"   Desteklenen: {', '.join(SUPPORTED_EXTS)}")
+        print(f"HATA: Desteklenmeyen dosya turu: {target.suffix}")
         sys.exit(1)
 
 
