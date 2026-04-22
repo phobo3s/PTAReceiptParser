@@ -82,6 +82,34 @@ COMMON_SKIP_PATTERNS=[
     r"^SN:",
     r"^EFT-[PF]OS",  # ödeme yöntemi satırı (toplam değil)
     r"^BROT\s+GIDA",  # gıda-dışı KDV özet satırı
+    # METRO e-Fatura / genel fatura başlık satırları
+    r"^MERKEZ:",
+    r"^OLUŞTURMA\s+TARİHİ",
+    r"^FİİLİ\s+SEVK\s+TARİHİ",
+    r"^METRO\s+FATURA\s+NO",
+    r"^İŞLEM\s+NO",
+    r"^KASİYER\s+NO",
+    r"^MÜŞTERI\s+NO",
+    r"^VKN",
+    r"^D\d+\s+[A-Z]",        # METRO barkod+ürün: D123456 XYZ
+    r"^[0-9]{8,}[A-Z]",      # barkod+harf karması
+    # İletişim / web satırları
+    r"^TEL[:\s：]",
+    r"^FAX[:\s：]",
+    r"^www\.",
+    r"^ww\.",
+    # Kart / ödeme detay satırları
+    r"^KREDI\s+KARTI",
+    r"^KART\s+NO",
+    r"^RRN:",
+    r"^ACQUİRER",
+    r"^TUTAR\s+KARŞILAŞTIRI",
+    r"^HİZMET\s+ALINDI",
+    r"^BU\s+BEL",
+]
+
+PRICE_PREFIX_CLEANUP = [
+    (r"[￥¥$§¢€£₹₽]", "*"),  # OCR garip para birimi → *
 ]
 
 COMMON_NAME_CLEANUPS = [
@@ -217,6 +245,46 @@ STORE_PROFILES = {
         "name_cleanup": COMMON_NAME_CLEANUPS + [
             (r"^[=\-]+\s*", ""),
         ],
+    },
+    "buenas": {
+        "name": "BUENAS / RESTORAN",
+        "identifiers": [
+            r"BUENAS",
+        ],
+        "layout": {
+            "y_tolerance": 15,
+            "header_y_max": 500,
+            "footer_y_min": 9999,
+        },
+        "price_pattern": r"^[\*x×](-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2})$",
+        "skip_patterns": COMMON_SKIP_PATTERNS + [
+            r"^[0-9]{8,}[A-Z]",
+        ],
+        "total_pattern": r"^(NET\s+TOPLAM|ODENE|[ÖO]DENE|TOPLAM(?!\s+K[DO]V))",
+        "date_pattern": COMMON_DATE_PATTERNS,
+        "name_cleanup": COMMON_NAME_CLEANUPS + [
+            (r"^[0-9]{8,}[A-Z]?", ""),
+        ],
+    },
+    "cafegurup": {
+        "name": "CAFEGURUP / Restoran",
+        "identifiers": [
+            r"CAFEGURUP",
+            r"GASTRONOMI",
+            r"SANAYIVE\s+TİCARET",
+        ],
+        "layout": {
+            "y_tolerance": 18,
+            "header_y_max": 400,
+            "footer_y_min": 9999,
+        },
+        "price_pattern": r"^[\*x×]?(\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|\d+[.,]\d{2})\s*(?:TL)?$",
+        "skip_patterns": COMMON_SKIP_PATTERNS + [
+            r"^[A-Z\s]+[İiI]\s*[Ss].*[Tt][iI]",
+        ],
+        "total_pattern": r"^(TOPLAM(?!\s*K[DO]V)|GENEL\s+TOPLAM|OPLAM)",
+        "date_pattern": COMMON_DATE_PATTERNS,
+        "name_cleanup": COMMON_NAME_CLEANUPS,
     },
 }
 
@@ -420,18 +488,20 @@ def clean_name(name: str, cleanups: list[tuple]) -> str:
 
 
 def parse_price(text: str, price_pattern: str) -> Optional[float]:
-    m = re.match(price_pattern, text.strip())
+    cleaned = text.strip()
+    for pattern, repl in PRICE_PREFIX_CLEANUP:
+        cleaned = re.sub(pattern, repl, cleaned)
+    m = re.match(price_pattern, cleaned)
     if m:
         price_str = m.group(1)
-        # Iki format destekle:
-        # Turkce: 2.537,47 (nokta=binde ayirici, virgül=ondalik)
-        # Ingilizce: 14.62 (nokta=ondalik)
         if "," in price_str:
-            # Turkce format: 2.537,47 → 2537.47
+            # Türkçe format: 2.537,47 → 2537.47
             price_str = price_str.replace(".", "").replace(",", ".")
-        else:
-            # Ingilizce format: 14.62 (keep as-is)
-            pass
+        elif price_str.count(".") >= 2:
+            # OCR virgül→nokta hatası: 1.439.00 → gerçekte 1.439,00 → 1439.00
+            parts = price_str.rsplit(".", 1)
+            price_str = parts[0].replace(".", "") + "." + parts[1]
+        # else: İngilizce format 14.62 — olduğu gibi bırak
         try:
             return float(price_str)
         except ValueError:
