@@ -25,6 +25,8 @@ OCR backend: PaddlePaddle (varsayılan). Tesseract için --engine tesseract.
 """
 
 import json
+import os
+import platform
 import shutil
 import sys
 import time
@@ -57,29 +59,56 @@ def laplacian_sharpness(img: np.ndarray) -> float:
 
 # ── Yardımcı: OCR çalıştır (PaddleOCR veya Tesseract) ────────────────────────
 
+_paddle_ocr_engine = None
+
+def _get_paddle_engine():
+    global _paddle_ocr_engine
+    if _paddle_ocr_engine is not None:
+        return _paddle_ocr_engine
+    os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'
+    from paddleocr import PaddleOCR
+    os.environ["FLAGS_use_mkldnn"] = "0"
+    _paddle_ocr_engine = PaddleOCR(
+        use_textline_orientation=True,
+        device='cpu',
+        lang='tr',
+        text_detection_model_name="PP-OCRv5_mobile_det",
+        text_recognition_model_name="PP-OCRv5_mobile_rec",
+        enable_mkldnn=(platform.system() == "Linux"),
+        text_det_unclip_ratio=1.6,
+        text_det_box_thresh=0.5,
+        text_det_thresh=0.3,
+        use_doc_unwarping=True,
+    )
+    return _paddle_ocr_engine
+
+
 def run_paddle_ocr(image_path: Path, cache_dir: Path) -> dict | None:
     cache_file = cache_dir / (image_path.stem + ".json")
     if cache_file.exists():
         return json.loads(cache_file.read_text(encoding="utf-8"))
     try:
-        from paddleocr import PaddleOCR
-        ocr = PaddleOCR(use_angle_cls=True, lang="en", show_log=False)
-        result = ocr.ocr(str(image_path), cls=True)
-        if result is None or not result:
-            data = {"detections": []}
-        else:
-            detections = []
-            for line in result[0] or []:
-                box, (text, conf) = line
-                xs = [p[0] for p in box]
-                ys = [p[1] for p in box]
+        ocr = _get_paddle_engine()
+        result = list(ocr.predict(str(image_path)))
+        detections = []
+        for ocr_result in result:
+            boxes  = ocr_result.get("dt_polys")
+            texts  = ocr_result.get("rec_texts")
+            scores = ocr_result.get("rec_scores")
+            if boxes is None or texts is None or scores is None:
+                continue
+            for bbox, text, conf in zip(boxes, texts, scores):
+                if hasattr(bbox, "tolist"):
+                    bbox = bbox.tolist()
+                xs = [p[0] for p in bbox]
+                ys = [p[1] for p in bbox]
                 detections.append({
                     "text": text,
                     "confidence": float(conf),
                     "x_min": min(xs), "x_max": max(xs),
                     "y_min": min(ys), "y_max": max(ys),
                 })
-            data = {"detections": detections}
+        data = {"detections": detections}
         cache_dir.mkdir(parents=True, exist_ok=True)
         cache_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         return data
