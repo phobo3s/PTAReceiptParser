@@ -63,7 +63,7 @@ def run_paddle_ocr(image_path: Path, cache_dir: Path) -> dict | None:
         return json.loads(cache_file.read_text(encoding="utf-8"))
     try:
         from paddleocr import PaddleOCR
-        ocr = PaddleOCR(use_angle_cls=True, lang="latin", show_log=False)
+        ocr = PaddleOCR(use_angle_cls=True, lang="en", show_log=False)
         result = ocr.ocr(str(image_path), cls=True)
         if result is None or not result:
             data = {"detections": []}
