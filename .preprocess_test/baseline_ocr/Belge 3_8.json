@@ -1,0 +1,692 @@
+{
+  "detections": [
+    {
+      "text": "AFE GURUP GASTRONOMI INSAAT",
+      "confidence": 0.9112562537193298,
+      "x_min": 149,
+      "x_max": 882,
+      "y_min": 40,
+      "y_max": 133
+    },
+    {
+      "text": "ANAVIVETICARET LIMTEO SIRKET",
+      "confidence": 0.8588281869888306,
+      "x_min": 131,
+      "x_max": 874,
+      "y_min": 97,
+      "y_max": 202
+    },
+    {
+      "text": "ANCAK MAH KIBRIS SEHITLERI CAD.",
+      "confidence": 0.9126791954040527,
+      "x_min": 164,
+      "x_max": 859,
+      "y_min": 174,
+      "y_max": 252
+    },
+    {
+      "text": "NO 167/A KONAK/IZMiR/Turkiye",
+      "confidence": 0.8576955199241638,
+      "x_min": 141,
+      "x_max": 814,
+      "y_min": 235,
+      "y_max": 306
+    },
+    {
+      "text": "Kor ton Vergi Dairesi vkN: 0010855520",
+      "confidence": 0.836246132850647,
+      "x_min": 131,
+      "x_max": 817,
+      "y_min": 295,
+      "y_max": 354
+    },
+    {
+      "text": "E-ARSIV FATURA",
+      "confidence": 0.933347761631012,
+      "x_min": 582,
+      "x_max": 895,
+      "y_min": 477,
+      "y_max": 554
+    },
+    {
+      "text": "GMU 507 Tebigrne uygundur",
+      "confidence": 0.870868980884552,
+      "x_min": 369,
+      "x_max": 895,
+      "y_min": 537,
+      "y_max": 603
+    },
+    {
+      "text": "48",
+      "confidence": 0.40291619300842285,
+      "x_min": 96,
+      "x_max": 112,
+      "y_min": 557,
+      "y_max": 575
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 248,
+      "x_max": 267,
+      "y_min": 560,
+      "y_max": 579
+    },
+    {
+      "text": "Tarih/Saat",
+      "confidence": 0.9354187250137329,
+      "x_min": 17,
+      "x_max": 227,
+      "y_min": 645,
+      "y_max": 703
+    },
+    {
+      "text": "26.12.2025 23:12",
+      "confidence": 0.9708253145217896,
+      "x_min": 599,
+      "x_max": 894,
+      "y_min": 633,
+      "y_max": 697
+    },
+    {
+      "text": "Sals No",
+      "confidence": 0.9236494898796082,
+      "x_min": 7,
+      "x_max": 193,
+      "y_min": 696,
+      "y_max": 768
+    },
+    {
+      "text": "D8LX4Ibg3w",
+      "confidence": 0.941257119178772,
+      "x_min": 666,
+      "x_max": 893,
+      "y_min": 684,
+      "y_max": 743
+    },
+    {
+      "text": "Belge No",
+      "confidence": 0.9438575506210327,
+      "x_min": 12,
+      "x_max": 209,
+      "y_min": 753,
+      "y_max": 819
+    },
+    {
+      "text": "1EE2025000015269",
+      "confidence": 0.9692959785461426,
+      "x_min": 558,
+      "x_max": 894,
+      "y_min": 731,
+      "y_max": 802
+    },
+    {
+      "text": "地111",
+      "confidence": 0.7107306122779846,
+      "x_min": 663,
+      "x_max": 887,
+      "y_min": 787,
+      "y_max": 831
+    },
+    {
+      "text": "MusteriVRN/CKN",
+      "confidence": 0.8260729908943176,
+      "x_min": 11,
+      "x_max": 381,
+      "y_min": 808,
+      "y_max": 877
+    },
+    {
+      "text": "1Adet x 495.00117AJe",
+      "confidence": 0.7447937726974487,
+      "x_min": 26,
+      "x_max": 391,
+      "y_min": 886,
+      "y_max": 948
+    },
+    {
+      "text": "195,00",
+      "confidence": 0.8931239247322083,
+      "x_min": 763,
+      "x_max": 895,
+      "y_min": 891,
+      "y_max": 957
+    },
+    {
+      "text": "%10",
+      "confidence": 0.8793707489967346,
+      "x_min": 586,
+      "x_max": 684,
+      "y_min": 910,
+      "y_max": 970
+    },
+    {
+      "text": "1OTSPECIAL BURGERIA",
+      "confidence": 0.9408913850784302,
+      "x_min": 5,
+      "x_max": 491,
+      "y_min": 922,
+      "y_max": 1003
+    },
+    {
+      "text": "1 Adet  51500 1/Ade",
+      "confidence": 0.6766757965087891,
+      "x_min": 23,
+      "x_max": 388,
+      "y_min": 1006,
+      "y_max": 1066
+    },
+    {
+      "text": "515,00",
+      "confidence": 0.9493575096130371,
+      "x_min": 761,
+      "x_max": 895,
+      "y_min": 1005,
+      "y_max": 1070
+    },
+    {
+      "text": "1CHIEDDAR DOLGUUBURGER%10",
+      "confidence": 0.8789635300636292,
+      "x_min": 0,
+      "x_max": 684,
+      "y_min": 1020,
+      "y_max": 1120
+    },
+    {
+      "text": "1Aet200001e",
+      "confidence": 0.6494172215461731,
+      "x_min": 20,
+      "x_max": 384,
+      "y_min": 1118,
+      "y_max": 1179
+    },
+    {
+      "text": "260.00",
+      "confidence": 0.8976842761039734,
+      "x_min": 764,
+      "x_max": 896,
+      "y_min": 1121,
+      "y_max": 1184
+    },
+    {
+      "text": "1BOMONTIFILTRESIZ50",
+      "confidence": 0.9342751502990723,
+      "x_min": 0,
+      "x_max": 497,
+      "y_min": 1152,
+      "y_max": 1230
+    },
+    {
+      "text": "420",
+      "confidence": 0.800407350063324,
+      "x_min": 583,
+      "x_max": 679,
+      "y_min": 1141,
+      "y_max": 1201
+    },
+    {
+      "text": "大",
+      "confidence": 0.31013962626457214,
+      "x_min": 343,
+      "x_max": 364,
+      "y_min": 1222,
+      "y_max": 1249
+    },
+    {
+      "text": "I Adetx 109001/Adet",
+      "confidence": 0.745972752571106,
+      "x_min": 9,
+      "x_max": 382,
+      "y_min": 1240,
+      "y_max": 1295
+    },
+    {
+      "text": "169,00",
+      "confidence": 0.9642545580863953,
+      "x_min": 758,
+      "x_max": 895,
+      "y_min": 1237,
+      "y_max": 1303
+    },
+    {
+      "text": "%20",
+      "confidence": 0.8163365721702576,
+      "x_min": 582,
+      "x_max": 675,
+      "y_min": 1260,
+      "y_max": 1318
+    },
+    {
+      "text": "1 KAMP 50CL EFESF1C.1",
+      "confidence": 0.7919907569885254,
+      "x_min": 0,
+      "x_max": 456,
+      "y_min": 1276,
+      "y_max": 1350
+    },
+    {
+      "text": "163.32TL",
+      "confidence": 0.9463425278663635,
+      "x_min": 715,
+      "x_max": 889,
+      "y_min": 1330,
+      "y_max": 1392
+    },
+    {
+      "text": "TOPLAM KUV",
+      "confidence": 0.888466477394104,
+      "x_min": 0,
+      "x_max": 270,
+      "y_min": 1381,
+      "y_max": 1438
+    },
+    {
+      "text": "1.439.00TL",
+      "confidence": 0.9321775436401367,
+      "x_min": 656,
+      "x_max": 891,
+      "y_min": 1382,
+      "y_max": 1460
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.9408750534057617,
+      "x_min": 0,
+      "x_max": 197,
+      "y_min": 1437,
+      "y_max": 1492
+    },
+    {
+      "text": "Toplam",
+      "confidence": 0.9841528534889221,
+      "x_min": 747,
+      "x_max": 893,
+      "y_min": 1454,
+      "y_max": 1513
+    },
+    {
+      "text": "KDV",
+      "confidence": 0.9699215888977051,
+      "x_min": 557,
+      "x_max": 646,
+      "y_min": 1475,
+      "y_max": 1522
+    },
+    {
+      "text": "KDVOrani",
+      "confidence": 0.9117043018341064,
+      "x_min": 0,
+      "x_max": 211,
+      "y_min": 1506,
+      "y_max": 1558
+    },
+    {
+      "text": "91.82",
+      "confidence": 0.9745510816574097,
+      "x_min": 540,
+      "x_max": 655,
+      "y_min": 1528,
+      "y_max": 1578
+    },
+    {
+      "text": "1.010.00T",
+      "confidence": 0.9652129411697388,
+      "x_min": 676,
+      "x_max": 889,
+      "y_min": 1503,
+      "y_max": 1571
+    },
+    {
+      "text": "2",
+      "confidence": 0.12750233709812164,
+      "x_min": 672,
+      "x_max": 685,
+      "y_min": 1539,
+      "y_max": 1553
+    },
+    {
+      "text": "%10",
+      "confidence": 0.8161678314208984,
+      "x_min": 0,
+      "x_max": 102,
+      "y_min": 1564,
+      "y_max": 1610
+    },
+    {
+      "text": "42900TL",
+      "confidence": 0.9327803254127502,
+      "x_min": 704,
+      "x_max": 891,
+      "y_min": 1556,
+      "y_max": 1621
+    },
+    {
+      "text": "71.50",
+      "confidence": 0.956647515296936,
+      "x_min": 543,
+      "x_max": 655,
+      "y_min": 1580,
+      "y_max": 1634
+    },
+    {
+      "text": "4020",
+      "confidence": 0.8432067036628723,
+      "x_min": 0,
+      "x_max": 102,
+      "y_min": 1621,
+      "y_max": 1667
+    },
+    {
+      "text": "1439,00 TL.",
+      "confidence": 0.8456106781959534,
+      "x_min": 678,
+      "x_max": 891,
+      "y_min": 1624,
+      "y_max": 1687
+    },
+    {
+      "text": "BKM TechpOs",
+      "confidence": 0.8739071488380432,
+      "x_min": 2,
+      "x_max": 279,
+      "y_min": 1685,
+      "y_max": 1738
+    },
+    {
+      "text": "ODEMELER",
+      "confidence": 0.9936970472335815,
+      "x_min": 345,
+      "x_max": 571,
+      "y_min": 1725,
+      "y_max": 1797
+    },
+    {
+      "text": "Kart/Karekod Odemesi",
+      "confidence": 0.9211697578430176,
+      "x_min": 200,
+      "x_max": 707,
+      "y_min": 1771,
+      "y_max": 1891
+    },
+    {
+      "text": "T.GARANTIEANKASIA.S.",
+      "confidence": 0.9391833543777466,
+      "x_min": 177,
+      "x_max": 730,
+      "y_min": 1829,
+      "y_max": 1939
+    },
+    {
+      "text": "SAA1.23.12",
+      "confidence": 0.8527688980102539,
+      "x_min": 675,
+      "x_max": 888,
+      "y_min": 1864,
+      "y_max": 1920
+    },
+    {
+      "text": "POS:03936/39",
+      "confidence": 0.9258672595024109,
+      "x_min": 607,
+      "x_max": 890,
+      "y_min": 1903,
+      "y_max": 1966
+    },
+    {
+      "text": "1AR1:26122025",
+      "confidence": 0.9026612639427185,
+      "x_min": 0,
+      "x_max": 343,
+      "y_min": 1925,
+      "y_max": 1986
+    },
+    {
+      "text": "111",
+      "confidence": 0.931464672088623,
+      "x_min": 819,
+      "x_max": 893,
+      "y_min": 1941,
+      "y_max": 1990
+    },
+    {
+      "text": "ISYERI:000000001590461",
+      "confidence": 0.9295530915260315,
+      "x_min": 0,
+      "x_max": 489,
+      "y_min": 1944,
+      "y_max": 2035
+    },
+    {
+      "text": "STAN:000093",
+      "confidence": 0.9137576818466187,
+      "x_min": 629,
+      "x_max": 890,
+      "y_min": 1980,
+      "y_max": 2049
+    },
+    {
+      "text": "BAICH1NO:000/6",
+      "confidence": 0.85258549451828,
+      "x_min": 0,
+      "x_max": 365,
+      "y_min": 2006,
+      "y_max": 2070
+    },
+    {
+      "text": "ISIEMNO:000054",
+      "confidence": 0.9421992301940918,
+      "x_min": 0,
+      "x_max": 353,
+      "y_min": 2049,
+      "y_max": 2111
+    },
+    {
+      "text": "SN:PAV60W6A2561AV/1X",
+      "confidence": 0.8162195086479187,
+      "x_min": 0,
+      "x_max": 542,
+      "y_min": 2061,
+      "y_max": 2158
+    },
+    {
+      "text": "SATIS",
+      "confidence": 0.9891809225082397,
+      "x_min": 362,
+      "x_max": 545,
+      "y_min": 2101,
+      "y_max": 2182
+    },
+    {
+      "text": "****2911",
+      "confidence": 0.8432291746139526,
+      "x_min": 433,
+      "x_max": 660,
+      "y_min": 2144,
+      "y_max": 2217
+    },
+    {
+      "text": "MarkaPaylasmn VIsAKreh",
+      "confidence": 0.7596307396888733,
+      "x_min": 215,
+      "x_max": 691,
+      "y_min": 2191,
+      "y_max": 2290
+    },
+    {
+      "text": "TUTAR",
+      "confidence": 0.9948202967643738,
+      "x_min": 370,
+      "x_max": 537,
+      "y_min": 2251,
+      "y_max": 2316
+    },
+    {
+      "text": "1439,00TL",
+      "confidence": 0.9640120267868042,
+      "x_min": 245,
+      "x_max": 637,
+      "y_min": 2292,
+      "y_max": 2418
+    },
+    {
+      "text": "RRN536095529566",
+      "confidence": 0.9484179019927979,
+      "x_min": 515,
+      "x_max": 885,
+      "y_min": 2344,
+      "y_max": 2428
+    },
+    {
+      "text": "NAYKODU853437",
+      "confidence": 0.8828145265579224,
+      "x_min": 21,
+      "x_max": 394,
+      "y_min": 2399,
+      "y_max": 2484
+    },
+    {
+      "text": "BANKAREFERANS:5360894887450000",
+      "confidence": 0.9635265469551086,
+      "x_min": 90,
+      "x_max": 807,
+      "y_min": 2393,
+      "y_max": 2516
+    },
+    {
+      "text": "VISA",
+      "confidence": 0.991188108921051,
+      "x_min": 401,
+      "x_max": 497,
+      "y_min": 2470,
+      "y_max": 2519
+    },
+    {
+      "text": "AIDA0000000031010AC:104303A4A68AF9",
+      "confidence": 0.926873505115509,
+      "x_min": 11,
+      "x_max": 891,
+      "y_min": 2462,
+      "y_max": 2603
+    },
+    {
+      "text": "ACQUIRER1D:62",
+      "confidence": 0.8341187238693237,
+      "x_min": 295,
+      "x_max": 603,
+      "y_min": 2540,
+      "y_max": 2607
+    },
+    {
+      "text": "TUIAR KARSI GIMAT VE VAHIZMETAIDIM",
+      "confidence": 0.8405978083610535,
+      "x_min": 70,
+      "x_max": 837,
+      "y_min": 2592,
+      "y_max": 2715
+    },
+    {
+      "text": "BUBTICI YISAKI AYINIZ",
+      "confidence": 0.7985036969184875,
+      "x_min": 228,
+      "x_max": 667,
+      "y_min": 2680,
+      "y_max": 2757
+    },
+    {
+      "text": "TEMASSIZISLEM 6",
+      "confidence": 0.8984357714653015,
+      "x_min": 269,
+      "x_max": 711,
+      "y_min": 2714,
+      "y_max": 2805
+    },
+    {
+      "text": "MUSIERINUSHASI",
+      "confidence": 0.8884602189064026,
+      "x_min": 275,
+      "x_max": 617,
+      "y_min": 2777,
+      "y_max": 2839
+    },
+    {
+      "text": "arant",
+      "confidence": 0.9809511303901672,
+      "x_min": 349,
+      "x_max": 721,
+      "y_min": 2845,
+      "y_max": 3008
+    },
+    {
+      "text": "E-Belgeye karekodla veya",
+      "confidence": 0.9659581184387207,
+      "x_min": 0,
+      "x_max": 537,
+      "y_min": 3081,
+      "y_max": 3164
+    },
+    {
+      "text": "ebelge.pavo.com.tr",
+      "confidence": 0.9710646867752075,
+      "x_min": 0,
+      "x_max": 415,
+      "y_min": 3151,
+      "y_max": 3236
+    },
+    {
+      "text": "adresinden ulasabili siniz.",
+      "confidence": 0.928699254989624,
+      "x_min": 0,
+      "x_max": 551,
+      "y_min": 3212,
+      "y_max": 3306
+    },
+    {
+      "text": "AV As. GMU Versiyon 1.0.1",
+      "confidence": 0.8257669806480408,
+      "x_min": 0,
+      "x_max": 539,
+      "y_min": 3395,
+      "y_max": 3485
+    },
+    {
+      "text": "Kasiyer |849411",
+      "confidence": 0.8720511794090271,
+      "x_min": 609,
+      "x_max": 900,
+      "y_min": 3400,
+      "y_max": 3495
+    },
+    {
+      "text": "errinalN86uW6A2576",
+      "confidence": 0.8158379793167114,
+      "x_min": 0,
+      "x_max": 441,
+      "y_min": 3469,
+      "y_max": 3542
+    },
+    {
+      "text": "EK BILGILER",
+      "confidence": 0.9455486536026001,
+      "x_min": 290,
+      "x_max": 557,
+      "y_min": 3535,
+      "y_max": 3633
+    },
+    {
+      "text": "MIHAITUKETICI",
+      "confidence": 0.9145809412002563,
+      "x_min": 571,
+      "x_max": 901,
+      "y_min": 3537,
+      "y_max": 3664
+    },
+    {
+      "text": "意",
+      "confidence": 0.038565970957279205,
+      "x_min": 423,
+      "x_max": 444,
+      "y_min": 3629,
+      "y_max": 3650
+    }
+  ]
+}

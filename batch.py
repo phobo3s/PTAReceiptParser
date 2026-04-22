@@ -36,7 +36,7 @@ from update_journal import (
     build_new_transaction, update_journal, preview,
 )
 from snapshots import save_snapshot, check_snapshot
-#from preProcess import preProcessImage
+from preProcess import process_image as preprocess_image
 
 logging.basicConfig(level=logging.WARNING)  # PaddleOCR loglarını sustur
 
@@ -355,6 +355,7 @@ def main():
         print("  --excel   butce.xlsx     Excel defteri güncelle")
         print("  --sheet   SheetName      Excel sheet adı (default: ilk sheet)")
         print("  --api-key sk-ant-...     Anthropic API anahtarı")
+        print("  --preprocess             Görüntüleri OCR öncesi ön işle")
         print("\nÖrnekler:")
         print("  python batch.py fisler/ --hledger butce.hledger")
         print("  python batch.py fisler/ --excel butce.xlsx")
@@ -430,17 +431,16 @@ def main():
         print(f"📊 Excel aktif: {excel_path}{sheet_info}")
     print()
 
-    # Ön işleme
-    #print(f"⏳ {len(images)} fiş ön işleniyor...")
-    #for image_path in images:
-    #    preProcessImage(image_path)
-    #print(f"✓ Ön işleme tamamlandı\n")
-
-    # Processed Fişleri bul
-    #images = sorted([
-    #    p for p in Path("./.processedReceipts").iterdir()
-    #    if p.suffix.lower() in SUPPORTED_EXTS
-    #])
+    # Ön işleme (--preprocess ile aktif)
+    if "--preprocess" in sys.argv:
+        print(f"⏳ {len(images)} fiş ön işleniyor...")
+        for image_path in images:
+            preprocess_image(image_path, engine="paddle", debug=False)
+        print(f"✓ Ön işleme tamamlandı\n")
+        images = sorted([
+            p for p in Path(".processedReceipts").iterdir()
+            if p.suffix.lower() in SUPPORTED_EXTS
+        ])
 
     # Kuralları yükle — öğrenilmiş kurallar önce
     rules = []

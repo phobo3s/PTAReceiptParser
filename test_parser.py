@@ -60,14 +60,14 @@ class TestReceiptParser(unittest.TestCase):
         self.assertEqual(receipt.store, "BİM")
         self.assertEqual(receipt.date, "2026-03-26")
         self.assertAlmostEqual(receipt.total, 333.07, places=2)
-        self.assertEqual(len(receipt.items), 10) # Önceki çalıştırma 10 item tespit etmişti
-        
-        # İlk öğeyi kontrol et
-        self.assertEqual(receipt.items[0].name, "KEKCiK.KAP30G PiNGUI")
+        self.assertEqual(len(receipt.items), 9)  # $\1c}$ garbled item artık filtreleniyor
+
+        # İlk öğeyi kontrol et (OCR i→İ ve 0→O düzeltmeleri uygulandı)
+        self.assertEqual(receipt.items[0].name, "KEKCİK.KAP30G PİNGUI")
         self.assertAlmostEqual(receipt.items[0].amount, 26.00, places=2)
 
         # Tartılı ürünü kontrol et
-        self.assertEqual(receipt.items[6].name, "PATATES (0.74kg × 19.75)")
+        self.assertEqual(receipt.items[6].name, "PATATES 1 (0.74kg × 19.75)")
         self.assertAlmostEqual(receipt.items[6].amount, 14.62, places=2)
 
     def test_parse_receipt_tankar_sample_1(self):

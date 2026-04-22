@@ -1,53 +1,4 @@
 {
-  "WhatsApp Image 2026-03-27 at 09.05.32.json": {
-    "store": "BİM",
-    "date": "2026-03-26",
-    "total": 333.07,
-    "items_sum": 333.07,
-    "items": [
-      {
-        "name": "KEKCiK.KAP30G PiNGUI",
-        "amount": 26.0
-      },
-      {
-        "name": "KABARTMA T0ZU 10*10G",
-        "amount": 29.0
-      },
-      {
-        "name": "SEKERLI VANiLiN10*5G",
-        "amount": 21.5
-      },
-      {
-        "name": "HIKAYE KITAPLARI",
-        "amount": 65.0
-      },
-      {
-        "name": "HIKAYE KITAPLARI",
-        "amount": 65.0
-      },
-      {
-        "name": "ALISVERiS POSETI BIN",
-        "amount": 1.0
-      },
-      {
-        "name": "PATATES 1 (0.74kg × 19.75)",
-        "amount": 14.62
-      },
-      {
-        "name": "BIBER KAPYA (0.24kg × 199.00)",
-        "amount": 47.76
-      },
-      {
-        "name": "ELMA GOLDEN (0.26kg × 89.00)",
-        "amount": 23.14
-      },
-      {
-        "name": "$\\1c}$ (0.45kg × 89.00)",
-        "amount": 40.05
-      }
-    ],
-    "saved_at": "2026-04-21T11:28:57"
-  },
   "WhatsApp Image 2026-04-07 at 08.45.16.json": {
     "store": "BİM",
     "date": "2026-04-06",
@@ -59,7 +10,7 @@
         "amount": 87.5
       }
     ],
-    "saved_at": "2026-04-21T11:28:57"
+    "saved_at": "2026-04-21T20:21:01"
   },
   "WhatsApp Image 2026-04-09 at 15.28.49.json": {
     "store": "Tankar",
@@ -72,7 +23,7 @@
         "amount": 2537.47
       }
     ],
-    "saved_at": "2026-04-21T08:45:56"
+    "saved_at": "2026-04-21T20:21:01"
   },
   "WhatsApp Image 2026-04-09 at 15.52.24.json": {
     "store": "Tankar",
@@ -85,73 +36,7 @@
         "amount": 250.0
       }
     ],
-    "saved_at": "2026-04-21T11:53:44"
-  },
-  "WhatsApp Image 2026-04-13 at 13.20.46 (1).json": {
-    "store": "Migros / Market",
-    "date": "2026-04-12",
-    "total": 480.0,
-    "items_sum": 480.0,
-    "items": [
-      {
-        "name": "GIDA %01",
-        "amount": 480.0
-      }
-    ],
-    "saved_at": "2026-04-21T11:53:44"
-  },
-  "WhatsApp Image 2026-04-13 at 13.20.46.json": {
-    "store": "Migros / Market",
-    "date": "2025-04-11",
-    "total": 1760.67,
-    "items_sum": 1760.67,
-    "items": [
-      {
-        "name": "ASYA LALE ILKBAHAR %20",
-        "amount": 149.95
-      },
-      {
-        "name": "ESGLUTENSIZ BIRA %20 (3.0kg × 144.00)",
-        "amount": 432.0
-      },
-      {
-        "name": "KOCAMANMARINEHAMSI %1",
-        "amount": 199.9
-      },
-      {
-        "name": "%25 % iNDiRiM %1",
-        "amount": -49.98
-      },
-      {
-        "name": "ASYA LALE ILKBAHAR %20",
-        "amount": 149.95
-      },
-      {
-        "name": "MIGROS PLASTIK POSET %20",
-        "amount": 1.0
-      },
-      {
-        "name": "=ESMALTDEPOZITOLU %20",
-        "amount": 360.0
-      },
-      {
-        "name": "-ES PILSEN BOS SISE (4.0kg × 2.00)",
-        "amount": 8.0
-      },
-      {
-        "name": "JSMANIYE YER FISTIGI",
-        "amount": 109.95
-      },
-      {
-        "name": "KAVRULMUS CEREZ",
-        "amount": 299.9
-      },
-      {
-        "name": "=ESPILSEN GREEN %20",
-        "amount": 100.0
-      }
-    ],
-    "saved_at": "2026-04-21T11:53:44"
+    "saved_at": "2026-04-21T20:21:01"
   },
   "WhatsApp Image 2026-04-13 at 13.20.47 (1).json": {
     "store": "Migros / Market",
@@ -160,40 +45,27 @@
     "items_sum": 500.92,
     "items": [
       {
-        "name": "EFES GLUTENSIZ BIRA %20",
+        "name": "EFES GLUTENSIZ BIRA",
         "amount": 144.0
       },
       {
-        "name": "EFES GLUTENSIZ BIRA %20",
+        "name": "EFES GLUTENSIZ BIRA",
         "amount": 144.0
       },
       {
-        "name": "DOMATESSALKIMKG %1 (0.68kg × 149.95)",
+        "name": "DOMATESSALKIMKG (0.68kg × 149.95)",
         "amount": 101.97
       },
       {
-        "name": "KESTANEMANTARI350G %1",
+        "name": "KESTANEMANTARI350G",
         "amount": 109.95
       },
       {
-        "name": "MIGROS PLASTIK POSET %20",
+        "name": "MIGROS PLASTIK POSET",
         "amount": 1.0
       }
     ],
-    "saved_at": "2026-04-21T11:53:44"
-  },
-  "WhatsApp Image 2026-04-13 at 13.20.47.json": {
-    "store": "Migros / Market",
-    "date": "2026-04-12",
-    "total": 1580.0,
-    "items_sum": 1580.0,
-    "items": [
-      {
-        "name": "TEMEL GIDA %01",
-        "amount": 1580.0
-      }
-    ],
-    "saved_at": "2026-04-21T11:53:44"
+    "saved_at": "2026-04-21T20:21:01"
   },
   "WhatsApp Image 2026-04-20 at 17.35.08 (2).json": {
     "store": "BİM",
@@ -202,19 +74,19 @@
     "items_sum": 166.0,
     "items": [
       {
-        "name": "YUMURTA 63-72G15Li 10%",
+        "name": "YUMURTA 63-72G15Lİ",
         "amount": 99.0
       },
       {
-        "name": "SANDViCEKMEGi4*100G",
+        "name": "SANDVİCEKMEGİ4*100G",
         "amount": 66.0
       },
       {
-        "name": "ALISVERiS POSETI BiM",
+        "name": "ALISVERİS POSETI BİM",
         "amount": 1.0
       }
     ],
-    "saved_at": "2026-04-21T11:53:44"
+    "saved_at": "2026-04-21T20:21:01"
   },
   "WhatsApp Image 2026-04-20 at 17.35.09 (1).json": {
     "store": "Migros / Market",
@@ -223,7 +95,7 @@
     "items_sum": 570.44,
     "items": [
       {
-        "name": "ORTAKALKG %01",
+        "name": "ORTAKALKG",
         "amount": 56.06
       },
       {
@@ -231,7 +103,7 @@
         "amount": 56.88
       },
       {
-        "name": "JMURTA 63-72G15Li",
+        "name": "JMURTA 63-72G15Lİ",
         "amount": 99.0
       },
       {
@@ -239,59 +111,59 @@
         "amount": 93.0
       },
       {
-        "name": "TiViTEKiTAPLAR]",
+        "name": "TİVİTEKİTAPLAR]",
         "amount": 15.0
       },
       {
-        "name": "ISVERiSPOSETiBiM",
+        "name": "ISVERİSPOSETİBİM",
         "amount": 0.5
       },
       {
-        "name": "KTiViTEKITAPLARI",
+        "name": "KTİVİTEKITAPLARI",
         "amount": 15.0
       },
       {
-        "name": "KTiViTEKiTAPLARI",
+        "name": "KTİVİTEKİTAPLARI",
         "amount": 15.0
       },
       {
-        "name": "1KAYEKiTAPLARI %00",
+        "name": "1KAYEKİTAPLARI",
         "amount": 15.0
       },
       {
-        "name": "KTiViTEKiTAPLARI %00",
+        "name": "KTİVİTEKİTAPLARI",
         "amount": 15.0
       },
       {
-        "name": "KTIVITEKiTAPLARI %00",
+        "name": "KTIVITEKİTAPLARI",
         "amount": 15.0
       },
       {
-        "name": "KAVEKiTAPLARI %000",
+        "name": "KAVEKİTAPLARI",
         "amount": 20.0
       },
       {
-        "name": "IKAYEKITAPLARI %00",
+        "name": "IKAYEKITAPLARI",
         "amount": 15.0
       },
       {
-        "name": "IKAYEKITAPLARI %00",
+        "name": "IKAYEKITAPLARI",
         "amount": 15.0
       },
       {
-        "name": "LMERHiKAYEKITAPLR %00",
+        "name": "LMERHİKAYEKITAPLR",
         "amount": 23.0
       },
       {
-        "name": "LMERHiKAYEKiTAPLR %00",
+        "name": "LMERHİKAYEKİTAPLR",
         "amount": 23.0
       },
       {
-        "name": "UYGUEGiTiMiKiTABI %00",
+        "name": "UYGUEGİTİMİKİTABI",
         "amount": 79.0
       }
     ],
-    "saved_at": "2026-04-21T11:53:44"
+    "saved_at": "2026-04-21T20:21:01"
   },
   "WhatsApp Image 2026-04-20 at 17.35.09 (2).json": {
     "store": "Migros / Market",
@@ -300,19 +172,19 @@
     "items_sum": 209.5,
     "items": [
       {
-        "name": "TURK KAHVESi100GAE %01",
+        "name": "TURK KAHVESİ100GAE",
         "amount": 49.5
       },
       {
-        "name": "EKMEKODUN %01",
+        "name": "EKMEKODUN",
         "amount": 60.0
       },
       {
-        "name": "TUVALET KAGIDI 12Li %20",
+        "name": "TUVALET KAGIDI 12Lİ",
         "amount": 100.0
       }
     ],
-    "saved_at": "2026-04-21T11:53:44"
+    "saved_at": "2026-04-21T20:21:01"
   },
   "WhatsApp Image 2026-04-20 at 17.35.10 (1).json": {
     "store": "BİM",
@@ -325,6 +197,95 @@
         "amount": 419.0
       }
     ],
-    "saved_at": "2026-04-21T11:53:44"
+    "saved_at": "2026-04-21T20:21:01"
+  },
+  "WhatsApp Image 2026-04-13 at 13.20.46 (1).json": {
+    "store": "Migros / Market",
+    "date": "2026-04-12",
+    "total": 480.0,
+    "items_sum": 480.0,
+    "items": [
+      {
+        "name": "GIDA",
+        "amount": 480.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
+  },
+  "WhatsApp Image 2026-04-13 at 13.20.47.json": {
+    "store": "Migros / Market",
+    "date": "2026-04-12",
+    "total": 1580.0,
+    "items_sum": 1580.0,
+    "items": [
+      {
+        "name": "TEMEL GIDA",
+        "amount": 1580.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
+  },
+  "WhatsApp Image 2026-04-20 at 17.35.07.json": {
+    "store": "FSREF CAN GIDA",
+    "date": "2026-04-18",
+    "total": 390.0,
+    "items_sum": 390.0,
+    "items": [
+      {
+        "name": "ICECEK",
+        "amount": 390.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
+  },
+  "WhatsApp Image 2026-04-20 at 17.35.08 (1).json": {
+    "store": "BİM",
+    "date": "2025-12-13",
+    "total": 509.0,
+    "items_sum": 509.0,
+    "items": [
+      {
+        "name": "2×26,00",
+        "amount": 52.0
+      },
+      {
+        "name": "SU5L",
+        "amount": 0.5
+      },
+      {
+        "name": "TEREYAG250GPERVIN",
+        "amount": 114.5
+      },
+      {
+        "name": "YUMURTA63-72G 15Lİ",
+        "amount": 79.0
+      },
+      {
+        "name": "KAPIRUZGARONLEYİCİ",
+        "amount": 45.0
+      },
+      {
+        "name": "ZENCEFİL250G 2",
+        "amount": 59.0
+      },
+      {
+        "name": "KAGIT HAVLU16LI",
+        "amount": 159.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
+  },
+  "WhatsApp Image 2026-04-20 at 17.35.10.json": {
+    "store": "BİM",
+    "date": "2025-12-15",
+    "total": 539.0,
+    "items_sum": 539.0,
+    "items": [
+      {
+        "name": "LEGO KAMP VE OKCULUK",
+        "amount": 539.0
+      }
+    ],
+    "saved_at": "2026-04-22T04:07:39"
   }
 }

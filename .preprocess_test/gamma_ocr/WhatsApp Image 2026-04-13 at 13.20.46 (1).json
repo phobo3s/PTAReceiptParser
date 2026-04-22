@@ -1,0 +1,348 @@
+{
+  "detections": [
+    {
+      "text": "CAN MARKET",
+      "confidence": 0.9720648527145386,
+      "x_min": 280,
+      "x_max": 615,
+      "y_min": 161,
+      "y_max": 250
+    },
+    {
+      "text": "MERT HALIL AKTAS",
+      "confidence": 0.9547353386878967,
+      "x_min": 246,
+      "x_max": 641,
+      "y_min": 242,
+      "y_max": 329
+    },
+    {
+      "text": "ISMETPASA MH. MERSINAKI CD.",
+      "confidence": 0.9603354930877686,
+      "x_min": 128,
+      "x_max": 775,
+      "y_min": 307,
+      "y_max": 403
+    },
+    {
+      "text": "NO:166/35 F0CA IZMIR",
+      "confidence": 0.9162591099739075,
+      "x_min": 200,
+      "x_max": 676,
+      "y_min": 381,
+      "y_max": 452
+    },
+    {
+      "text": "28636972980",
+      "confidence": 0.9996534585952759,
+      "x_min": 318,
+      "x_max": 579,
+      "y_min": 448,
+      "y_max": 505
+    },
+    {
+      "text": "FOCA V.D. TC NO:",
+      "confidence": 0.9196764826774597,
+      "x_min": 244,
+      "x_max": 616,
+      "y_min": 500,
+      "y_max": 560
+    },
+    {
+      "text": "TARIH",
+      "confidence": 0.9847390055656433,
+      "x_min": 58,
+      "x_max": 196,
+      "y_min": 577,
+      "y_max": 651
+    },
+    {
+      "text": ":12/04/2026",
+      "confidence": 0.9528810977935791,
+      "x_min": 307,
+      "x_max": 592,
+      "y_min": 586,
+      "y_max": 648
+    },
+    {
+      "text": "SAAT",
+      "confidence": 0.991986870765686,
+      "x_min": 58,
+      "x_max": 168,
+      "y_min": 645,
+      "y_max": 709
+    },
+    {
+      "text": "14:18:50",
+      "confidence": 0.9582222700119019,
+      "x_min": 355,
+      "x_max": 550,
+      "y_min": 652,
+      "y_max": 707
+    },
+    {
+      "text": "-",
+      "confidence": 0.11974694579839706,
+      "x_min": 333,
+      "x_max": 338,
+      "y_min": 674,
+      "y_max": 680
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 340,
+      "x_max": 367,
+      "y_min": 666,
+      "y_max": 691
+    },
+    {
+      "text": "FiS NO",
+      "confidence": 0.8370559215545654,
+      "x_min": 52,
+      "x_max": 211,
+      "y_min": 702,
+      "y_max": 778
+    },
+    {
+      "text": ":0031",
+      "confidence": 0.9129759669303894,
+      "x_min": 311,
+      "x_max": 457,
+      "y_min": 711,
+      "y_max": 771
+    },
+    {
+      "text": "GIDA",
+      "confidence": 0.9979977011680603,
+      "x_min": 54,
+      "x_max": 146,
+      "y_min": 799,
+      "y_max": 867
+    },
+    {
+      "text": "%01",
+      "confidence": 0.9861658215522766,
+      "x_min": 486,
+      "x_max": 562,
+      "y_min": 801,
+      "y_max": 867
+    },
+    {
+      "text": "*480,00",
+      "confidence": 0.9156259298324585,
+      "x_min": 618,
+      "x_max": 775,
+      "y_min": 795,
+      "y_max": 869
+    },
+    {
+      "text": "TOPKDV",
+      "confidence": 0.9950149655342102,
+      "x_min": 56,
+      "x_max": 250,
+      "y_min": 938,
+      "y_max": 997
+    },
+    {
+      "text": "*4,75",
+      "confidence": 0.9462211728096008,
+      "x_min": 594,
+      "x_max": 767,
+      "y_min": 930,
+      "y_max": 999
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.9953315258026123,
+      "x_min": 54,
+      "x_max": 251,
+      "y_min": 1009,
+      "y_max": 1067
+    },
+    {
+      "text": "*480,00",
+      "confidence": 0.9650540351867676,
+      "x_min": 533,
+      "x_max": 766,
+      "y_min": 999,
+      "y_max": 1070
+    },
+    {
+      "text": "*480,00",
+      "confidence": 0.9173340201377869,
+      "x_min": 586,
+      "x_max": 766,
+      "y_min": 1131,
+      "y_max": 1196
+    },
+    {
+      "text": "KREDI",
+      "confidence": 0.9888817667961121,
+      "x_min": 50,
+      "x_max": 177,
+      "y_min": 1143,
+      "y_max": 1201
+    },
+    {
+      "text": "VAKIFBANK",
+      "confidence": 0.99479079246521,
+      "x_min": 66,
+      "x_max": 292,
+      "y_min": 1192,
+      "y_max": 1262
+    },
+    {
+      "text": "************2911",
+      "confidence": 0.9156441688537598,
+      "x_min": 67,
+      "x_max": 439,
+      "y_min": 1252,
+      "y_max": 1309
+    },
+    {
+      "text": "T.SICIL NO:",
+      "confidence": 0.9704498648643494,
+      "x_min": 39,
+      "x_max": 300,
+      "y_min": 1344,
+      "y_max": 1410
+    },
+    {
+      "text": "EKü NO:0002",
+      "confidence": 0.9029532074928284,
+      "x_min": 39,
+      "x_max": 299,
+      "y_min": 1469,
+      "y_max": 1525
+    },
+    {
+      "text": "ZNO:1977",
+      "confidence": 0.9691256284713745,
+      "x_min": 556,
+      "x_max": 792,
+      "y_min": 1465,
+      "y_max": 1528
+    },
+    {
+      "text": "iSYERINO:10230000089137",
+      "confidence": 0.9228182435035706,
+      "x_min": 38,
+      "x_max": 424,
+      "y_min": 1577,
+      "y_max": 1630
+    },
+    {
+      "text": "POSNO:01403575",
+      "confidence": 0.9848508834838867,
+      "x_min": 537,
+      "x_max": 794,
+      "y_min": 1580,
+      "y_max": 1639
+    },
+    {
+      "text": "iSLEM NO:JP0042BATCHNO:0809",
+      "confidence": 0.944476842880249,
+      "x_min": 36,
+      "x_max": 503,
+      "y_min": 1627,
+      "y_max": 1679
+    },
+    {
+      "text": "14:18",
+      "confidence": 0.9551377296447754,
+      "x_min": 699,
+      "x_max": 796,
+      "y_min": 1635,
+      "y_max": 1689
+    },
+    {
+      "text": "MOVE5000F-Ver:360-L1DC1V",
+      "confidence": 0.9542201161384583,
+      "x_min": 180,
+      "x_max": 630,
+      "y_min": 1676,
+      "y_max": 1731
+    },
+    {
+      "text": "************2911",
+      "confidence": 0.8573181629180908,
+      "x_min": 85,
+      "x_max": 689,
+      "y_min": 1727,
+      "y_max": 1782
+    },
+    {
+      "text": "2",
+      "confidence": 0.26460278034210205,
+      "x_min": 718,
+      "x_max": 729,
+      "y_min": 1722,
+      "y_max": 1731
+    },
+    {
+      "text": "SATIS",
+      "confidence": 0.9900873899459839,
+      "x_min": 298,
+      "x_max": 475,
+      "y_min": 1772,
+      "y_max": 1839
+    },
+    {
+      "text": "488:881",
+      "confidence": 0.6404533982276917,
+      "x_min": 239,
+      "x_max": 506,
+      "y_min": 1828,
+      "y_max": 1893
+    },
+    {
+      "text": "AID00031001SA）",
+      "confidence": 0.5756867527961731,
+      "x_min": 166,
+      "x_max": 615,
+      "y_min": 1861,
+      "y_max": 1933
+    },
+    {
+      "text": "TC：AEEA809136527EEB",
+      "confidence": 0.9823837280273438,
+      "x_min": 220,
+      "x_max": 566,
+      "y_min": 1920,
+      "y_max": 1978
+    },
+    {
+      "text": "ONAY K0DU:226171",
+      "confidence": 0.9563431143760681,
+      "x_min": 143,
+      "x_max": 661,
+      "y_min": 1971,
+      "y_max": 2033
+    },
+    {
+      "text": "TUTAR KARSILIOI MAL VEYA HIZMETIALDIM",
+      "confidence": 0.8979332447052002,
+      "x_min": 89,
+      "x_max": 719,
+      "y_min": 2064,
+      "y_max": 2131
+    },
+    {
+      "text": "BU BELGEYi SAKLAYINIZ (MUSTERI NUSHASI)",
+      "confidence": 0.8893508911132812,
+      "x_min": 71,
+      "x_max": 716,
+      "y_min": 2158,
+      "y_max": 2227
+    },
+    {
+      "text": "Viso paywaye ",
+      "confidence": 0.6639004349708557,
+      "x_min": 173,
+      "x_max": 621,
+      "y_min": 2194,
+      "y_max": 2288
+    }
+  ]
+}

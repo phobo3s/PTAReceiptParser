@@ -1,0 +1,404 @@
+{
+  "detections": [
+    {
+      "text": "TANKAROTOMOTIV PETROL",
+      "confidence": 0.9388837218284607,
+      "x_min": 19,
+      "x_max": 708,
+      "y_min": 0,
+      "y_max": 84
+    },
+    {
+      "text": "GIDA INGAAT SAN VE TIC LTD STI",
+      "confidence": 0.8301135897636414,
+      "x_min": 9,
+      "x_max": 724,
+      "y_min": 42,
+      "y_max": 150
+    },
+    {
+      "text": "REFIK SEVKEI INCE MH",
+      "confidence": 0.9315735101699829,
+      "x_min": 100,
+      "x_max": 594,
+      "y_min": 118,
+      "y_max": 199
+    },
+    {
+      "text": "2148/9SK NO:4",
+      "confidence": 0.929463267326355,
+      "x_min": 172,
+      "x_max": 542,
+      "y_min": 188,
+      "y_max": 256
+    },
+    {
+      "text": "BAYRAKLI IZMiR",
+      "confidence": 0.9301794767379761,
+      "x_min": 171,
+      "x_max": 565,
+      "y_min": 248,
+      "y_max": 318
+    },
+    {
+      "text": "GAZIEMIR VERGI DAIRESI MUD.",
+      "confidence": 0.917900025844574,
+      "x_min": 30,
+      "x_max": 663,
+      "y_min": 302,
+      "y_max": 387
+    },
+    {
+      "text": "8200045128",
+      "confidence": 0.9981603622436523,
+      "x_min": 239,
+      "x_max": 491,
+      "y_min": 371,
+      "y_max": 441
+    },
+    {
+      "text": "FiS NO: 0611",
+      "confidence": 0.8744367957115173,
+      "x_min": 417,
+      "x_max": 754,
+      "y_min": 442,
+      "y_max": 538
+    },
+    {
+      "text": "11-03-2026",
+      "confidence": 0.9974231719970703,
+      "x_min": 0,
+      "x_max": 235,
+      "y_min": 455,
+      "y_max": 529
+    },
+    {
+      "text": "SAAT 17:49",
+      "confidence": 0.9685721397399902,
+      "x_min": 0,
+      "x_max": 236,
+      "y_min": 518,
+      "y_max": 593
+    },
+    {
+      "text": "20*250,00",
+      "confidence": 0.9214715957641602,
+      "x_min": 472,
+      "x_max": 759,
+      "y_min": 601,
+      "y_max": 682
+    },
+    {
+      "text": "YIKAMA(OTOMATIK)",
+      "confidence": 0.9210456609725952,
+      "x_min": 0,
+      "x_max": 376,
+      "y_min": 601,
+      "y_max": 684
+    },
+    {
+      "text": "#BarkoP0S-2.0.14.70",
+      "confidence": 0.8853438496589661,
+      "x_min": 0,
+      "x_max": 502,
+      "y_min": 667,
+      "y_max": 754
+    },
+    {
+      "text": "*250,00",
+      "confidence": 0.9634384512901306,
+      "x_min": 580,
+      "x_max": 773,
+      "y_min": 725,
+      "y_max": 803
+    },
+    {
+      "text": "ARATOPLAM",
+      "confidence": 0.996555745601654,
+      "x_min": 0,
+      "x_max": 218,
+      "y_min": 744,
+      "y_max": 825
+    },
+    {
+      "text": "*41.67",
+      "confidence": 0.8859111666679382,
+      "x_min": 552,
+      "x_max": 773,
+      "y_min": 803,
+      "y_max": 894
+    },
+    {
+      "text": "KDU",
+      "confidence": 0.8111445903778076,
+      "x_min": 0,
+      "x_max": 99,
+      "y_min": 826,
+      "y_max": 913
+    },
+    {
+      "text": "￥250,00",
+      "confidence": 0.8395792245864868,
+      "x_min": 517,
+      "x_max": 776,
+      "y_min": 870,
+      "y_max": 974
+    },
+    {
+      "text": "TOP",
+      "confidence": 0.9789384007453918,
+      "x_min": 0,
+      "x_max": 104,
+      "y_min": 894,
+      "y_max": 986
+    },
+    {
+      "text": "*250,00",
+      "confidence": 0.9265539050102234,
+      "x_min": 578,
+      "x_max": 770,
+      "y_min": 956,
+      "y_max": 1039
+    },
+    {
+      "text": "EFT-POS",
+      "confidence": 0.9084347486495972,
+      "x_min": 0,
+      "x_max": 178,
+      "y_min": 980,
+      "y_max": 1050
+    },
+    {
+      "text": "T.VAKIFLAR CANKASI T.A.O.",
+      "confidence": 0.8341916799545288,
+      "x_min": 150,
+      "x_max": 554,
+      "y_min": 1096,
+      "y_max": 1155
+    },
+    {
+      "text": "POS:01413941",
+      "confidence": 0.9521568417549133,
+      "x_min": 493,
+      "x_max": 700,
+      "y_min": 1127,
+      "y_max": 1184
+    },
+    {
+      "text": "1SYER1: 122300001130506",
+      "confidence": 0.91445392370224,
+      "x_min": 41,
+      "x_max": 412,
+      "y_min": 1136,
+      "y_max": 1199
+    },
+    {
+      "text": "L11",
+      "confidence": 0.8004977107048035,
+      "x_min": 635,
+      "x_max": 704,
+      "y_min": 1168,
+      "y_max": 1214
+    },
+    {
+      "text": "BATCH NO:000569",
+      "confidence": 0.9384173154830933,
+      "x_min": 39,
+      "x_max": 285,
+      "y_min": 1178,
+      "y_max": 1235
+    },
+    {
+      "text": "国",
+      "confidence": 0.17722269892692566,
+      "x_min": 414,
+      "x_max": 423,
+      "y_min": 1219,
+      "y_max": 1231
+    },
+    {
+      "text": "STAN:034495",
+      "confidence": 0.964367687702179,
+      "x_min": 514,
+      "x_max": 703,
+      "y_min": 1207,
+      "y_max": 1260
+    },
+    {
+      "text": "ISLEM NO:000481",
+      "confidence": 0.907456636428833,
+      "x_min": 40,
+      "x_max": 282,
+      "y_min": 1217,
+      "y_max": 1274
+    },
+    {
+      "text": "HGN/T3Y",
+      "confidence": 0.9618457555770874,
+      "x_min": 342,
+      "x_max": 477,
+      "y_min": 1249,
+      "y_max": 1306
+    },
+    {
+      "text": "SN:FT40034634",
+      "confidence": 0.9727858304977417,
+      "x_min": 41,
+      "x_max": 272,
+      "y_min": 1258,
+      "y_max": 1312
+    },
+    {
+      "text": "1",
+      "confidence": 0.0449916273355484,
+      "x_min": 75,
+      "x_max": 89,
+      "y_min": 1335,
+      "y_max": 1349
+    },
+    {
+      "text": "SATIS",
+      "confidence": 0.9592016339302063,
+      "x_min": 269,
+      "x_max": 446,
+      "y_min": 1326,
+      "y_max": 1390
+    },
+    {
+      "text": "2911",
+      "confidence": 0.9904778599739075,
+      "x_min": 190,
+      "x_max": 512,
+      "y_min": 1405,
+      "y_max": 1458
+    },
+    {
+      "text": "ISLEM TUTARI",
+      "confidence": 0.8895455002784729,
+      "x_min": 147,
+      "x_max": 537,
+      "y_min": 1480,
+      "y_max": 1540
+    },
+    {
+      "text": "250,00",
+      "confidence": 0.9266440868377686,
+      "x_min": 206,
+      "x_max": 420,
+      "y_min": 1555,
+      "y_max": 1610
+    },
+    {
+      "text": "TL",
+      "confidence": 0.9348793029785156,
+      "x_min": 424,
+      "x_max": 504,
+      "y_min": 1549,
+      "y_max": 1609
+    },
+    {
+      "text": "OHAYK0DU:171242",
+      "confidence": 0.8633722066879272,
+      "x_min": 40,
+      "x_max": 311,
+      "y_min": 1632,
+      "y_max": 1678
+    },
+    {
+      "text": "RRN:607096377368",
+      "confidence": 0.9884754419326782,
+      "x_min": 429,
+      "x_max": 699,
+      "y_min": 1621,
+      "y_max": 1673
+    },
+    {
+      "text": "BANKRREFERANS:607017502572",
+      "confidence": 0.9774996042251587,
+      "x_min": 127,
+      "x_max": 570,
+      "y_min": 1658,
+      "y_max": 1720
+    },
+    {
+      "text": "VISR",
+      "confidence": 0.8754143118858337,
+      "x_min": 317,
+      "x_max": 404,
+      "y_min": 1709,
+      "y_max": 1753
+    },
+    {
+      "text": "AID:A0000000091010AC26B00426E528EA5",
+      "confidence": 0.8492597341537476,
+      "x_min": 36,
+      "x_max": 679,
+      "y_min": 1728,
+      "y_max": 1794
+    },
+    {
+      "text": "ISLEM TEMASSIZ YAPILMISTIR",
+      "confidence": 0.864159345626831,
+      "x_min": 147,
+      "x_max": 574,
+      "y_min": 1766,
+      "y_max": 1833
+    },
+    {
+      "text": "ACQUIRER ID:0015",
+      "confidence": 0.8686660528182983,
+      "x_min": 223,
+      "x_max": 496,
+      "y_min": 1803,
+      "y_max": 1860
+    },
+    {
+      "text": "TUTAR KARSILIGI MAL VEVA HIZMET ALDIN",
+      "confidence": 0.86567223072052,
+      "x_min": 51,
+      "x_max": 652,
+      "y_min": 1833,
+      "y_max": 1905
+    },
+    {
+      "text": "MUSTERI NUSHASI",
+      "confidence": 0.9406896829605103,
+      "x_min": 224,
+      "x_max": 471,
+      "y_min": 1905,
+      "y_max": 1975
+    },
+    {
+      "text": "BU BELGEYI SAKLAVINIZ",
+      "confidence": 0.8914629817008972,
+      "x_min": 180,
+      "x_max": 526,
+      "y_min": 1942,
+      "y_max": 2014
+    },
+    {
+      "text": "VeakrBsnk",
+      "confidence": 0.6305491924285889,
+      "x_min": 282,
+      "x_max": 434,
+      "y_min": 2035,
+      "y_max": 2097
+    },
+    {
+      "text": "ZNO:0569",
+      "confidence": 0.9603411555290222,
+      "x_min": 515,
+      "x_max": 765,
+      "y_min": 2155,
+      "y_max": 2218
+    },
+    {
+      "text": "EKU NO:0001",
+      "confidence": 0.9305000901222229,
+      "x_min": 0,
+      "x_max": 309,
+      "y_min": 2165,
+      "y_max": 2263
+    }
+  ]
+}
