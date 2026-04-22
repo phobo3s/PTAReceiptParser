@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "C:\PTAReceiptParser\batch.py", line 477, in <module>
+    main()
+  File "C:\PTAReceiptParser\batch.py", line 408, in main
+    print("\u26a0\ufe0f  Güncelleme kanalý seçilmedi — sadece OCR + kategorize yapýlacak.")
+  File "C:\Users\berk.kilinc\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1254.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
