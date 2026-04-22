@@ -68,7 +68,8 @@ COMMON_SKIP_PATTERNS=[
     r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
     r"^[BI]:[\d]+",            # B:706 S:9638 gibi
     r"^\d{4,6}\*+\d{4}$",     # kart numarası
-    r"^%\d+\.?$",             # %1. ve %1 — KDV oranı (noktalı veya noktasız)
+    r"^%\s*\d+(\s+%)?",        # %1, %20, % 2 0 gibi yüzde satırları
+
     r"^\$\d*\.?$",            # $0. — mobile OCR gürültüsü
     r"^[\$各\\]",           # 各1 $c}$ gibi saçma karakterler
     r"^\d+\.$",               # sadece "1."
@@ -77,11 +78,17 @@ COMMON_SKIP_PATTERNS=[
     r"^\([\d）]+\)$",
     r"^AFATOPLAM",  # Ara toplam (Tankar)
     r"^ARATOPLAM",
-    r"^TOP$",  # Sadece "TOP" label'ı (TOPLAM label değil)
+    r"^TOP(LAH|PLAH)?$",  # Sadece "TOP" / "TOPLAH" / "TOPPLAH" label'ı
+    r"^JOPLAM",             # OCR hatası: "TOPLAM" → "JOPLAM"
     r"^KDV$",  # KDV satırı (TOPLAM değil)
     r"^SN:",
     r"^EFT-[PF]OS",  # ödeme yöntemi satırı (toplam değil)
+    r"^Nakit\b",           # "Nakit" ödeme yöntemi
+    r"^Kredi\s+Kartı\b",   # "Kredi Kartı" ödeme yöntemi
     r"^BROT\s+GIDA",  # gıda-dışı KDV özet satırı
+    r"^BRUT\s+GIDA",  # Brut gıda satırı (METRO e-Fatura)
+    r"^(NET|ODEME|ÖDEM|ÖDEME)\s+TUTARI",  # Özet tutarı satırları
+    r"^\d{3}\s+\d+[\.,]\d{2}",  # Ödeme kodu + tutar: "020 71.50", "610 91.82"
     # METRO e-Fatura / genel fatura başlık satırları
     r"^MERKEZ:",
     r"^OLUŞTURMA\s+TARİHİ",
@@ -110,6 +117,7 @@ COMMON_SKIP_PATTERNS=[
 
 PRICE_PREFIX_CLEANUP = [
     (r"[￥¥$§¢€£₹₽]", "*"),  # OCR garip para birimi → *
+    (r"%[0-9A-Fa-f]{2}", " "),  # URL encoding: %20 → boşluk (inline fiyat satırlarında)
 ]
 
 COMMON_NAME_CLEANUPS = [
@@ -126,6 +134,8 @@ COMMON_NAME_CLEANUPS = [
 COMMON_DATE_PATTERNS = [
     (r"^.*:?(\d{2}([\.\-\/\\])\d{2}\2\d{4})(\s*\d{2}:\d{2})?"),  # 31.12.2026, 31-12-2026
     (r"^.*?(\d{2}\.(\d{2})\d{4})\b"),                              # 31.122026 (iki delimiter yok, OCR birleştirmiş)
+    (r"(\d{2})([\.\-]?)(\d{2})\2(\d{4})"),                        # Boşluklu tarihler: "31 . 12 . 2026"
+    (r"^.*?(\d{2}([\.\-\/])\d{2}\2\d{2})\b"),                    # 18/04/26 — 2 haneli yıl (20xx)
 ]
 
 STORE_PROFILES = {
@@ -168,13 +178,15 @@ STORE_PROFILES = {
             r"MİGROS",
             r"HAKAN KARACA",
             r"CAN MARKET",
+            r"DUFREL",              # Migros şube markası
+            r"GIDA\s+SAN",         # Gıda şirketleri
         ],
         "layout": {
             "y_tolerance": 15,
-            "header_y_max": 500,
+            "header_y_max": 900,    # Belge 3_13 gibi şubeler Y=800-900'de header
             "footer_y_min": 9999,
         },
-        "price_pattern": r"^[\*x×](-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
+        "price_pattern": r"^.*\*(-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^\([\d）]+\)$",         # (1） gibi
             r"^KOV\s+Z",              # KOV Z20 metadata
@@ -211,10 +223,13 @@ STORE_PROFILES = {
             r"METRO",
             r"ETRD",
             r"ETRDGROSMARET",
+            r"FETRO",             # OCR F↔M hatası
+            r"ETRO\s+GROS",      # "ETRO GROSMARKET" OCR kırpması
+            r"metro-tr",          # Web adresi
         ],
         "layout": {
             "y_tolerance": 15,
-            "header_y_max": 500,
+            "header_y_max": 1500,  # e-Fatura header'ı Y=1140+'a kadar uzanabiliyor
             "footer_y_min": 9999,
         },
         "price_pattern": r"^[\*x×](-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2})$",
@@ -253,7 +268,7 @@ STORE_PROFILES = {
         ],
         "layout": {
             "y_tolerance": 15,
-            "header_y_max": 500,
+            "header_y_max": 800,   # Header Y=700-780'e kadar uzanıyor
             "footer_y_min": 9999,
         },
         "price_pattern": r"^[\*x×](-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2})$",
@@ -360,7 +375,10 @@ def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[s
                     # DD.MMYYYY (ayırıcı yok, ör. 13.122025) → ayır
                     parts = [parts[0], parts[1][:2], parts[1][2:]]
                 if len(parts) == 3:
-                    result = f"{parts[2]}-{parts[1]}-{parts[0]}"
+                    year = parts[2]
+                    if len(year) == 2:
+                        year = "20" + year  # "26" → "2026"
+                    result = f"{year}-{parts[1]}-{parts[0]}"
                     if DEBUG:
                         print(f"    [+] ACCEPT: '{date_str}' -> {result}")
                     return result, d.y_max
@@ -772,6 +790,22 @@ def parse_receipt(ocr_json: dict) -> Receipt:
         if DEBUG:
             print(f"    [*] Price dets (): {[d.text for d in price_dets]}")
             print(f"    [*] Name dets (): {[d.text for d in name_dets]}")
+
+        # Eğer name_dets boş ama tek detection (inline isim+fiyat), ayır
+        if not name_dets and len(price_dets) == 1:
+            raw_t = price_dets[0].text
+            for _p, _r in PRICE_PREFIX_CLEANUP:
+                raw_t = re.sub(_p, _r, raw_t)
+            inline_m = re.match(r"^(.+?)\*(-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$", raw_t)
+            if inline_m:
+                d0 = price_dets[0]
+                name_dets = [Detection(
+                    text=inline_m.group(1).strip(),
+                    confidence=d0.confidence, x_min=d0.x_min, x_max=d0.x_max,
+                    y_min=d0.y_min, y_max=d0.y_max, y_center=d0.y_center, bbox=d0.bbox
+                )]
+                if DEBUG:
+                    print(f"    [*] Inline ayırma: isim='{inline_m.group(1).strip()}'")
 
         if not price_dets or not name_dets:
             if DEBUG:

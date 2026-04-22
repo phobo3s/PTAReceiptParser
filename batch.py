@@ -43,7 +43,8 @@ logging.basicConfig(level=logging.WARNING)  # PaddleOCR loglarını sustur
 RULES_FILE         = Path("rules.toml")
 LEARNED_RULES_FILE = Path("rules_learned.toml")
 SUPPORTED_EXTS     = {".jpg", ".jpeg", ".png"}
-OCR_CACHE_DIR      = Path(".ocr_cache")  # işlenmiş json'ları sakla, tekrar OCR'lamaz
+OCR_CACHE_DIR      = Path(".ocr_cache")           # PaddleOCR cache
+OCR_CACHE_DIR_EASY = Path(".ocr_cache_easyocr")  # EasyOCR cache (Türkçe karakter desteği)
 
 
 # ── OCR ───────────────────────────────────────────────────────────────────────
@@ -56,11 +57,13 @@ def get_ocr_engine():
     os.environ["FLAGS_use_mkldnn"] = "0"  # oneDNN disable
     print("⏳ PaddleOCR yükleniyor (ilk seferinde model indirilebilir)...")
     ocr = PaddleOCR(
-        use_textline_orientation=True,
+        use_textline_orientation=False,
         #use_angle_cls=True,
-        device='cpu',
-        lang='tr',
-        #character_dict_path='./customKeys.txt', # custom keyler. saçma sapan asci karakterleri ile uğraşmayalım diye
+        #device='cpu',
+        # NOT: lang parametresi, model adları verilince ignore ediliyor (UserWarning).
+        # Türkçe için PaddleOCR'da özel model yok. en_PP-OCRv5_mobile_rec İ/Ğ/Ş gibi
+        # karakterleri tamamen kaçırıyor. Multilingual model bunları "0" veya "I" olarak
+        # veriyor — parser bu hataları zaten tolere ediyor, bu yüzden bu daha iyi.
         text_detection_model_name="PP-OCRv5_mobile_det",
         text_recognition_model_name="PP-OCRv5_mobile_rec",
         enable_mkldnn=(platform.system() == "Linux"),  # Linux'ta aktif; Windows'ta MKLDNN/PIR crash yapar
@@ -71,58 +74,108 @@ def get_ocr_engine():
         text_det_thresh=0.3,         # Binarization threshold. Düşürülmüş: düşük kontrastlı termal kağıt için.
         # Recognition Parameters
         #drop_score=0.5,              # OCR seviyesinde noise filtresi; parser'daki 0.60 eşiğiyle tutarlı.
-        use_doc_unwarping=True,
+        use_doc_unwarping=False,
     )
     print("+ PaddleOCR hazır\n")
     return ocr
 
-def run_ocr(ocr_engine, image_path: Path) -> dict:
+
+def get_easyocr_engine():
+    """EasyOCR'ı bir kez yükle. Türkçe karakter desteği var (İ, Ğ, Ş, Ö, Ü, Ç)."""
+    try:
+        import easyocr
+    except ImportError:
+        print("❌ EasyOCR yüklü değil: pip install easyocr")
+        sys.exit(1)
+    print("⏳ EasyOCR yükleniyor (ilk seferinde model indirilebilir)...")
+    reader = easyocr.Reader(['tr'], gpu=False, verbose=False)
+    print("+ EasyOCR hazır (Türkçe: İ/Ğ/Ş/Ö/Ü/Ç desteği aktif)\n")
+    return reader
+
+
+def run_ocr(ocr_engine, image_path: Path, engine_name: str = "paddleocr") -> dict:
+    """OCR çalıştır ve parser'ın beklediği ortak formatta döndür."""
     import numpy as np
     from PIL import Image
 
-    print(f"  DEBUG: Görüntü açılıyor...")
     img = Image.open(image_path).convert("RGB")
     img_array = np.array(img)
     h, w = img_array.shape[:2]
-    print(f"  DEBUG: Görüntü boyutu: {w}x{h}")
 
+    if engine_name == "easyocr":
+        return _run_easyocr(ocr_engine, image_path, img, w, h)
+    else:
+        return _run_paddleocr(ocr_engine, image_path, img_array, w, h)
+
+
+def _run_paddleocr(ocr_engine, image_path: Path, img_array, w: int, h: int) -> dict:
     print(f"  DEBUG: predict çağrılıyor...")
     result = list(ocr_engine.predict(str(image_path)))
     print(f"  DEBUG: predict bitti, {len(result)} sonuç")
-    
+
     guided_receipts_dir = Path(".guidedReceipts")
     guided_receipts_dir.mkdir(exist_ok=True)
-    output_path = guided_receipts_dir / f"{image_path.name}"
+    output_path = guided_receipts_dir / image_path.name
     result[0].img['ocr_res_img'].save(str(output_path))
-    
+
     detections = []
     for i, ocr_result in enumerate(result):
-        print(f"  DEBUG: result[{i}] keys: {list(ocr_result.keys())}")
         boxes  = ocr_result.get("dt_polys") or ocr_result.get("boxes")
         texts  = ocr_result.get("rec_texts") or ocr_result.get("texts")
         scores = ocr_result.get("rec_scores") or ocr_result.get("scores")
-        print(f"  DEBUG: boxes={boxes is not None}, texts={texts is not None}, scores={scores is not None}")
         if boxes is None or texts is None or scores is None:
             continue
         for bbox, text, conf in zip(boxes, texts, scores):
             if hasattr(bbox, "tolist"):
                 bbox = bbox.tolist()
             detections.append([bbox, [text, float(conf)]])
-    
+
     print(f"  DEBUG: Toplam {len(detections)} detection")
     return {"status": "success", "image_width": w, "image_height": h, "detections": detections}
 
-def ocr_with_cache(ocr_engine, image_path: Path) -> dict:
-    """Cache'te varsa OCR'ı tekrar yapmaz."""
-    OCR_CACHE_DIR.mkdir(exist_ok=True)
-    cache_file = OCR_CACHE_DIR / (image_path.stem + ".json")
+
+def _run_easyocr(reader, image_path: Path, img, w: int, h: int) -> dict:
+    """EasyOCR çalıştır. Bbox formatı PaddleOCR ile aynı — parser doğrudan okur."""
+    from PIL import ImageDraw
+
+    results = reader.readtext(str(image_path))
+
+    # Görselleştirme (.guidedReceipts/ klasörüne)
+    guided_receipts_dir = Path(".guidedReceipts")
+    guided_receipts_dir.mkdir(exist_ok=True)
+    vis = img.copy()
+    draw = ImageDraw.Draw(vis)
+    for (bbox, text, conf) in results:
+        pts = [(int(p[0]), int(p[1])) for p in bbox]
+        draw.polygon(pts, outline="red")
+    vis.save(str(guided_receipts_dir / image_path.name))
+
+    # EasyOCR: (bbox, text, conf) — bbox [[x1,y1],[x2,y2],[x3,y3],[x4,y4]]
+    # load_detections() beklediği format: [bbox, [text, conf]]  — aynı polygon, direkt uyumlu
+    detections = []
+    for (bbox, text, conf) in results:
+        # EasyOCR bazen numpy array döndürür, listeye çevir
+        if hasattr(bbox, "tolist"):
+            bbox = bbox.tolist()
+        else:
+            bbox = [[int(p[0]), int(p[1])] for p in bbox]
+        detections.append([bbox, [text, float(conf)]])
+
+    print(f"  EasyOCR: Toplam {len(detections)} detection")
+    return {"status": "success", "image_width": w, "image_height": h, "detections": detections}
+
+def ocr_with_cache(ocr_engine, image_path: Path, engine_name: str = "paddleocr") -> dict:
+    """Cache'te varsa OCR'ı tekrar yapmaz. Her engine'in ayrı cache klasörü var."""
+    cache_dir = OCR_CACHE_DIR_EASY if engine_name == "easyocr" else OCR_CACHE_DIR
+    cache_dir.mkdir(exist_ok=True)
+    cache_file = cache_dir / (image_path.stem + ".json")
 
     if cache_file.exists():
         print(f"  📂 Cache'ten okunuyor: {cache_file.name}")
         return json.loads(cache_file.read_text(encoding="utf-8"))
 
     print(f"  🔍 OCR yapılıyor: {image_path.name}")
-    result = run_ocr(ocr_engine, image_path)
+    result = run_ocr(ocr_engine, image_path, engine_name)
     cache_file.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     return result
 
@@ -239,6 +292,7 @@ def process_receipt(
     journal_path: Optional[Path] = None,
     excel_path: Optional[Path] = None,
     excel_sheet: Optional[str] = None,
+    engine_name: str = "paddleocr",
 ) -> bool:
     """Bir fişi işle. En az bir kanal güncellendiyse True döndür."""
     print(f"\n{'═' * 60}")
@@ -247,7 +301,7 @@ def process_receipt(
 
     # OCR
     try:
-        ocr_json = ocr_with_cache(ocr_engine, image_path)
+        ocr_json = ocr_with_cache(ocr_engine, image_path, engine_name)
     except Exception as e:
         print(f"  ❌ OCR hatası: {e}")
         return False
@@ -356,6 +410,7 @@ def main():
         print("  --sheet   SheetName      Excel sheet adı (default: ilk sheet)")
         print("  --api-key sk-ant-...     Anthropic API anahtarı")
         print("  --preprocess             Görüntüleri OCR öncesi ön işle")
+        print("  --engine paddleocr|easyocr  OCR motoru (default: paddleocr)")
         print("\nÖrnekler:")
         print("  python batch.py fisler/ --hledger butce.hledger")
         print("  python batch.py fisler/ --excel butce.xlsx")
@@ -450,15 +505,29 @@ def main():
     
     print(f"📋 {len(rules)} kural yüklendi")
     
-    # OCR engine
-    ocr_engine = get_ocr_engine()
-    
+    # OCR engine seçimi
+    engine_name = "paddleocr"
+    if "--engine" in sys.argv:
+        idx = sys.argv.index("--engine")
+        if idx + 1 < len(sys.argv):
+            engine_name = sys.argv[idx + 1].lower()
+    if engine_name not in ("paddleocr", "easyocr"):
+        print(f"❌ Bilinmeyen engine: {engine_name}  (paddleocr veya easyocr olmalı)")
+        sys.exit(1)
+
+    print(f"🔧 OCR engine: {engine_name}")
+    if engine_name == "easyocr":
+        ocr_engine = get_easyocr_engine()
+    else:
+        ocr_engine = get_ocr_engine()
+
     # İşle
     success, failed, skipped = 0, 0, 0
     for image_path in images:
         ok = process_receipt(image_path, ocr_engine, rules, api_key,
                              journal_path=journal_path,
-                             excel_path=excel_path, excel_sheet=excel_sheet)
+                             excel_path=excel_path, excel_sheet=excel_sheet,
+                             engine_name=engine_name)
         if ok:
             success += 1
         else:
