@@ -4,31 +4,26 @@ Fiş Görüntü Ön İşleyici
 Bir klasördeki tüm jpg/png fişleri işler ve .processedReceipts/ klasörüne kaydeder.
 
 Kullanım:
-    python preprocess.py <klasor>
-    python preprocess.py Receipts/
-    python preprocess.py fiş.jpg        ← tek dosya da desteklenir
-    python preprocess.py Receipts/ --engine tesseract  ← binary adımı etkin
+    python preProcess.py Receipts/
+    python preProcess.py Receipts/ --engine tesseract
+    python preProcess.py Receipts/ --sharpen          ← unsharp masking ekle
+    python preProcess.py Receipts/ --gamma 0.7        ← gamma düzeltme ekle
+    python preProcess.py Receipts/ --sharpen --gamma 0.7
 
 Adımlar (sırayla):
     0. Upscale          — dar görüntüleri (< MIN_WIDTH) büyüt
     1. Dönme düzeltme   — Hough çizgileriyle eğim tespiti
     2. Perspektif       — 4 köşe tespiti + warpPerspective
     3. Bg normalizasyon — gölge/eşitsiz ışık giderme (büyük Gaussian bölme)
-    4. CLAHE kontrast   — adaptif histogram eşitleme (parlaklığa göre ayarlı)
-    5. Denoise          — bilateral filtre ile ince gürültü bastırma
-    6. Binary (opsiyonel) — Tesseract için; PaddleOCR için atlanır
-    7. Crop             — fiş dışı boşlukları kırp
-
-Çıktılar:
-    .processedReceipts/
-        fiş.jpg                  ← final (tüm adımlar uygulanmış)
-        debug/
-            fiş_0_upscale.jpg
-            fiş_1_rotated.jpg
-            ...
+    4. Gamma (opsiyonel)— midton parlaklık düzeltme (--gamma 0.7 ile aktif)
+    5. CLAHE kontrast   — adaptif histogram eşitleme (parlaklığa göre ayarlı)
+    6. Denoise          — bilateral filtre ile ince gürültü bastırma
+    7. Sharpen (opsiy.) — unsharp masking ile kenar keskinleştirme (--sharpen ile)
+    8. Binary (opsiyonel)— Tesseract için; PaddleOCR için atlanır
+    9. Crop             — fiş dışı boşlukları kırp
 
 Bağımlılıklar:
-    pip install opencv-python numpy Pillow
+    pip install opencv-python numpy
 """
 
 import cv2
@@ -247,7 +242,27 @@ def enhance_contrast(img: np.ndarray) -> np.ndarray:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ADIM 5 — DENOISE (YENİ)
+# ADIM 4 — GAMMA DÜZELTMESİ (OPSİYONEL, YENİ)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def gamma_correct(img: np.ndarray, gamma: float = 0.7) -> np.ndarray:
+    """
+    Güç yasası dönüşümü ile midton parlaklığını artırır.
+    gamma < 1.0 → karanlık pikseller aydınlanır (önerilen: 0.6–0.8)
+    gamma > 1.0 → görüntü karartılır (genelde kullanılmaz)
+
+    CLAHE'den önce uygulanır: gamma genel seviyeyi kaldırır,
+    CLAHE ardından yerel kontrast detayını ince ayarlar.
+    Karanlık telefon fotoğraflarında (brightness < 150) en etkili.
+    """
+    table = np.array(
+        [(i / 255.0) ** gamma * 255 for i in range(256)], dtype=np.uint8
+    )
+    return cv2.LUT(img, table)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ADIM 6 — DENOISE
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def denoise(img: np.ndarray) -> np.ndarray:
@@ -260,7 +275,27 @@ def denoise(img: np.ndarray) -> np.ndarray:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ADIM 6 — ADAPTİF BINARY (SADECE TESSERACT İÇİN)
+# ADIM 7 — UNSHARP MASKING (OPSİYONEL, YENİ)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def sharpen(img: np.ndarray, strength: float = 1.5) -> np.ndarray:
+    """
+    Unsharp masking: bulanık kopyayı orijinalden çıkararak kenarları vurgular.
+
+    Formül: output = img * strength - blur * (strength - 1)
+    strength=1.5 → %50 kenar güçlendirme (önerilen başlangıç)
+    strength=2.0 → %100, agresif; gürültüyü de yükseltir
+
+    Denoise sonrası uygulanır: önce gürültü bastırılır, sonra kenarlar açılır.
+    Hem karanlık hem parlak görüntülerde işe yarar.
+    """
+    blurred = cv2.GaussianBlur(img, (0, 0), sigmaX=2)
+    sharpened = cv2.addWeighted(img, strength, blurred, -(strength - 1), 0)
+    return np.clip(sharpened, 0, 255).astype(np.uint8)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ADIM 8 — ADAPTİF BINARY (SADECE TESSERACT İÇİN)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def to_binary(img: np.ndarray) -> np.ndarray:
@@ -332,12 +367,21 @@ def save_debug(img: np.ndarray, stem: str, step: int, name: str):
     return path
 
 
-def process_image(image_path: Path, engine: str = "paddle", debug: bool = True) -> bool:
+def process_image(
+    image_path: Path,
+    engine: str = "paddle",
+    use_gamma: float = 0.0,
+    use_sharpen: bool = False,
+    output_dir: Path = OUTPUT_DIR,
+    debug: bool = True,
+) -> bool:
     """
     Tek bir görüntüyü işle.
 
-    engine: "paddle" (default) veya "tesseract".
-            "tesseract" seçildiğinde binary adımı da uygulanır.
+    engine     : "paddle" (default) veya "tesseract" — binary adımını etkiler
+    use_gamma  : 0.0 = kapalı, 0.1–0.9 = açık (önerilen: 0.7)
+    use_sharpen: True = unsharp masking uygula
+    output_dir : çıktı klasörü (test senaryolarında farklı dizin verilebilir)
     """
     print(f"\n  {image_path.name}")
 
@@ -347,122 +391,137 @@ def process_image(image_path: Path, engine: str = "paddle", debug: bool = True) 
         return False
 
     h, w = img.shape[:2]
-    print(f"    Boyut: {w}x{h}px  engine={engine}")
+    opts = []
+    if use_gamma:   opts.append(f"gamma={use_gamma}")
+    if use_sharpen: opts.append("sharpen")
+    print(f"    Boyut: {w}x{h}px  [{', '.join(opts) or 'baseline'}]")
     stem = image_path.stem
+    debug_dir = output_dir / "debug"
+
+    def _dbg(im, step, name):
+        if debug:
+            debug_dir.mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(
+                str(debug_dir / f"{stem}_{step}_{name}.jpg"),
+                im, [cv2.IMWRITE_JPEG_QUALITY, 92]
+            )
 
     # ── Adım 0: Minimum genişlik ──────────────────────────────────────────────
-    h0, w0 = img.shape[:2]
-    upscaled = enforce_min_width(img)
-    h1, w1 = upscaled.shape[:2]
-    if w1 != w0:
-        print(f"    [0/7] Upscale: {w0}x{h0} -> {w1}x{h1}")
-    else:
-        print(f"    [0/7] Upscale: gereksiz ({w0}px >= {MIN_WIDTH}px)")
-    if debug:
-        save_debug(upscaled, stem, 0, "upscale")
+    w0 = img.shape[1]
+    cur = enforce_min_width(img)
+    if cur.shape[1] != w0:
+        print(f"    [0] Upscale: {w0}px -> {cur.shape[1]}px")
+    _dbg(cur, 0, "upscale")
 
     # ── Adım 1: Dönme düzeltme ────────────────────────────────────────────────
     try:
-        rotated, angle = correct_rotation(upscaled)
+        cur, angle = correct_rotation(cur)
         if abs(angle) >= 0.3:
-            print(f"    [1/7] Donme: {angle:+.1f} derece duzeltildi")
-        else:
-            print(f"    [1/7] Donme: gereksiz")
-        if debug:
-            save_debug(rotated, stem, 1, "rotated")
+            print(f"    [1] Donme: {angle:+.1f} derece")
+        _dbg(cur, 1, "rotated")
     except Exception as e:
-        print(f"    [1/7] Donme: HATA, atlandı ({e})")
-        rotated = upscaled
+        print(f"    [1] Donme: HATA ({e})")
 
     # ── Adım 2: Perspektif düzeltme ───────────────────────────────────────────
     try:
-        warped = correct_perspective(rotated)
-        h2, w2 = warped.shape[:2]
-        if (h2, w2) != (rotated.shape[0], rotated.shape[1]):
-            print(f"    [2/7] Perspektif: {rotated.shape[1]}x{rotated.shape[0]} -> {w2}x{h2}")
-        else:
-            print(f"    [2/7] Perspektif: kose tespiti yapilamadi, atlandı")
-        if debug:
-            save_debug(warped, stem, 2, "perspective")
+        w_before = cur.shape[1]
+        warped = correct_perspective(cur)
+        if warped.shape != cur.shape:
+            print(f"    [2] Perspektif: {cur.shape[1]}x{cur.shape[0]} -> {warped.shape[1]}x{warped.shape[0]}")
+        cur = warped
+        _dbg(cur, 2, "perspective")
     except Exception as e:
-        print(f"    [2/7] Perspektif: HATA, atlandı ({e})")
-        warped = rotated
+        print(f"    [2] Perspektif: HATA ({e})")
 
-    # Perspektif sonrası genişlik kontrolü (köşe tespiti görüntüyü daraltabilir)
-    warped = enforce_min_width(warped)
-    hw, ww = warped.shape[:2]
-    if ww != w2:
-        print(f"    [2/7] Post-perspektif upscale: {w2}px -> {ww}px")
+    # Perspektif sonrası genişlik kontrolü
+    w_after = cur.shape[1]
+    cur = enforce_min_width(cur)
+    if cur.shape[1] != w_after:
+        print(f"    [2] Post-perspektif upscale: {w_after}px -> {cur.shape[1]}px")
 
     # ── Adım 3: Arka plan normalizasyonu ──────────────────────────────────────
     try:
-        gray_check = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
-        brightness = gray_check.mean()
-        normalized = normalize_background(warped)
-        if brightness <= 200:
-            print(f"    [3/7] Bg normaliz: uygulandı (parlaklik={brightness:.0f})")
-        else:
-            print(f"    [3/7] Bg normaliz: atlandı (parlaklik={brightness:.0f} > 200)")
-        if debug:
-            save_debug(normalized, stem, 3, "bg_normalized")
+        brightness = cv2.cvtColor(cur, cv2.COLOR_BGR2GRAY).mean()
+        cur = normalize_background(cur)
+        status = f"uygulandı (parlak={brightness:.0f})" if brightness <= 200 else f"atlandı (parlak={brightness:.0f})"
+        print(f"    [3] Bg normaliz: {status}")
+        _dbg(cur, 3, "bg_norm")
     except Exception as e:
-        print(f"    [3/7] Bg normaliz: HATA, atlandı ({e})")
-        normalized = warped
+        print(f"    [3] Bg normaliz: HATA ({e})")
 
-    # ── Adım 4: Kontrast (CLAHE) ──────────────────────────────────────────────
+    # ── Adım 4: Gamma (opsiyonel) ─────────────────────────────────────────────
+    if use_gamma > 0:
+        try:
+            cur = gamma_correct(cur, gamma=use_gamma)
+            print(f"    [4] Gamma: {use_gamma}")
+            _dbg(cur, 4, "gamma")
+        except Exception as e:
+            print(f"    [4] Gamma: HATA ({e})")
+    else:
+        print(f"    [4] Gamma: atlandı")
+
+    # ── Adım 5: CLAHE kontrast ────────────────────────────────────────────────
     try:
-        contrasted = enhance_contrast(normalized)
-        print(f"    [4/7] CLAHE kontrast: tamamlandı")
-        if debug:
-            save_debug(contrasted, stem, 4, "contrast")
+        cur = enhance_contrast(cur)
+        print(f"    [5] CLAHE: tamamlandı")
+        _dbg(cur, 5, "clahe")
     except Exception as e:
-        print(f"    [4/7] CLAHE kontrast: HATA, atlandı ({e})")
-        contrasted = normalized
+        print(f"    [5] CLAHE: HATA ({e})")
 
-    # ── Adım 5: Denoise ───────────────────────────────────────────────────────
+    # ── Adım 6: Denoise ───────────────────────────────────────────────────────
     try:
-        denoised = denoise(contrasted)
-        print(f"    [5/7] Denoise: tamamlandı")
-        if debug:
-            save_debug(denoised, stem, 5, "denoised")
+        cur = denoise(cur)
+        print(f"    [6] Denoise: tamamlandı")
+        _dbg(cur, 6, "denoised")
     except Exception as e:
-        print(f"    [5/7] Denoise: HATA, atlandı ({e})")
-        denoised = contrasted
+        print(f"    [6] Denoise: HATA ({e})")
 
-    # ── Adım 6: Binary (sadece Tesseract) ─────────────────────────────────────
+    # ── Adım 7: Sharpen (opsiyonel) ───────────────────────────────────────────
+    if use_sharpen:
+        try:
+            cur = sharpen(cur)
+            print(f"    [7] Sharpen: tamamlandı")
+            _dbg(cur, 7, "sharpened")
+        except Exception as e:
+            print(f"    [7] Sharpen: HATA ({e})")
+    else:
+        print(f"    [7] Sharpen: atlandı")
+
+    # ── Adım 8: Binary (sadece Tesseract) ─────────────────────────────────────
     if engine == "tesseract":
         try:
-            binarized = to_binary(denoised)
-            print(f"    [6/7] Binary: uygulandı (Tesseract modu)")
-            if debug:
-                save_debug(binarized, stem, 6, "binary")
+            cur = to_binary(cur)
+            print(f"    [8] Binary: uygulandı (Tesseract)")
+            _dbg(cur, 8, "binary")
         except Exception as e:
-            print(f"    [6/7] Binary: HATA, atlandı ({e})")
-            binarized = denoised
+            print(f"    [8] Binary: HATA ({e})")
     else:
-        print(f"    [6/7] Binary: atlandı (PaddleOCR grayscale tercih eder)")
-        binarized = denoised
+        print(f"    [8] Binary: atlandı (PaddleOCR)")
 
-    # ── Adım 7: Crop ──────────────────────────────────────────────────────────
+    # ── Adım 9: Crop ──────────────────────────────────────────────────────────
     try:
-        cropped = crop_receipt(binarized)
-        h3, w3 = cropped.shape[:2]
-        print(f"    [7/7] Crop: final {w3}x{h3}px")
-        if debug:
-            save_debug(cropped, stem, 7, "crop")
+        cur = crop_receipt(cur)
+        print(f"    [9] Crop: final {cur.shape[1]}x{cur.shape[0]}px")
+        _dbg(cur, 9, "crop")
     except Exception as e:
-        print(f"    [7/7] Crop: HATA, atlandı ({e})")
-        cropped = binarized
+        print(f"    [9] Crop: HATA ({e})")
 
     # ── Final kayıt ───────────────────────────────────────────────────────────
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = OUTPUT_DIR / image_path.name
-    cv2.imwrite(str(out_path), cropped, [cv2.IMWRITE_JPEG_QUALITY, 95])
+    output_dir.mkdir(parents=True, exist_ok=True)
+    out_path = output_dir / image_path.name
+    cv2.imwrite(str(out_path), cur, [cv2.IMWRITE_JPEG_QUALITY, 95])
     print(f"    => {out_path}")
     return True
 
 
-def process_folder(folder: Path, engine: str = "paddle"):
+def process_folder(
+    folder: Path,
+    engine: str = "paddle",
+    use_gamma: float = 0.0,
+    use_sharpen: bool = False,
+    output_dir: Path = OUTPUT_DIR,
+    debug: bool = True,
+):
     images = sorted([
         p for p in folder.iterdir()
         if p.suffix.lower() in SUPPORTED_EXTS
@@ -472,16 +531,28 @@ def process_folder(folder: Path, engine: str = "paddle"):
         print(f"HATA: {folder} icinde jpg/png bulunamadi")
         return
 
+    opts = []
+    if use_gamma:   opts.append(f"gamma={use_gamma}")
+    if use_sharpen: opts.append("sharpen")
+    config_label = ", ".join(opts) or "baseline"
+
     print(f"\n{'='*60}")
-    print(f"  {len(images)} goruntu: {folder}  (engine={engine})")
-    print(f"  Cikti: {OUTPUT_DIR}/")
-    print(f"  Debug: {DEBUG_DIR}/")
+    print(f"  {len(images)} goruntu: {folder}  (engine={engine}, {config_label})")
+    print(f"  Cikti: {output_dir}/")
+    print(f"  Debug: {output_dir / 'debug'}/")
     print(f"{'='*60}")
 
     success = failed = 0
     for img_path in images:
         try:
-            ok = process_image(img_path, engine=engine)
+            ok = process_image(
+                img_path,
+                engine=engine,
+                use_gamma=use_gamma,
+                use_sharpen=use_sharpen,
+                output_dir=output_dir,
+                debug=debug,
+            )
             success += 1 if ok else 0
             failed  += 0 if ok else 1
         except Exception as e:
@@ -500,10 +571,27 @@ def process_folder(folder: Path, engine: str = "paddle"):
 
 def main():
     import argparse
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(
+        description="Fiş görüntüsü ön işleyici",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Örnekler:
+  python preProcess.py Receipts/
+  python preProcess.py Receipts/ --gamma 0.7
+  python preProcess.py Receipts/ --sharpen
+  python preProcess.py Receipts/ --gamma 0.7 --sharpen
+  python preProcess.py Receipts/ --engine tesseract --output .processed_tess
+        """
+    )
     ap.add_argument("target", help="Klasör veya tek görüntü")
     ap.add_argument("--engine", choices=["paddle", "tesseract"], default="paddle",
                     help="OCR motoru (binary adımını etkiler, varsayılan: paddle)")
+    ap.add_argument("--gamma", type=float, default=0.0, metavar="GAMMA",
+                    help="Gamma düzeltme değeri (0.0=kapalı, önerilen: 0.7)")
+    ap.add_argument("--sharpen", action="store_true",
+                    help="Unsharp masking ile kenar keskinleştirme uygula")
+    ap.add_argument("--output", type=Path, default=OUTPUT_DIR, metavar="DIR",
+                    help=f"Çıktı dizini (varsayılan: {OUTPUT_DIR})")
     ap.add_argument("--no-debug", action="store_true", help="Debug görüntülerini kaydetme")
     args = ap.parse_args()
 
@@ -513,10 +601,24 @@ def main():
         sys.exit(1)
 
     if target.is_dir():
-        process_folder(target, engine=args.engine)
+        process_folder(
+            target,
+            engine=args.engine,
+            use_gamma=args.gamma,
+            use_sharpen=args.sharpen,
+            output_dir=args.output,
+            debug=not args.no_debug,
+        )
     elif target.suffix.lower() in SUPPORTED_EXTS:
-        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        process_image(target, engine=args.engine, debug=not args.no_debug)
+        args.output.mkdir(parents=True, exist_ok=True)
+        process_image(
+            target,
+            engine=args.engine,
+            use_gamma=args.gamma,
+            use_sharpen=args.sharpen,
+            output_dir=args.output,
+            debug=not args.no_debug,
+        )
     else:
         print(f"HATA: Desteklenmeyen dosya turu: {target.suffix}")
         sys.exit(1)
