@@ -1,0 +1,596 @@
+{
+  "detections": [
+    {
+      "text": "MIGROS",
+      "confidence": 0.9919174313545227,
+      "x_min": 48,
+      "x_max": 305,
+      "y_min": 127,
+      "y_max": 174
+    },
+    {
+      "text": "TICARET",
+      "confidence": 0.9948819279670715,
+      "x_min": 321,
+      "x_max": 599,
+      "y_min": 126,
+      "y_max": 182
+    },
+    {
+      "text": "A.",
+      "confidence": 0.82062166929245,
+      "x_min": 627,
+      "x_max": 698,
+      "y_min": 140,
+      "y_max": 176
+    },
+    {
+      "text": "5",
+      "confidence": 0.37580493092536926,
+      "x_min": 709,
+      "x_max": 755,
+      "y_min": 149,
+      "y_max": 171
+    },
+    {
+      "text": "MERSINAKI CD.FOCA IZMIR MIGROS SATIS MGZ",
+      "confidence": 0.9554489254951477,
+      "x_min": 44,
+      "x_max": 821,
+      "y_min": 207,
+      "y_max": 258
+    },
+    {
+      "text": "ISMETPASA MH. MERSINAKI CD.NO:140/1",
+      "confidence": 0.9475659132003784,
+      "x_min": 42,
+      "x_max": 746,
+      "y_min": 246,
+      "y_max": 298
+    },
+    {
+      "text": "FOCA/IZMIR",
+      "confidence": 0.993004322052002,
+      "x_min": 41,
+      "x_max": 253,
+      "y_min": 288,
+      "y_max": 334
+    },
+    {
+      "text": "TEL:08508227738",
+      "confidence": 0.9752597808837891,
+      "x_min": 318,
+      "x_max": 614,
+      "y_min": 292,
+      "y_max": 329
+    },
+    {
+      "text": "BUYUK MUKELLEFLER V.D.6220529513",
+      "confidence": 0.9732056856155396,
+      "x_min": 41,
+      "x_max": 673,
+      "y_min": 324,
+      "y_max": 373
+    },
+    {
+      "text": "MERKEZ ADRESi: ATATURK MAH. TURGUT OZAL",
+      "confidence": 0.9405476450920105,
+      "x_min": 39,
+      "x_max": 801,
+      "y_min": 360,
+      "y_max": 411
+    },
+    {
+      "text": "BULV. NO:7ATASEHiR/iSTANBUL",
+      "confidence": 0.945991039276123,
+      "x_min": 40,
+      "x_max": 594,
+      "y_min": 401,
+      "y_max": 448
+    },
+    {
+      "text": "TARIH:12/04/2026",
+      "confidence": 0.979332447052002,
+      "x_min": 40,
+      "x_max": 362,
+      "y_min": 476,
+      "y_max": 519
+    },
+    {
+      "text": "SAAT:17:32",
+      "confidence": 0.9896190762519836,
+      "x_min": 620,
+      "x_max": 819,
+      "y_min": 468,
+      "y_max": 514
+    },
+    {
+      "text": "FISNO:0091",
+      "confidence": 0.955281138420105,
+      "x_min": 33,
+      "x_max": 304,
+      "y_min": 513,
+      "y_max": 564
+    },
+    {
+      "text": "BILGI",
+      "confidence": 0.9569500088691711,
+      "x_min": 256,
+      "x_max": 459,
+      "y_min": 586,
+      "y_max": 641
+    },
+    {
+      "text": "FISI",
+      "confidence": 0.8484659194946289,
+      "x_min": 485,
+      "x_max": 646,
+      "y_min": 585,
+      "y_max": 633
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 12,
+      "x_max": 42,
+      "y_min": 608,
+      "y_max": 658
+    },
+    {
+      "text": "TUR:e-ARSIV FATURA",
+      "confidence": 0.9251378178596497,
+      "x_min": 38,
+      "x_max": 401,
+      "y_min": 666,
+      "y_max": 719
+    },
+    {
+      "text": "Fatura/trsaliye Seri Sira No:",
+      "confidence": 0.9529972076416016,
+      "x_min": 32,
+      "x_max": 610,
+      "y_min": 691,
+      "y_max": 766
+    },
+    {
+      "text": "85040012147260412",
+      "confidence": 0.9987225532531738,
+      "x_min": 516,
+      "x_max": 856,
+      "y_min": 721,
+      "y_max": 780
+    },
+    {
+      "text": "MUSTERI TCKN:11111111111",
+      "confidence": 0.9657281041145325,
+      "x_min": 38,
+      "x_max": 510,
+      "y_min": 775,
+      "y_max": 838
+    },
+    {
+      "text": "%20",
+      "confidence": 0.9846670031547546,
+      "x_min": 497,
+      "x_max": 566,
+      "y_min": 850,
+      "y_max": 893
+    },
+    {
+      "text": "×144,00",
+      "confidence": 0.9439293742179871,
+      "x_min": 664,
+      "x_max": 818,
+      "y_min": 835,
+      "y_max": 890
+    },
+    {
+      "text": "EFES GLUTENSIZ BIRA",
+      "confidence": 0.9845085144042969,
+      "x_min": 33,
+      "x_max": 416,
+      "y_min": 853,
+      "y_max": 912
+    },
+    {
+      "text": "%20",
+      "confidence": 0.9758278727531433,
+      "x_min": 494,
+      "x_max": 568,
+      "y_min": 883,
+      "y_max": 933
+    },
+    {
+      "text": "*144,00",
+      "confidence": 0.8811526298522949,
+      "x_min": 665,
+      "x_max": 818,
+      "y_min": 874,
+      "y_max": 930
+    },
+    {
+      "text": "EFES GLUTENSIZ BIRA",
+      "confidence": 0.9682831168174744,
+      "x_min": 32,
+      "x_max": 416,
+      "y_min": 893,
+      "y_max": 947
+    },
+    {
+      "text": "0.680KGx149,95 TL/KG",
+      "confidence": 0.9398228526115417,
+      "x_min": 30,
+      "x_max": 491,
+      "y_min": 927,
+      "y_max": 989
+    },
+    {
+      "text": "%1",
+      "confidence": 0.9269931316375732,
+      "x_min": 495,
+      "x_max": 542,
+      "y_min": 968,
+      "y_max": 1009
+    },
+    {
+      "text": "×101,97",
+      "confidence": 0.9093145132064819,
+      "x_min": 663,
+      "x_max": 818,
+      "y_min": 952,
+      "y_max": 1006
+    },
+    {
+      "text": "DOMATES SALKIMKG",
+      "confidence": 0.980487585067749,
+      "x_min": 30,
+      "x_max": 375,
+      "y_min": 973,
+      "y_max": 1023
+    },
+    {
+      "text": "%1",
+      "confidence": 0.9616426229476929,
+      "x_min": 494,
+      "x_max": 549,
+      "y_min": 1004,
+      "y_max": 1044
+    },
+    {
+      "text": "×109,95",
+      "confidence": 0.9349021315574646,
+      "x_min": 665,
+      "x_max": 821,
+      "y_min": 991,
+      "y_max": 1044
+    },
+    {
+      "text": "KESTANEMANTARI350G",
+      "confidence": 0.9784016013145447,
+      "x_min": 29,
+      "x_max": 428,
+      "y_min": 1009,
+      "y_max": 1057
+    },
+    {
+      "text": "%20",
+      "confidence": 0.9460959434509277,
+      "x_min": 494,
+      "x_max": 562,
+      "y_min": 1043,
+      "y_max": 1080
+    },
+    {
+      "text": "*1,00",
+      "confidence": 0.8305614590644836,
+      "x_min": 700,
+      "x_max": 821,
+      "y_min": 1028,
+      "y_max": 1081
+    },
+    {
+      "text": "MIGROS PLASTIK POSET",
+      "confidence": 0.9699540138244629,
+      "x_min": 26,
+      "x_max": 426,
+      "y_min": 1046,
+      "y_max": 1094
+    },
+    {
+      "text": "×500,92",
+      "confidence": 0.8911218643188477,
+      "x_min": 666,
+      "x_max": 818,
+      "y_min": 1070,
+      "y_max": 1119
+    },
+    {
+      "text": "ARATOPLAM",
+      "confidence": 0.9907723665237427,
+      "x_min": 29,
+      "x_max": 234,
+      "y_min": 1090,
+      "y_max": 1127
+    },
+    {
+      "text": "*50,27",
+      "confidence": 0.817653477191925,
+      "x_min": 568,
+      "x_max": 817,
+      "y_min": 1148,
+      "y_max": 1200
+    },
+    {
+      "text": "TOPKDV",
+      "confidence": 0.9797274470329285,
+      "x_min": 29,
+      "x_max": 271,
+      "y_min": 1165,
+      "y_max": 1205
+    },
+    {
+      "text": "*500,92",
+      "confidence": 0.9269524216651917,
+      "x_min": 529,
+      "x_max": 817,
+      "y_min": 1189,
+      "y_max": 1242
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.9937076568603516,
+      "x_min": 26,
+      "x_max": 272,
+      "y_min": 1202,
+      "y_max": 1248
+    },
+    {
+      "text": "2",
+      "confidence": 0.14112165570259094,
+      "x_min": 119,
+      "x_max": 130,
+      "y_min": 1270,
+      "y_max": 1286
+    },
+    {
+      "text": "V",
+      "confidence": 0.08206141740083694,
+      "x_min": 156,
+      "x_max": 164,
+      "y_min": 1270,
+      "y_max": 1278
+    },
+    {
+      "text": "ORTAK POS",
+      "confidence": 0.9432097673416138,
+      "x_min": 413,
+      "x_max": 599,
+      "y_min": 1301,
+      "y_max": 1346
+    },
+    {
+      "text": "*500,92",
+      "confidence": 0.9038575291633606,
+      "x_min": 667,
+      "x_max": 816,
+      "y_min": 1302,
+      "y_max": 1340
+    },
+    {
+      "text": "#440293******2911",
+      "confidence": 0.9221691489219666,
+      "x_min": 24,
+      "x_max": 371,
+      "y_min": 1309,
+      "y_max": 1356
+    },
+    {
+      "text": "MERSISNO:0622052951300016",
+      "confidence": 0.9728859066963196,
+      "x_min": 22,
+      "x_max": 560,
+      "y_min": 1336,
+      "y_max": 1392
+    },
+    {
+      "text": "http://www.migros.com.tr",
+      "confidence": 0.988417387008667,
+      "x_min": 23,
+      "x_max": 502,
+      "y_min": 1375,
+      "y_max": 1431
+    },
+    {
+      "text": "GECER",
+      "confidence": 0.9957574009895325,
+      "x_min": 651,
+      "x_max": 860,
+      "y_min": 1399,
+      "y_max": 1451
+    },
+    {
+      "text": "IRSALIYE YERINE",
+      "confidence": 0.9517509341239929,
+      "x_min": 28,
+      "x_max": 624,
+      "y_min": 1403,
+      "y_max": 1466
+    },
+    {
+      "text": "IMZA:",
+      "confidence": 0.9231802821159363,
+      "x_min": 35,
+      "x_max": 152,
+      "y_min": 1493,
+      "y_max": 1539
+    },
+    {
+      "text": "040",
+      "confidence": 0.99090576171875,
+      "x_min": 296,
+      "x_max": 375,
+      "y_min": 1626,
+      "y_max": 1679
+    },
+    {
+      "text": "313952",
+      "confidence": 0.9996607303619385,
+      "x_min": 416,
+      "x_max": 542,
+      "y_min": 1627,
+      "y_max": 1669
+    },
+    {
+      "text": "KASiYER",
+      "confidence": 0.9744510054588318,
+      "x_min": 25,
+      "x_max": 176,
+      "y_min": 1641,
+      "y_max": 1686
+    },
+    {
+      "text": "E-ARSIV FATURASINA,",
+      "confidence": 0.9653358459472656,
+      "x_min": 279,
+      "x_max": 657,
+      "y_min": 1693,
+      "y_max": 1749
+    },
+    {
+      "text": "https://earsiv.migros.com.tr",
+      "confidence": 0.9855484366416931,
+      "x_min": 183,
+      "x_max": 741,
+      "y_min": 1728,
+      "y_max": 1790
+    },
+    {
+      "text": "ADRESI UZERINDEN ULASABILIRSINIZ.",
+      "confidence": 0.9636008143424988,
+      "x_min": 108,
+      "x_max": 756,
+      "y_min": 1762,
+      "y_max": 1830
+    },
+    {
+      "text": "21478504/001/040+12/04/2617:32AC-00",
+      "confidence": 0.9912023544311523,
+      "x_min": 27,
+      "x_max": 821,
+      "y_min": 1831,
+      "y_max": 1905
+    },
+    {
+      "text": "85040012147260412",
+      "confidence": 0.9985060095787048,
+      "x_min": 262,
+      "x_max": 600,
+      "y_min": 1947,
+      "y_max": 2007
+    },
+    {
+      "text": "2",
+      "confidence": 0.3964008092880249,
+      "x_min": 409,
+      "x_max": 435,
+      "y_min": 2033,
+      "y_max": 2078
+    },
+    {
+      "text": "SATIS",
+      "confidence": 0.979936957359314,
+      "x_min": 35,
+      "x_max": 234,
+      "y_min": 2050,
+      "y_max": 2093
+    },
+    {
+      "text": "440293******2911",
+      "confidence": 0.9890599250793457,
+      "x_min": 32,
+      "x_max": 353,
+      "y_min": 2084,
+      "y_max": 2133
+    },
+    {
+      "text": "*500,92TL",
+      "confidence": 0.8980648517608643,
+      "x_min": 31,
+      "x_max": 419,
+      "y_min": 2115,
+      "y_max": 2176
+    },
+    {
+      "text": "REF NO:610264446555",
+      "confidence": 0.9549228549003601,
+      "x_min": 29,
+      "x_max": 448,
+      "y_min": 2151,
+      "y_max": 2216
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 415,
+      "x_max": 446,
+      "y_min": 2196,
+      "y_max": 2235
+    },
+    {
+      "text": "ONAY KODU:416272",
+      "confidence": 0.9486278295516968,
+      "x_min": 29,
+      "x_max": 391,
+      "y_min": 2196,
+      "y_max": 2253
+    },
+    {
+      "text": "GARANTI BBVA",
+      "confidence": 0.9687080979347229,
+      "x_min": 27,
+      "x_max": 274,
+      "y_min": 2240,
+      "y_max": 2292
+    },
+    {
+      "text": "Isyeri ID:0002435958 Sira No:003598",
+      "confidence": 0.9672148823738098,
+      "x_min": 24,
+      "x_max": 724,
+      "y_min": 2252,
+      "y_max": 2333
+    },
+    {
+      "text": "Terminal ID:03806110 Batch No:001938",
+      "confidence": 0.9488701224327087,
+      "x_min": 24,
+      "x_max": 743,
+      "y_min": 2292,
+      "y_max": 2369
+    },
+    {
+      "text": "ZNO:1015",
+      "confidence": 0.9749370813369751,
+      "x_min": 627,
+      "x_max": 817,
+      "y_min": 2414,
+      "y_max": 2466
+    },
+    {
+      "text": "EKUNO:0001",
+      "confidence": 0.9680315256118774,
+      "x_min": 26,
+      "x_max": 250,
+      "y_min": 2424,
+      "y_max": 2476
+    },
+    {
+      "text": "TY 10007397",
+      "confidence": 0.927229642868042,
+      "x_min": 299,
+      "x_max": 593,
+      "y_min": 2491,
+      "y_max": 2538
+    }
+  ]
+}

@@ -1,0 +1,532 @@
+{
+  "detections": [
+    {
+      "text": "SOHA UNLU MAMUL.GIDA KAFE ISL.",
+      "confidence": 0.9242327213287354,
+      "x_min": 66,
+      "x_max": 943,
+      "y_min": 148,
+      "y_max": 262
+    },
+    {
+      "text": "INS.SAN.TIC.LTD.STI.",
+      "confidence": 0.9504352807998657,
+      "x_min": 207,
+      "x_max": 786,
+      "y_min": 236,
+      "y_max": 328
+    },
+    {
+      "text": "ERZENE MH.FEVZI CAKMAK CD.",
+      "confidence": 0.9534546136856079,
+      "x_min": 125,
+      "x_max": 875,
+      "y_min": 316,
+      "y_max": 397
+    },
+    {
+      "text": "NO:5/E BORNOVA/IZMIR",
+      "confidence": 0.9725370407104492,
+      "x_min": 210,
+      "x_max": 785,
+      "y_min": 389,
+      "y_max": 469
+    },
+    {
+      "text": "BORNOVA V.D. 7850610793",
+      "confidence": 0.982331395149231,
+      "x_min": 186,
+      "x_max": 850,
+      "y_min": 459,
+      "y_max": 549
+    },
+    {
+      "text": "TARIH",
+      "confidence": 0.9899714589118958,
+      "x_min": 51,
+      "x_max": 216,
+      "y_min": 562,
+      "y_max": 650
+    },
+    {
+      "text": ":18/04/2026",
+      "confidence": 0.952579915523529,
+      "x_min": 344,
+      "x_max": 690,
+      "y_min": 579,
+      "y_max": 659
+    },
+    {
+      "text": "SAAT",
+      "confidence": 0.9940796494483948,
+      "x_min": 55,
+      "x_max": 186,
+      "y_min": 634,
+      "y_max": 714
+    },
+    {
+      "text": ":23:07:16",
+      "confidence": 0.9406858086585999,
+      "x_min": 349,
+      "x_max": 642,
+      "y_min": 655,
+      "y_max": 726
+    },
+    {
+      "text": "FiS NO",
+      "confidence": 0.874058723449707,
+      "x_min": 52,
+      "x_max": 246,
+      "y_min": 696,
+      "y_max": 795
+    },
+    {
+      "text": "：0138",
+      "confidence": 0.9596697092056274,
+      "x_min": 336,
+      "x_max": 533,
+      "y_min": 723,
+      "y_max": 796
+    },
+    {
+      "text": "Profiterol",
+      "confidence": 0.9366100430488586,
+      "x_min": 57,
+      "x_max": 301,
+      "y_min": 799,
+      "y_max": 890
+    },
+    {
+      "text": "*300,00",
+      "confidence": 0.9181049466133118,
+      "x_min": 737,
+      "x_max": 931,
+      "y_min": 821,
+      "y_max": 891
+    },
+    {
+      "text": "%10",
+      "confidence": 0.9245392680168152,
+      "x_min": 567,
+      "x_max": 660,
+      "y_min": 834,
+      "y_max": 901
+    },
+    {
+      "text": "Profiterol",
+      "confidence": 0.9230170249938965,
+      "x_min": 58,
+      "x_max": 299,
+      "y_min": 867,
+      "y_max": 953
+    },
+    {
+      "text": "*300,00",
+      "confidence": 0.9086859822273254,
+      "x_min": 736,
+      "x_max": 932,
+      "y_min": 894,
+      "y_max": 962
+    },
+    {
+      "text": "%10",
+      "confidence": 0.9821872115135193,
+      "x_min": 566,
+      "x_max": 658,
+      "y_min": 905,
+      "y_max": 967
+    },
+    {
+      "text": "Profiterol",
+      "confidence": 0.8971737027168274,
+      "x_min": 57,
+      "x_max": 299,
+      "y_min": 933,
+      "y_max": 1019
+    },
+    {
+      "text": "*300,00",
+      "confidence": 0.8985270857810974,
+      "x_min": 734,
+      "x_max": 932,
+      "y_min": 961,
+      "y_max": 1035
+    },
+    {
+      "text": "%10",
+      "confidence": 0.95240718126297,
+      "x_min": 568,
+      "x_max": 656,
+      "y_min": 973,
+      "y_max": 1032
+    },
+    {
+      "text": "Tavukgoğuslu Kazandi",
+      "confidence": 0.902045726776123,
+      "x_min": 53,
+      "x_max": 520,
+      "y_min": 1000,
+      "y_max": 1110
+    },
+    {
+      "text": "*280,00",
+      "confidence": 0.9353877305984497,
+      "x_min": 736,
+      "x_max": 934,
+      "y_min": 1029,
+      "y_max": 1106
+    },
+    {
+      "text": "%10",
+      "confidence": 0.946532666683197,
+      "x_min": 567,
+      "x_max": 657,
+      "y_min": 1040,
+      "y_max": 1101
+    },
+    {
+      "text": "Su",
+      "confidence": 0.8758206367492676,
+      "x_min": 53,
+      "x_max": 123,
+      "y_min": 1070,
+      "y_max": 1135
+    },
+    {
+      "text": "*30,00",
+      "confidence": 0.9108176827430725,
+      "x_min": 758,
+      "x_max": 935,
+      "y_min": 1099,
+      "y_max": 1179
+    },
+    {
+      "text": "%10",
+      "confidence": 0.9698780179023743,
+      "x_min": 562,
+      "x_max": 660,
+      "y_min": 1105,
+      "y_max": 1176
+    },
+    {
+      "text": "TOPKDV",
+      "confidence": 0.9948110580444336,
+      "x_min": 55,
+      "x_max": 290,
+      "y_min": 1210,
+      "y_max": 1292
+    },
+    {
+      "text": "*110,00",
+      "confidence": 0.984491765499115,
+      "x_min": 631,
+      "x_max": 929,
+      "y_min": 1243,
+      "y_max": 1318
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.9947753548622131,
+      "x_min": 55,
+      "x_max": 292,
+      "y_min": 1281,
+      "y_max": 1363
+    },
+    {
+      "text": "*1.210,00",
+      "confidence": 0.9882421493530273,
+      "x_min": 557,
+      "x_max": 930,
+      "y_min": 1314,
+      "y_max": 1395
+    },
+    {
+      "text": "KREDI",
+      "confidence": 0.9105010032653809,
+      "x_min": 50,
+      "x_max": 206,
+      "y_min": 1419,
+      "y_max": 1494
+    },
+    {
+      "text": "*1.210,00",
+      "confidence": 0.979783296585083,
+      "x_min": 646,
+      "x_max": 938,
+      "y_min": 1462,
+      "y_max": 1543
+    },
+    {
+      "text": "ZIRAATBANK",
+      "confidence": 0.9977231025695801,
+      "x_min": 77,
+      "x_max": 367,
+      "y_min": 1485,
+      "y_max": 1576
+    },
+    {
+      "text": "************2911",
+      "confidence": 0.781618595123291,
+      "x_min": 76,
+      "x_max": 531,
+      "y_min": 1539,
+      "y_max": 1650
+    },
+    {
+      "text": "MERSIS:0785061079300001",
+      "confidence": 0.9933921098709106,
+      "x_min": 42,
+      "x_max": 755,
+      "y_min": 1638,
+      "y_max": 1740
+    },
+    {
+      "text": "EKU NO:0001",
+      "confidence": 0.9275208115577698,
+      "x_min": 44,
+      "x_max": 372,
+      "y_min": 1768,
+      "y_max": 1857
+    },
+    {
+      "text": "ZNO:0088",
+      "confidence": 0.9694744348526001,
+      "x_min": 683,
+      "x_max": 977,
+      "y_min": 1807,
+      "y_max": 1889
+    },
+    {
+      "text": "MASA NO:S03",
+      "confidence": 0.9484415650367737,
+      "x_min": 40,
+      "x_max": 372,
+      "y_min": 1873,
+      "y_max": 1953
+    },
+    {
+      "text": "CEK NO:#131",
+      "confidence": 0.9113966226577759,
+      "x_min": 41,
+      "x_max": 373,
+      "y_min": 1942,
+      "y_max": 2025
+    },
+    {
+      "text": "iSYERIN0:000000001827896",
+      "confidence": 0.926601231098175,
+      "x_min": 39,
+      "x_max": 536,
+      "y_min": 2078,
+      "y_max": 2161
+    },
+    {
+      "text": "POSNO:02656019",
+      "confidence": 0.9594228863716125,
+      "x_min": 669,
+      "x_max": 976,
+      "y_min": 2109,
+      "y_max": 2185
+    },
+    {
+      "text": "iSLEM NO:0079/KP0138",
+      "confidence": 0.9236069917678833,
+      "x_min": 40,
+      "x_max": 440,
+      "y_min": 2137,
+      "y_max": 2212
+    },
+    {
+      "text": "23:07",
+      "confidence": 0.9726986885070801,
+      "x_min": 858,
+      "x_max": 977,
+      "y_min": 2173,
+      "y_max": 2240
+    },
+    {
+      "text": "SATIS",
+      "confidence": 0.9846378564834595,
+      "x_min": 421,
+      "x_max": 632,
+      "y_min": 2211,
+      "y_max": 2287
+    },
+    {
+      "text": "****",
+      "confidence": 0.9204034209251404,
+      "x_min": 156,
+      "x_max": 319,
+      "y_min": 2262,
+      "y_max": 2313
+    },
+    {
+      "text": "********",
+      "confidence": 0.892886757850647,
+      "x_min": 344,
+      "x_max": 706,
+      "y_min": 2275,
+      "y_max": 2333
+    },
+    {
+      "text": "2911",
+      "confidence": 0.9992198944091797,
+      "x_min": 738,
+      "x_max": 896,
+      "y_min": 2289,
+      "y_max": 2348
+    },
+    {
+      "text": "TUTAR",
+      "confidence": 0.992275595664978,
+      "x_min": 426,
+      "x_max": 637,
+      "y_min": 2339,
+      "y_max": 2403
+    },
+    {
+      "text": "1.210,00",
+      "confidence": 0.9630185961723328,
+      "x_min": 306,
+      "x_max": 642,
+      "y_min": 2394,
+      "y_max": 2470
+    },
+    {
+      "text": "TL",
+      "confidence": 0.9879553318023682,
+      "x_min": 665,
+      "x_max": 748,
+      "y_min": 2410,
+      "y_max": 2468
+    },
+    {
+      "text": "AID:A000000031010",
+      "confidence": 0.8309232592582703,
+      "x_min": 26,
+      "x_max": 449,
+      "y_min": 2436,
+      "y_max": 2520
+    },
+    {
+      "text": "VISA",
+      "confidence": 0.870018720626831,
+      "x_min": 893,
+      "x_max": 981,
+      "y_min": 2471,
+      "y_max": 2525
+    },
+    {
+      "text": "ONAYKODU:289384",
+      "confidence": 0.9630699753761292,
+      "x_min": 328,
+      "x_max": 700,
+      "y_min": 2515,
+      "y_max": 2579
+    },
+    {
+      "text": "TUTAR KARSILIGI MAL VEYA HIZMETI ALDIH",
+      "confidence": 0.914410412311554,
+      "x_min": 129,
+      "x_max": 894,
+      "y_min": 2553,
+      "y_max": 2650
+    },
+    {
+      "text": "BU BELGEYI SAKLAVINIZ",
+      "confidence": 0.8904920220375061,
+      "x_min": 303,
+      "x_max": 739,
+      "y_min": 2624,
+      "y_max": 2690
+    },
+    {
+      "text": "Visa payWave",
+      "confidence": 0.8995490074157715,
+      "x_min": 253,
+      "x_max": 772,
+      "y_min": 2672,
+      "y_max": 2781
+    },
+    {
+      "text": "***SADECETEMASSIZ***",
+      "confidence": 0.9745691418647766,
+      "x_min": 94,
+      "x_max": 952,
+      "y_min": 2732,
+      "y_max": 2830
+    },
+    {
+      "text": "SUHA UNLU MAMULLERI GIDA KAFE",
+      "confidence": 0.9435263872146606,
+      "x_min": 227,
+      "x_max": 826,
+      "y_min": 2855,
+      "y_max": 2921
+    },
+    {
+      "text": "Bi FIRIN ERZENE MAH. FEUZI CAKHAK CD. NO:5 E",
+      "confidence": 0.9075527191162109,
+      "x_min": 61,
+      "x_max": 977,
+      "y_min": 2904,
+      "y_max": 2976
+    },
+    {
+      "text": "35000B0RN0UA35000iZHiR",
+      "confidence": 0.9192684292793274,
+      "x_min": 274,
+      "x_max": 785,
+      "y_min": 2967,
+      "y_max": 3017
+    },
+    {
+      "text": "ZiraatBankasi",
+      "confidence": 0.9712895154953003,
+      "x_min": 164,
+      "x_max": 1002,
+      "y_min": 3083,
+      "y_max": 3257
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 256,
+      "x_max": 269,
+      "y_min": 3141,
+      "y_max": 3148
+    },
+    {
+      "text": "1",
+      "confidence": 0.4920048415660858,
+      "x_min": 274,
+      "x_max": 290,
+      "y_min": 3141,
+      "y_max": 3148
+    },
+    {
+      "text": "KART HAHiLI NUSHASIDIR",
+      "confidence": 0.9290297031402588,
+      "x_min": 294,
+      "x_max": 745,
+      "y_min": 3246,
+      "y_max": 3322
+    },
+    {
+      "text": "ZNO:0088",
+      "confidence": 0.968905508518219,
+      "x_min": 712,
+      "x_max": 996,
+      "y_min": 3327,
+      "y_max": 3415
+    },
+    {
+      "text": "EKU NO:0001",
+      "confidence": 0.9220997095108032,
+      "x_min": 23,
+      "x_max": 390,
+      "y_min": 3334,
+      "y_max": 3415
+    }
+  ]
+}

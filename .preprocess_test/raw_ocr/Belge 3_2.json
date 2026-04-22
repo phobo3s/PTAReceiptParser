@@ -1,0 +1,356 @@
+{
+  "detections": [
+    {
+      "text": "BUENAS RESTORAN",
+      "confidence": 0.984352707862854,
+      "x_min": 276,
+      "x_max": 775,
+      "y_min": 167,
+      "y_max": 247
+    },
+    {
+      "text": "TASBAHGE GIDA TURZ.ORG.",
+      "confidence": 0.9476259350776672,
+      "x_min": 144,
+      "x_max": 893,
+      "y_min": 234,
+      "y_max": 339
+    },
+    {
+      "text": "SAN.VE TIC.AS ERZENE MAH.83",
+      "confidence": 0.940000057220459,
+      "x_min": 74,
+      "x_max": 970,
+      "y_min": 302,
+      "y_max": 432
+    },
+    {
+      "text": "SOK.NO:10 BORNOVA/IZMIR",
+      "confidence": 0.9493128061294556,
+      "x_min": 144,
+      "x_max": 905,
+      "y_min": 398,
+      "y_max": 506
+    },
+    {
+      "text": "BORNOVA V.D 8260527938",
+      "confidence": 0.9716127514839172,
+      "x_min": 147,
+      "x_max": 875,
+      "y_min": 487,
+      "y_max": 580
+    },
+    {
+      "text": "FIS NO: 0027",
+      "confidence": 0.9125593304634094,
+      "x_min": 0,
+      "x_max": 436,
+      "y_min": 590,
+      "y_max": 725
+    },
+    {
+      "text": "TARIH: 18/04/26",
+      "confidence": 0.9667133092880249,
+      "x_min": 527,
+      "x_max": 1024,
+      "y_min": 609,
+      "y_max": 722
+    },
+    {
+      "text": "SAAT",
+      "confidence": 0.9898090958595276,
+      "x_min": 0,
+      "x_max": 147,
+      "y_min": 692,
+      "y_max": 784
+    },
+    {
+      "text": "22:24:57",
+      "confidence": 0.9819502830505371,
+      "x_min": 751,
+      "x_max": 1021,
+      "y_min": 709,
+      "y_max": 800
+    },
+    {
+      "text": ".",
+      "confidence": 0.4208087921142578,
+      "x_min": 200,
+      "x_max": 282,
+      "y_min": 713,
+      "y_max": 796
+    },
+    {
+      "text": "YIYECEK",
+      "confidence": 0.9432782530784607,
+      "x_min": 0,
+      "x_max": 244,
+      "y_min": 804,
+      "y_max": 921
+    },
+    {
+      "text": "%10",
+      "confidence": 0.8888301849365234,
+      "x_min": 527,
+      "x_max": 654,
+      "y_min": 839,
+      "y_max": 921
+    },
+    {
+      "text": "*2365.00",
+      "confidence": 0.9878434538841248,
+      "x_min": 750,
+      "x_max": 1023,
+      "y_min": 841,
+      "y_max": 929
+    },
+    {
+      "text": "TOPKDV",
+      "confidence": 0.9959955215454102,
+      "x_min": 0,
+      "x_max": 208,
+      "y_min": 976,
+      "y_max": 1074
+    },
+    {
+      "text": "*215.00",
+      "confidence": 0.9946771860122681,
+      "x_min": 779,
+      "x_max": 1022,
+      "y_min": 1004,
+      "y_max": 1095
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.9953062534332275,
+      "x_min": 0,
+      "x_max": 204,
+      "y_min": 1066,
+      "y_max": 1151
+    },
+    {
+      "text": "*2365.00",
+      "confidence": 0.9962297677993774,
+      "x_min": 750,
+      "x_max": 1018,
+      "y_min": 1086,
+      "y_max": 1172
+    },
+    {
+      "text": "BANKA/KREDI KARTI",
+      "confidence": 0.9503514766693115,
+      "x_min": 0,
+      "x_max": 558,
+      "y_min": 1216,
+      "y_max": 1322
+    },
+    {
+      "text": "*2365.00",
+      "confidence": 0.9969414472579956,
+      "x_min": 747,
+      "x_max": 1015,
+      "y_min": 1242,
+      "y_max": 1326
+    },
+    {
+      "text": "Garanti Bbva",
+      "confidence": 0.9536268711090088,
+      "x_min": 0,
+      "x_max": 397,
+      "y_min": 1301,
+      "y_max": 1401
+    },
+    {
+      "text": "MERSIS :0826052793800001",
+      "confidence": 0.9497050642967224,
+      "x_min": 0,
+      "x_max": 800,
+      "y_min": 1382,
+      "y_max": 1475
+    },
+    {
+      "text": "T：2652483",
+      "confidence": 0.9608142375946045,
+      "x_min": 0,
+      "x_max": 434,
+      "y_min": 1457,
+      "y_max": 1540
+    },
+    {
+      "text": "T：04424165",
+      "confidence": 0.9838202595710754,
+      "x_min": 544,
+      "x_max": 1015,
+      "y_min": 1465,
+      "y_max": 1545
+    },
+    {
+      "text": "18/04/2026-22:25",
+      "confidence": 0.990168571472168,
+      "x_min": 0,
+      "x_max": 415,
+      "y_min": 1525,
+      "y_max": 1608
+    },
+    {
+      "text": "B:000437 S:020789",
+      "confidence": 0.9834200739860535,
+      "x_min": 573,
+      "x_max": 1014,
+      "y_min": 1533,
+      "y_max": 1608
+    },
+    {
+      "text": "AID:A0000000031010",
+      "confidence": 0.9817744493484497,
+      "x_min": 0,
+      "x_max": 466,
+      "y_min": 1585,
+      "y_max": 1670
+    },
+    {
+      "text": "APP.LABEL:VISA",
+      "confidence": 0.9693652987480164,
+      "x_min": 648,
+      "x_max": 1013,
+      "y_min": 1598,
+      "y_max": 1671
+    },
+    {
+      "text": "VER:ZWATB803 0P:0000001",
+      "confidence": 0.9545489549636841,
+      "x_min": 0,
+      "x_max": 593,
+      "y_min": 1646,
+      "y_max": 1735
+    },
+    {
+      "text": "KT:TEBONUS",
+      "confidence": 0.9837460517883301,
+      "x_min": 743,
+      "x_max": 1011,
+      "y_min": 1662,
+      "y_max": 1735
+    },
+    {
+      "text": "K.N.:************2911",
+      "confidence": 0.958495020866394,
+      "x_min": 64,
+      "x_max": 982,
+      "y_min": 1707,
+      "y_max": 1814
+    },
+    {
+      "text": "EMV SATIS TUTARI",
+      "confidence": 0.9646550416946411,
+      "x_min": 0,
+      "x_max": 416,
+      "y_min": 1852,
+      "y_max": 1929
+    },
+    {
+      "text": "2.365,00 TL",
+      "confidence": 0.9537826776504517,
+      "x_min": 538,
+      "x_max": 1004,
+      "y_min": 1918,
+      "y_max": 2002
+    },
+    {
+      "text": "BU ISLEM TEMASSIZ BIR KART ILE",
+      "confidence": 0.9518613815307617,
+      "x_min": 113,
+      "x_max": 897,
+      "y_min": 1981,
+      "y_max": 2067
+    },
+    {
+      "text": "GERCEKLESTIRILMISTIR.",
+      "confidence": 0.9794409871101379,
+      "x_min": 240,
+      "x_max": 788,
+      "y_min": 2047,
+      "y_max": 2126
+    },
+    {
+      "text": "ONAY NO:138494",
+      "confidence": 0.943668007850647,
+      "x_min": 0,
+      "x_max": 367,
+      "y_min": 2119,
+      "y_max": 2186
+    },
+    {
+      "text": "REF NO:610881718468",
+      "confidence": 0.9878799319267273,
+      "x_min": 515,
+      "x_max": 998,
+      "y_min": 2116,
+      "y_max": 2185
+    },
+    {
+      "text": "Garanti BBVA",
+      "confidence": 0.9211819767951965,
+      "x_min": 116,
+      "x_max": 917,
+      "y_min": 2192,
+      "y_max": 2352
+    },
+    {
+      "text": "MERSIS NO: 0879 0017 5660 0379",
+      "confidence": 0.9213405251502991,
+      "x_min": 102,
+      "x_max": 891,
+      "y_min": 2341,
+      "y_max": 2434
+    },
+    {
+      "text": "WWW.GARANTIBBVA,COM.TR",
+      "confidence": 0.9473361968994141,
+      "x_min": 209,
+      "x_max": 791,
+      "y_min": 2410,
+      "y_max": 2493
+    },
+    {
+      "text": "1.NUSHA (KART SAHIBINE AITTIR.)",
+      "confidence": 0.9185776710510254,
+      "x_min": 96,
+      "x_max": 909,
+      "y_min": 2466,
+      "y_max": 2570
+    },
+    {
+      "text": ") Visa payWave",
+      "confidence": 0.9247461557388306,
+      "x_min": 237,
+      "x_max": 766,
+      "y_min": 2544,
+      "y_max": 2668
+    },
+    {
+      "text": "EKU NO:0001",
+      "confidence": 0.931126594543457,
+      "x_min": 0,
+      "x_max": 355,
+      "y_min": 2664,
+      "y_max": 2772
+    },
+    {
+      "text": "ZNO:0267",
+      "confidence": 0.985844612121582,
+      "x_min": 701,
+      "x_max": 1024,
+      "y_min": 2674,
+      "y_max": 2767
+    },
+    {
+      "text": "0A7",
+      "confidence": 0.32725146412849426,
+      "x_min": 497,
+      "x_max": 714,
+      "y_min": 2767,
+      "y_max": 2789
+    }
+  ]
+}

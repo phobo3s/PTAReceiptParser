@@ -1,0 +1,420 @@
+{
+  "detections": [
+    {
+      "text": "DUFREL. MARKET",
+      "confidence": 0.8435527086257935,
+      "x_min": 192,
+      "x_max": 599,
+      "y_min": 545,
+      "y_max": 617
+    },
+    {
+      "text": "GIDA SAN VE IC LTD STI",
+      "confidence": 0.8873411417007446,
+      "x_min": 112,
+      "x_max": 670,
+      "y_min": 595,
+      "y_max": 689
+    },
+    {
+      "text": "ERGENE MAHY.I.HAKKI CAD NO:127",
+      "confidence": 0.8436333537101746,
+      "x_min": 13,
+      "x_max": 769,
+      "y_min": 644,
+      "y_max": 763
+    },
+    {
+      "text": "C",
+      "confidence": 0.09688659757375717,
+      "x_min": 198,
+      "x_max": 206,
+      "y_min": 748,
+      "y_max": 759
+    },
+    {
+      "text": "BORNOVA / TZMIR",
+      "confidence": 0.8794382214546204,
+      "x_min": 208,
+      "x_max": 570,
+      "y_min": 736,
+      "y_max": 814
+    },
+    {
+      "text": "BORNDVA V.D. 3131510078",
+      "confidence": 0.9406715035438538,
+      "x_min": 118,
+      "x_max": 663,
+      "y_min": 801,
+      "y_max": 878
+    },
+    {
+      "text": "TARIH",
+      "confidence": 0.9893207550048828,
+      "x_min": 0,
+      "x_max": 139,
+      "y_min": 901,
+      "y_max": 974
+    },
+    {
+      "text": "10/12/2025",
+      "confidence": 0.9963979721069336,
+      "x_min": 294,
+      "x_max": 541,
+      "y_min": 891,
+      "y_max": 979
+    },
+    {
+      "text": ";",
+      "confidence": 0.1705908626317978,
+      "x_min": 272,
+      "x_max": 311,
+      "y_min": 928,
+      "y_max": 961
+    },
+    {
+      "text": "SAAT",
+      "confidence": 0.9892064332962036,
+      "x_min": 0,
+      "x_max": 114,
+      "y_min": 973,
+      "y_max": 1040
+    },
+    {
+      "text": "18:23:12",
+      "confidence": 0.95806884765625,
+      "x_min": 299,
+      "x_max": 502,
+      "y_min": 966,
+      "y_max": 1040
+    },
+    {
+      "text": "FiSNO",
+      "confidence": 0.8521000146865845,
+      "x_min": 0,
+      "x_max": 164,
+      "y_min": 1037,
+      "y_max": 1116
+    },
+    {
+      "text": "0052",
+      "confidence": 0.996780514717102,
+      "x_min": 295,
+      "x_max": 410,
+      "y_min": 1037,
+      "y_max": 1109
+    },
+    {
+      "text": "HIGHIANDPARK12Y070CL%20*1.600,00",
+      "confidence": 0.939658522605896,
+      "x_min": 1,
+      "x_max": 721,
+      "y_min": 1137,
+      "y_max": 1225
+    },
+    {
+      "text": "TOPKDV",
+      "confidence": 0.9967718124389648,
+      "x_min": 7,
+      "x_max": 207,
+      "y_min": 1289,
+      "y_max": 1360
+    },
+    {
+      "text": "*266,67",
+      "confidence": 0.9519891738891602,
+      "x_min": 481,
+      "x_max": 708,
+      "y_min": 1286,
+      "y_max": 1358
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.99421626329422,
+      "x_min": 10,
+      "x_max": 206,
+      "y_min": 1361,
+      "y_max": 1428
+    },
+    {
+      "text": "*1.600,00",
+      "confidence": 0.9074987769126892,
+      "x_min": 420,
+      "x_max": 707,
+      "y_min": 1350,
+      "y_max": 1425
+    },
+    {
+      "text": "*1.600,00",
+      "confidence": 0.9698456525802612,
+      "x_min": 494,
+      "x_max": 718,
+      "y_min": 1472,
+      "y_max": 1545
+    },
+    {
+      "text": "KREDI",
+      "confidence": 0.9594457745552063,
+      "x_min": 0,
+      "x_max": 135,
+      "y_min": 1487,
+      "y_max": 1562
+    },
+    {
+      "text": "ZIRAATBANK",
+      "confidence": 0.9952604174613953,
+      "x_min": 24,
+      "x_max": 265,
+      "y_min": 1547,
+      "y_max": 1617
+    },
+    {
+      "text": "************2911",
+      "confidence": 0.8970415592193604,
+      "x_min": 24,
+      "x_max": 399,
+      "y_min": 1608,
+      "y_max": 1668
+    },
+    {
+      "text": "MERSIS:0",
+      "confidence": 0.9815317392349243,
+      "x_min": 0,
+      "x_max": 248,
+      "y_min": 1701,
+      "y_max": 1775
+    },
+    {
+      "text": "ZNO:0848",
+      "confidence": 0.9709504842758179,
+      "x_min": 516,
+      "x_max": 734,
+      "y_min": 1755,
+      "y_max": 1813
+    },
+    {
+      "text": "EKU NO:0002",
+      "confidence": 0.9381284713745117,
+      "x_min": 2,
+      "x_max": 265,
+      "y_min": 1764,
+      "y_max": 1837
+    },
+    {
+      "text": "POS NO:02415264",
+      "confidence": 0.9725993871688843,
+      "x_min": 492,
+      "x_max": 730,
+      "y_min": 1910,
+      "y_max": 1966
+    },
+    {
+      "text": "ISYERi N0:000000003196452",
+      "confidence": 0.9120913147926331,
+      "x_min": 6,
+      "x_max": 384,
+      "y_min": 1922,
+      "y_max": 1983
+    },
+    {
+      "text": "8.23",
+      "confidence": 0.8822259902954102,
+      "x_min": 648,
+      "x_max": 734,
+      "y_min": 1955,
+      "y_max": 2004
+    },
+    {
+      "text": "iSLEH N0.0029KP0220",
+      "confidence": 0.8757178783416748,
+      "x_min": 6,
+      "x_max": 317,
+      "y_min": 1967,
+      "y_max": 2031
+    },
+    {
+      "text": "SATIS",
+      "confidence": 0.9948804974555969,
+      "x_min": 298,
+      "x_max": 457,
+      "y_min": 2014,
+      "y_max": 2068
+    },
+    {
+      "text": "********2911",
+      "confidence": 0.9433568120002747,
+      "x_min": 228,
+      "x_max": 674,
+      "y_min": 2051,
+      "y_max": 2119
+    },
+    {
+      "text": "****",
+      "confidence": 0.9037723541259766,
+      "x_min": 96,
+      "x_max": 228,
+      "y_min": 2072,
+      "y_max": 2112
+    },
+    {
+      "text": "TUTAR",
+      "confidence": 0.9972900152206421,
+      "x_min": 300,
+      "x_max": 462,
+      "y_min": 2117,
+      "y_max": 2169
+    },
+    {
+      "text": "1.600.00",
+      "confidence": 0.9963865280151367,
+      "x_min": 214,
+      "x_max": 469,
+      "y_min": 2167,
+      "y_max": 2226
+    },
+    {
+      "text": "TL",
+      "confidence": 0.9900899529457092,
+      "x_min": 476,
+      "x_max": 539,
+      "y_min": 2167,
+      "y_max": 2210
+    },
+    {
+      "text": "UISA",
+      "confidence": 0.864417552947998,
+      "x_min": 658,
+      "x_max": 737,
+      "y_min": 2207,
+      "y_max": 2263
+    },
+    {
+      "text": "AID:A000000031010",
+      "confidence": 0.8860924243927002,
+      "x_min": 0,
+      "x_max": 315,
+      "y_min": 2222,
+      "y_max": 2276
+    },
+    {
+      "text": "ONAY KODU :513335",
+      "confidence": 0.9168344140052795,
+      "x_min": 221,
+      "x_max": 510,
+      "y_min": 2258,
+      "y_max": 2321
+    },
+    {
+      "text": "TUTAR KARSILIGI MAL VEYA HIZMETI ALDIH",
+      "confidence": 0.9244808554649353,
+      "x_min": 79,
+      "x_max": 659,
+      "y_min": 2306,
+      "y_max": 2369
+    },
+    {
+      "text": "BU BELGEYI SAKLAVINIZ",
+      "confidence": 0.9235259294509888,
+      "x_min": 201,
+      "x_max": 541,
+      "y_min": 2351,
+      "y_max": 2417
+    },
+    {
+      "text": ")visa paywave",
+      "confidence": 0.8935482501983643,
+      "x_min": 178,
+      "x_max": 559,
+      "y_min": 2413,
+      "y_max": 2490
+    },
+    {
+      "text": "**SIFRELI VE TEMASSIZ**",
+      "confidence": 0.950741171836853,
+      "x_min": 32,
+      "x_max": 729,
+      "y_min": 2467,
+      "y_max": 2534
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 32,
+      "x_max": 705,
+      "y_min": 2563,
+      "y_max": 2626
+    },
+    {
+      "text": "SiRKFTi",
+      "confidence": 0.8598149418830872,
+      "x_min": 308,
+      "x_max": 440,
+      "y_min": 2611,
+      "y_max": 2669
+    },
+    {
+      "text": "6",
+      "confidence": 0.12316776812076569,
+      "x_min": 299,
+      "x_max": 326,
+      "y_min": 2629,
+      "y_max": 2658
+    },
+    {
+      "text": "DUFREE MARKET GIDR SANAYI UE T ERGENE MAH.",
+      "confidence": 0.9071738123893738,
+      "x_min": 49,
+      "x_max": 682,
+      "y_min": 2663,
+      "y_max": 2718
+    },
+    {
+      "text": "YUZBASI IBRAHiH HAKKICD.NO:12735040 BORNOUH",
+      "confidence": 0.8739418983459473,
+      "x_min": 21,
+      "x_max": 734,
+      "y_min": 2714,
+      "y_max": 2767
+    },
+    {
+      "text": "35040/iZHiR",
+      "confidence": 0.9349987506866455,
+      "x_min": 288,
+      "x_max": 465,
+      "y_min": 2760,
+      "y_max": 2811
+    },
+    {
+      "text": "ZiraatBankasI",
+      "confidence": 0.9432721734046936,
+      "x_min": 120,
+      "x_max": 748,
+      "y_min": 2888,
+      "y_max": 3043
+    },
+    {
+      "text": "KAR HAMII NUSHASIOIR",
+      "confidence": 0.8424681425094604,
+      "x_min": 189,
+      "x_max": 539,
+      "y_min": 3050,
+      "y_max": 3106
+    },
+    {
+      "text": "FKU NO:0002",
+      "confidence": 0.9090381860733032,
+      "x_min": 17,
+      "x_max": 277,
+      "y_min": 3127,
+      "y_max": 3193
+    },
+    {
+      "text": "ZNO:0848",
+      "confidence": 0.9385523200035095,
+      "x_min": 527,
+      "x_max": 741,
+      "y_min": 3134,
+      "y_max": 3192
+    }
+  ]
+}

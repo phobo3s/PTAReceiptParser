@@ -1,0 +1,732 @@
+{
+  "detections": [
+    {
+      "text": "FETRO",
+      "confidence": 0.8845933675765991,
+      "x_min": 166,
+      "x_max": 356,
+      "y_min": 31,
+      "y_max": 148
+    },
+    {
+      "text": "HOSMARKET BAAROY",
+      "confidence": 0.7630442380905151,
+      "x_min": 122,
+      "x_max": 365,
+      "y_min": 126,
+      "y_max": 196
+    },
+    {
+      "text": "agemmealfciro.si",
+      "confidence": 0.5544086694717407,
+      "x_min": 137,
+      "x_max": 356,
+      "y_min": 173,
+      "y_max": 233
+    },
+    {
+      "text": "e-Arsiy Fatura",
+      "confidence": 0.9421754479408264,
+      "x_min": 433,
+      "x_max": 610,
+      "y_min": 402,
+      "y_max": 457
+    },
+    {
+      "text": "ETRO GROSMARKETB.KOYALIS.HIZ.IC.LID.ST.",
+      "confidence": 0.89995938539505,
+      "x_min": 0,
+      "x_max": 540,
+      "y_min": 428,
+      "y_max": 541
+    },
+    {
+      "text": "IERKEZ:15TEMMUZMAH.KOCMANCAD.NO:52",
+      "confidence": 0.9161458015441895,
+      "x_min": 0,
+      "x_max": 508,
+      "y_min": 471,
+      "y_max": 578
+    },
+    {
+      "text": "84212 BAGCILAR/ ISTANBUL",
+      "confidence": 0.913947582244873,
+      "x_min": 0,
+      "x_max": 317,
+      "y_min": 514,
+      "y_max": 591
+    },
+    {
+      "text": "TEL:（0212）4787000",
+      "confidence": 0.9378936886787415,
+      "x_min": 0,
+      "x_max": 249,
+      "y_min": 554,
+      "y_max": 621
+    },
+    {
+      "text": "BUYUKMUKELLEFLERV.D.6200031354",
+      "confidence": 0.9674904346466064,
+      "x_min": 0,
+      "x_max": 410,
+      "y_min": 594,
+      "y_max": 675
+    },
+    {
+      "text": "www.metro-tr.com",
+      "confidence": 0.9848169088363647,
+      "x_min": 246,
+      "x_max": 440,
+      "y_min": 661,
+      "y_max": 712
+    },
+    {
+      "text": "CIoLI",
+      "confidence": 0.532975435256958,
+      "x_min": 0,
+      "x_max": 73,
+      "y_min": 711,
+      "y_max": 757
+    },
+    {
+      "text": "MALTEPE MAH.ANADOLU CAD.NO:740",
+      "confidence": 0.933096706867218,
+      "x_min": 0,
+      "x_max": 386,
+      "y_min": 751,
+      "y_max": 817
+    },
+    {
+      "text": "35640CIGLI / IZMIR",
+      "confidence": 0.9148698449134827,
+      "x_min": 0,
+      "x_max": 247,
+      "y_min": 787,
+      "y_max": 847
+    },
+    {
+      "text": "TEL：（0232）3981800FAX:（0232）3981855",
+      "confidence": 0.9144226908683777,
+      "x_min": 0,
+      "x_max": 476,
+      "y_min": 826,
+      "y_max": 897
+    },
+    {
+      "text": "MERSISNO:8937495688385104",
+      "confidence": 0.9729523658752441,
+      "x_min": 0,
+      "x_max": 338,
+      "y_min": 869,
+      "y_max": 927
+    },
+    {
+      "text": "FATURANUMARASI:",
+      "confidence": 0.9843503832817078,
+      "x_min": 0,
+      "x_max": 208,
+      "y_min": 945,
+      "y_max": 997
+    },
+    {
+      "text": "2372025000024400",
+      "confidence": 0.9297167062759399,
+      "x_min": 244,
+      "x_max": 439,
+      "y_min": 957,
+      "y_max": 1004
+    },
+    {
+      "text": "OLUSTURMA TARIHI:",
+      "confidence": 0.9474064111709595,
+      "x_min": 0,
+      "x_max": 258,
+      "y_min": 982,
+      "y_max": 1035
+    },
+    {
+      "text": "21-12-202518:41",
+      "confidence": 0.9826803803443909,
+      "x_min": 240,
+      "x_max": 452,
+      "y_min": 994,
+      "y_max": 1042
+    },
+    {
+      "text": "FIILISEVK TARIHI:",
+      "confidence": 0.9628905057907104,
+      "x_min": 0,
+      "x_max": 232,
+      "y_min": 1018,
+      "y_max": 1071
+    },
+    {
+      "text": "21.12.202518:42",
+      "confidence": 0.9818572998046875,
+      "x_min": 239,
+      "x_max": 453,
+      "y_min": 1031,
+      "y_max": 1078
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 226,
+      "x_max": 251,
+      "y_min": 1041,
+      "y_max": 1061
+    },
+    {
+      "text": "ETTN:",
+      "confidence": 0.9668874740600586,
+      "x_min": 2,
+      "x_max": 74,
+      "y_min": 1061,
+      "y_max": 1101
+    },
+    {
+      "text": "7dbf7320-1ccd-4895-a961-b36430884970",
+      "confidence": 0.9558767676353455,
+      "x_min": 242,
+      "x_max": 675,
+      "y_min": 1067,
+      "y_max": 1122
+    },
+    {
+      "text": "METRO FATURANO:",
+      "confidence": 0.9598974585533142,
+      "x_min": 0,
+      "x_max": 207,
+      "y_min": 1095,
+      "y_max": 1147
+    },
+    {
+      "text": "1/0（027）0007/023615",
+      "confidence": 0.9325414896011353,
+      "x_min": 244,
+      "x_max": 475,
+      "y_min": 1107,
+      "y_max": 1155
+    },
+    {
+      "text": "ISLEM NO:",
+      "confidence": 0.9533053636550903,
+      "x_min": 4,
+      "x_max": 123,
+      "y_min": 1140,
+      "y_max": 1182
+    },
+    {
+      "text": "（007-890314）",
+      "confidence": 0.9273385405540466,
+      "x_min": 244,
+      "x_max": 394,
+      "y_min": 1144,
+      "y_max": 1191
+    },
+    {
+      "text": "KASIYERNO:",
+      "confidence": 0.9812387228012085,
+      "x_min": 4,
+      "x_max": 148,
+      "y_min": 1179,
+      "y_max": 1220
+    },
+    {
+      "text": "027/803",
+      "confidence": 0.9978461861610413,
+      "x_min": 241,
+      "x_max": 337,
+      "y_min": 1182,
+      "y_max": 1228
+    },
+    {
+      "text": "MUSTERINO:27103001",
+      "confidence": 0.9579871296882629,
+      "x_min": 4,
+      "x_max": 265,
+      "y_min": 1215,
+      "y_max": 1263
+    },
+    {
+      "text": "KY",
+      "confidence": 0.9168148636817932,
+      "x_min": 491,
+      "x_max": 519,
+      "y_min": 1231,
+      "y_max": 1267
+    },
+    {
+      "text": "991",
+      "confidence": 0.9836506843566895,
+      "x_min": 628,
+      "x_max": 675,
+      "y_min": 1225,
+      "y_max": 1267
+    },
+    {
+      "text": "AYSEKILINC",
+      "confidence": 0.9813792109489441,
+      "x_min": 4,
+      "x_max": 149,
+      "y_min": 1288,
+      "y_max": 1335
+    },
+    {
+      "text": "cIaLI/cIeLI",
+      "confidence": 0.4667000472545624,
+      "x_min": 5,
+      "x_max": 174,
+      "y_min": 1326,
+      "y_max": 1372
+    },
+    {
+      "text": "VKN/TCKN:",
+      "confidence": 0.9857608079910278,
+      "x_min": 5,
+      "x_max": 122,
+      "y_min": 1363,
+      "y_max": 1407
+    },
+    {
+      "text": "VD:MUAF",
+      "confidence": 0.927415668964386,
+      "x_min": 562,
+      "x_max": 670,
+      "y_min": 1374,
+      "y_max": 1415
+    },
+    {
+      "text": "0804531710052 0007648 wTAS PIRINCMAKARNA400G",
+      "confidence": 0.9300900101661682,
+      "x_min": 6,
+      "x_max": 593,
+      "y_min": 1431,
+      "y_max": 1486
+    },
+    {
+      "text": "123,27 2ADX1246,54 %1*249,00",
+      "confidence": 0.8531781435012817,
+      "x_min": 124,
+      "x_max": 630,
+      "y_min": 1468,
+      "y_max": 1521
+    },
+    {
+      "text": "86962361184460396783 *FINELIFECAMAGACI84GYESIL",
+      "confidence": 0.9737902283668518,
+      "x_min": 7,
+      "x_max": 660,
+      "y_min": 1504,
+      "y_max": 1554
+    },
+    {
+      "text": "*188.02*1ADX1*188,02%1*189,90",
+      "confidence": 0.8667723536491394,
+      "x_min": 124,
+      "x_max": 629,
+      "y_min": 1540,
+      "y_max": 1588
+    },
+    {
+      "text": "86962361185450396787*FINELIFE KARDANADAM CIK0 84G",
+      "confidence": 0.9473782777786255,
+      "x_min": 8,
+      "x_max": 664,
+      "y_min": 1573,
+      "y_max": 1624
+    },
+    {
+      "text": "*188.02*1ADX1*188.02%1*189,90",
+      "confidence": 0.8807762265205383,
+      "x_min": 125,
+      "x_max": 629,
+      "y_min": 1610,
+      "y_max": 1658
+    },
+    {
+      "text": "86962361098400303818*RI0BA YESILCAY75G MNG&CICEK",
+      "confidence": 0.9515853524208069,
+      "x_min": 8,
+      "x_max": 674,
+      "y_min": 1643,
+      "y_max": 1694
+    },
+    {
+      "text": "*237,52 *1AD×1*237.52%1 *239.90",
+      "confidence": 0.8479021787643433,
+      "x_min": 125,
+      "x_max": 629,
+      "y_min": 1675,
+      "y_max": 1726
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 235,
+      "x_max": 253,
+      "y_min": 1718,
+      "y_max": 1737
+    },
+    {
+      "text": "*-23.99",
+      "confidence": 0.921253502368927,
+      "x_min": 583,
+      "x_max": 672,
+      "y_min": 1723,
+      "y_max": 1755
+    },
+    {
+      "text": "0365463 RIOBA LADY GREY CAY 75G",
+      "confidence": 0.9278069734573364,
+      "x_min": 192,
+      "x_max": 596,
+      "y_min": 1735,
+      "y_max": 1782
+    },
+    {
+      "text": "8696236114998",
+      "confidence": 0.9978115558624268,
+      "x_min": 8,
+      "x_max": 177,
+      "y_min": 1739,
+      "y_max": 1785
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 166,
+      "x_max": 198,
+      "y_min": 1750,
+      "y_max": 1769
+    },
+    {
+      "text": "*237.521ADX1237,52%1*239.90",
+      "confidence": 0.8649442195892334,
+      "x_min": 125,
+      "x_max": 631,
+      "y_min": 1772,
+      "y_max": 1817
+    },
+    {
+      "text": "*-23,99",
+      "confidence": 0.8022282719612122,
+      "x_min": 580,
+      "x_max": 675,
+      "y_min": 1810,
+      "y_max": 1853
+    },
+    {
+      "text": "0335935*AY PLASTIKKASA POSETI 30*60CM",
+      "confidence": 0.9308896660804749,
+      "x_min": 190,
+      "x_max": 678,
+      "y_min": 1837,
+      "y_max": 1888
+    },
+    {
+      "text": "8696236594707",
+      "confidence": 0.9971262812614441,
+      "x_min": 11,
+      "x_max": 207,
+      "y_min": 1842,
+      "y_max": 1893
+    },
+    {
+      "text": "*0.42*1 AD×1*0，42%20*0，50",
+      "confidence": 0.8132100701332092,
+      "x_min": 123,
+      "x_max": 610,
+      "y_min": 1874,
+      "y_max": 1920
+    },
+    {
+      "text": "037399 K25ACTIVE SFTSHL MNT YKL S-XL",
+      "confidence": 0.9278109669685364,
+      "x_min": 194,
+      "x_max": 673,
+      "y_min": 1905,
+      "y_max": 1954
+    },
+    {
+      "text": "23739994",
+      "confidence": 0.9989033937454224,
+      "x_min": 10,
+      "x_max": 117,
+      "y_min": 1916,
+      "y_max": 1963
+    },
+    {
+      "text": "909.001ADX1*909.00%10*999.90",
+      "confidence": 0.8475659489631653,
+      "x_min": 125,
+      "x_max": 630,
+      "y_min": 1940,
+      "y_max": 1986
+    },
+    {
+      "text": "0306275 LOFT EJEAN RICARD0SIYAH 32-3",
+      "confidence": 0.9440751671791077,
+      "x_min": 194,
+      "x_max": 677,
+      "y_min": 1972,
+      "y_max": 2019
+    },
+    {
+      "text": "23062757",
+      "confidence": 0.9985899925231934,
+      "x_min": 9,
+      "x_max": 116,
+      "y_min": 1981,
+      "y_max": 2028
+    },
+    {
+      "text": "*818.09*1ADX1*818.09%10899.90",
+      "confidence": 0.8729832768440247,
+      "x_min": 126,
+      "x_max": 631,
+      "y_min": 2005,
+      "y_max": 2052
+    },
+    {
+      "text": "Toplam Ag1rl1k:0,000KG",
+      "confidence": 0.8404248952865601,
+      "x_min": 314,
+      "x_max": 609,
+      "y_min": 2073,
+      "y_max": 2124
+    },
+    {
+      "text": "Toplam Koli Mik.: 9",
+      "confidence": 0.9059814810752869,
+      "x_min": 9,
+      "x_max": 246,
+      "y_min": 2070,
+      "y_max": 2128
+    },
+    {
+      "text": "BRUT GIDA&TEMIZLIK&KOZMETIK:",
+      "confidence": 0.9508230090141296,
+      "x_min": 8,
+      "x_max": 347,
+      "y_min": 2140,
+      "y_max": 2197
+    },
+    {
+      "text": "*1.061,13",
+      "confidence": 0.9513113498687744,
+      "x_min": 562,
+      "x_max": 674,
+      "y_min": 2150,
+      "y_max": 2188
+    },
+    {
+      "text": "BRUT GIDA DISI:",
+      "confidence": 0.9481846690177917,
+      "x_min": 10,
+      "x_max": 197,
+      "y_min": 2181,
+      "y_max": 2230
+    },
+    {
+      "text": "*1.899,80",
+      "confidence": 0.9720427393913269,
+      "x_min": 562,
+      "x_max": 674,
+      "y_min": 2184,
+      "y_max": 2226
+    },
+    {
+      "text": "INDIRIMLER:",
+      "confidence": 0.971099853515625,
+      "x_min": 14,
+      "x_max": 149,
+      "y_min": 2252,
+      "y_max": 2297
+    },
+    {
+      "text": "*-47,98",
+      "confidence": 0.8384583592414856,
+      "x_min": 587,
+      "x_max": 676,
+      "y_min": 2255,
+      "y_max": 2294
+    },
+    {
+      "text": "KDV %1:",
+      "confidence": 0.9030914902687073,
+      "x_min": 13,
+      "x_max": 106,
+      "y_min": 2322,
+      "y_max": 2365
+    },
+    {
+      "text": "*1.050,12",
+      "confidence": 0.9560973048210144,
+      "x_min": 202,
+      "x_max": 318,
+      "y_min": 2319,
+      "y_max": 2360
+    },
+    {
+      "text": "*10,50",
+      "confidence": 0.8663787245750427,
+      "x_min": 598,
+      "x_max": 675,
+      "y_min": 2323,
+      "y_max": 2359
+    },
+    {
+      "text": "KDV %10:",
+      "confidence": 0.9054687023162842,
+      "x_min": 15,
+      "x_max": 118,
+      "y_min": 2358,
+      "y_max": 2398
+    },
+    {
+      "text": "*1.727,09",
+      "confidence": 0.8736260533332825,
+      "x_min": 204,
+      "x_max": 316,
+      "y_min": 2354,
+      "y_max": 2393
+    },
+    {
+      "text": "*172.71",
+      "confidence": 0.9483819007873535,
+      "x_min": 586,
+      "x_max": 677,
+      "y_min": 2353,
+      "y_max": 2396
+    },
+    {
+      "text": "KDV %20:",
+      "confidence": 0.9050973653793335,
+      "x_min": 16,
+      "x_max": 118,
+      "y_min": 2394,
+      "y_max": 2433
+    },
+    {
+      "text": "*0,42",
+      "confidence": 0.8125748634338379,
+      "x_min": 202,
+      "x_max": 273,
+      "y_min": 2390,
+      "y_max": 2431
+    },
+    {
+      "text": "*0,08",
+      "confidence": 0.8680509328842163,
+      "x_min": 608,
+      "x_max": 677,
+      "y_min": 2390,
+      "y_max": 2432
+    },
+    {
+      "text": "NET TOPLAM:",
+      "confidence": 0.9596601724624634,
+      "x_min": 17,
+      "x_max": 154,
+      "y_min": 2463,
+      "y_max": 2500
+    },
+    {
+      "text": "*2.777.63",
+      "confidence": 0.926237940788269,
+      "x_min": 564,
+      "x_max": 676,
+      "y_min": 2455,
+      "y_max": 2496
+    },
+    {
+      "text": "ODEME TUTARI:",
+      "confidence": 0.9535237550735474,
+      "x_min": 16,
+      "x_max": 178,
+      "y_min": 2496,
+      "y_max": 2535
+    },
+    {
+      "text": "*2.960,92",
+      "confidence": 0.9397103190422058,
+      "x_min": 566,
+      "x_max": 677,
+      "y_min": 2490,
+      "y_max": 2532
+    },
+    {
+      "text": "ODEMETIPI:KREDIKARTI:*2.960,92",
+      "confidence": 0.9383483529090881,
+      "x_min": 16,
+      "x_max": 424,
+      "y_min": 2526,
+      "y_max": 2568
+    },
+    {
+      "text": "KARTN0:44029300****2911",
+      "confidence": 0.9049104452133179,
+      "x_min": 15,
+      "x_max": 353,
+      "y_min": 2561,
+      "y_max": 2602
+    },
+    {
+      "text": "OMAY KOD!:",
+      "confidence": 0.7874706983566284,
+      "x_min": 415,
+      "x_max": 552,
+      "y_min": 2562,
+      "y_max": 2599
+    },
+    {
+      "text": "979944",
+      "confidence": 0.9983395934104919,
+      "x_min": 600,
+      "x_max": 677,
+      "y_min": 2557,
+      "y_max": 2595
+    },
+    {
+      "text": "4y",
+      "confidence": 0.22728006541728973,
+      "x_min": 394,
+      "x_max": 401,
+      "y_min": 2593,
+      "y_max": 2605
+    },
+    {
+      "text": "YALNIZ Ikibindokuzyuzaltmis TLdoksaniki KR",
+      "confidence": 0.9174394011497498,
+      "x_min": 14,
+      "x_max": 529,
+      "y_min": 2628,
+      "y_max": 2668
+    },
+    {
+      "text": "Vergi mikelleflerininiadeislemlerinde\"ADE FATURAS\"",
+      "confidence": 0.8429142236709595,
+      "x_min": 0,
+      "x_max": 685,
+      "y_min": 3257,
+      "y_max": 3330
+    },
+    {
+      "text": "duzenlemesi zorunludur.",
+      "confidence": 0.9617969393730164,
+      "x_min": 0,
+      "x_max": 284,
+      "y_min": 3297,
+      "y_max": 3359
+    },
+    {
+      "text": "Irsallye Yerine Gecer.",
+      "confidence": 0.9122728109359741,
+      "x_min": 0,
+      "x_max": 272,
+      "y_min": 3334,
+      "y_max": 3397
+    }
+  ]
+}

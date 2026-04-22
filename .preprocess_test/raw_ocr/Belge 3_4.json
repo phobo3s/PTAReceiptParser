@@ -1,0 +1,1364 @@
+{
+  "detections": [
+    {
+      "text": "へ",
+      "confidence": 0.18445268273353577,
+      "x_min": 207,
+      "x_max": 215,
+      "y_min": 7,
+      "y_max": 15
+    },
+    {
+      "text": "1307206",
+      "confidence": 0.5014108419418335,
+      "x_min": 0,
+      "x_max": 96,
+      "y_min": 74,
+      "y_max": 141
+    },
+    {
+      "text": "S4:1615",
+      "confidence": 0.6198726892471313,
+      "x_min": 0,
+      "x_max": 102,
+      "y_min": 110,
+      "y_max": 175
+    },
+    {
+      "text": "FSN8087",
+      "confidence": 0.4825706481933594,
+      "x_min": 214,
+      "x_max": 332,
+      "y_min": 128,
+      "y_max": 187
+    },
+    {
+      "text": "LEC",
+      "confidence": 0.5011372566223145,
+      "x_min": 45,
+      "x_max": 280,
+      "y_min": 215,
+      "y_max": 285
+    },
+    {
+      "text": "12",
+      "confidence": 0.4614245891571045,
+      "x_min": 0,
+      "x_max": 326,
+      "y_min": 245,
+      "y_max": 329
+    },
+    {
+      "text": "178.0-80",
+      "confidence": 0.5292860269546509,
+      "x_min": 110,
+      "x_max": 220,
+      "y_min": 248,
+      "y_max": 290
+    },
+    {
+      "text": "007",
+      "confidence": 0.5136738419532776,
+      "x_min": 63,
+      "x_max": 210,
+      "y_min": 278,
+      "y_max": 327
+    },
+    {
+      "text": "1904.7028",
+      "confidence": 0.7516354322433472,
+      "x_min": 93,
+      "x_max": 183,
+      "y_min": 302,
+      "y_max": 339
+    },
+    {
+      "text": "1001牌",
+      "confidence": 0.5375224351882935,
+      "x_min": 194,
+      "x_max": 272,
+      "y_min": 300,
+      "y_max": 339
+    },
+    {
+      "text": "SATIS",
+      "confidence": 0.8354175686836243,
+      "x_min": 78,
+      "x_max": 130,
+      "y_min": 318,
+      "y_max": 348
+    },
+    {
+      "text": "SS",
+      "confidence": 0.4842323660850525,
+      "x_min": 118,
+      "x_max": 255,
+      "y_min": 324,
+      "y_max": 370
+    },
+    {
+      "text": "16:17",
+      "confidence": 0.7211295962333679,
+      "x_min": 192,
+      "x_max": 242,
+      "y_min": 321,
+      "y_max": 348
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 15,
+      "x_max": 69,
+      "y_min": 332,
+      "y_max": 362
+    },
+    {
+      "text": "1UTAR 550.00 1L",
+      "confidence": 0.6259033679962158,
+      "x_min": 48,
+      "x_max": 284,
+      "y_min": 353,
+      "y_max": 413
+    },
+    {
+      "text": "6",
+      "confidence": 0.19359593093395233,
+      "x_min": 85,
+      "x_max": 98,
+      "y_min": 348,
+      "y_max": 356
+    },
+    {
+      "text": "S",
+      "confidence": 0.2938425540924072,
+      "x_min": 113,
+      "x_max": 128,
+      "y_min": 351,
+      "y_max": 362
+    },
+    {
+      "text": "4605",
+      "confidence": 0.8413547277450562,
+      "x_min": 155,
+      "x_max": 297,
+      "y_min": 349,
+      "y_max": 395
+    },
+    {
+      "text": "A",
+      "confidence": 0.33506250381469727,
+      "x_min": 45,
+      "x_max": 280,
+      "y_min": 372,
+      "y_max": 432
+    },
+    {
+      "text": "ON0YK00U:594707",
+      "confidence": 0.817874550819397,
+      "x_min": 29,
+      "x_max": 283,
+      "y_min": 391,
+      "y_max": 448
+    },
+    {
+      "text": "SLATAO",
+      "confidence": 0.4503030478954315,
+      "x_min": 21,
+      "x_max": 311,
+      "y_min": 409,
+      "y_max": 470
+    },
+    {
+      "text": "SADECEYEMASSIZ",
+      "confidence": 0.9330438375473022,
+      "x_min": 32,
+      "x_max": 322,
+      "y_min": 429,
+      "y_max": 489
+    },
+    {
+      "text": "V：SAMAVINTZ",
+      "confidence": 0.7219566106796265,
+      "x_min": 76,
+      "x_max": 248,
+      "y_min": 451,
+      "y_max": 498
+    },
+    {
+      "text": " 5S YICE ",
+      "confidence": 0.5093217492103577,
+      "x_min": 31,
+      "x_max": 288,
+      "y_min": 482,
+      "y_max": 540
+    },
+    {
+      "text": "CMTEESE",
+      "confidence": 0.5759270787239075,
+      "x_min": 40,
+      "x_max": 287,
+      "y_min": 502,
+      "y_max": 558
+    },
+    {
+      "text": "Ticwt S1:937",
+      "confidence": 0.5779934525489807,
+      "x_min": 77,
+      "x_max": 251,
+      "y_min": 524,
+      "y_max": 570
+    },
+    {
+      "text": "C4518",
+      "confidence": 0.46974319219589233,
+      "x_min": 40,
+      "x_max": 279,
+      "y_min": 536,
+      "y_max": 592
+    },
+    {
+      "text": "b.",
+      "confidence": 0.2625192105770111,
+      "x_min": 23,
+      "x_max": 55,
+      "y_min": 561,
+      "y_max": 580
+    },
+    {
+      "text": "1",
+      "confidence": 0.5245941281318665,
+      "x_min": 42,
+      "x_max": 304,
+      "y_min": 554,
+      "y_max": 614
+    },
+    {
+      "text": "Zivoat Bunkust",
+      "confidence": 0.8243098855018616,
+      "x_min": 94,
+      "x_max": 278,
+      "y_min": 624,
+      "y_max": 697
+    },
+    {
+      "text": "DEGERI",
+      "confidence": 0.9837409853935242,
+      "x_min": 91,
+      "x_max": 194,
+      "y_min": 793,
+      "y_max": 830
+    },
+    {
+      "text": "MMALI",
+      "confidence": 0.7233948707580566,
+      "x_min": 6,
+      "x_max": 96,
+      "y_min": 798,
+      "y_max": 829
+    },
+    {
+      "text": "YOKTURU",
+      "confidence": 0.8714057207107544,
+      "x_min": 191,
+      "x_max": 299,
+      "y_min": 803,
+      "y_max": 844
+    },
+    {
+      "text": "7N0:00025",
+      "confidence": 0.6556593775749207,
+      "x_min": 0,
+      "x_max": 99,
+      "y_min": 832,
+      "y_max": 885
+    },
+    {
+      "text": "BOM0:01",
+      "confidence": 0.591623842716217,
+      "x_min": 222,
+      "x_max": 319,
+      "y_min": 844,
+      "y_max": 902
+    },
+    {
+      "text": "3204129",
+      "confidence": 0.7219155430793762,
+      "x_min": 116,
+      "x_max": 220,
+      "y_min": 872,
+      "y_max": 937
+    },
+    {
+      "text": "e",
+      "confidence": 0.2612186074256897,
+      "x_min": 150,
+      "x_max": 173,
+      "y_min": 983,
+      "y_max": 1016
+    },
+    {
+      "text": "BILSEOARESTAEWT",
+      "confidence": 0.750944972038269,
+      "x_min": 72,
+      "x_max": 250,
+      "y_min": 1034,
+      "y_max": 1098
+    },
+    {
+      "text": "YIECY COK HIZ.AS.",
+      "confidence": 0.7270693778991699,
+      "x_min": 75,
+      "x_max": 248,
+      "y_min": 1067,
+      "y_max": 1132
+    },
+    {
+      "text": "MKARA 012-0AA",
+      "confidence": 0.43111783266067505,
+      "x_min": 54,
+      "x_max": 276,
+      "y_min": 1104,
+      "y_max": 1167
+    },
+    {
+      "text": "BORNOA 12R",
+      "confidence": 0.5314307808876038,
+      "x_min": 97,
+      "x_max": 223,
+      "y_min": 1141,
+      "y_max": 1198
+    },
+    {
+      "text": "BORONA D138441324",
+      "confidence": 0.6152349710464478,
+      "x_min": 77,
+      "x_max": 242,
+      "y_min": 1179,
+      "y_max": 1235
+    },
+    {
+      "text": "FIS NO:0008",
+      "confidence": 0.8269844651222229,
+      "x_min": 206,
+      "x_max": 321,
+      "y_min": 1232,
+      "y_max": 1281
+    },
+    {
+      "text": "19/042826",
+      "confidence": 0.7951937913894653,
+      "x_min": 4,
+      "x_max": 96,
+      "y_min": 1237,
+      "y_max": 1295
+    },
+    {
+      "text": "SAT: 16:19",
+      "confidence": 0.8800959587097168,
+      "x_min": 5,
+      "x_max": 105,
+      "y_min": 1269,
+      "y_max": 1331
+    },
+    {
+      "text": "125.0",
+      "confidence": 0.6651078462600708,
+      "x_min": 245,
+      "x_max": 311,
+      "y_min": 1311,
+      "y_max": 1356
+    },
+    {
+      "text": "1 TAUKLUKENU",
+      "confidence": 0.5905110239982605,
+      "x_min": 13,
+      "x_max": 124,
+      "y_min": 1322,
+      "y_max": 1379
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 156,
+      "x_max": 192,
+      "y_min": 1334,
+      "y_max": 1409
+    },
+    {
+      "text": "00",
+      "confidence": 0.30589359998703003,
+      "x_min": 258,
+      "x_max": 310,
+      "y_min": 1345,
+      "y_max": 1385
+    },
+    {
+      "text": "1 TAVUKKIOS",
+      "confidence": 0.6548288464546204,
+      "x_min": 24,
+      "x_max": 125,
+      "y_min": 1357,
+      "y_max": 1409
+    },
+    {
+      "text": "0.00",
+      "confidence": 0.8199073672294617,
+      "x_min": 263,
+      "x_max": 307,
+      "y_min": 1378,
+      "y_max": 1415
+    },
+    {
+      "text": "1+Mayonez 0",
+      "confidence": 0.6069163680076599,
+      "x_min": 37,
+      "x_max": 198,
+      "y_min": 1391,
+      "y_max": 1447
+    },
+    {
+      "text": "10.00",
+      "confidence": 0.7581464648246765,
+      "x_min": 264,
+      "x_max": 306,
+      "y_min": 1408,
+      "y_max": 1447
+    },
+    {
+      "text": "I+Hardal Yok",
+      "confidence": 0.8788238167762756,
+      "x_min": 43,
+      "x_max": 160,
+      "y_min": 1427,
+      "y_max": 1470
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 157,
+      "x_max": 196,
+      "y_min": 1431,
+      "y_max": 1630
+    },
+    {
+      "text": "0.00",
+      "confidence": 0.7450342774391174,
+      "x_min": 264,
+      "x_max": 307,
+      "y_min": 1440,
+      "y_max": 1477
+    },
+    {
+      "text": "1 KIDSOYNK",
+      "confidence": 0.8231313824653625,
+      "x_min": 31,
+      "x_max": 123,
+      "y_min": 1461,
+      "y_max": 1500
+    },
+    {
+      "text": "0.83",
+      "confidence": 0.6102477312088013,
+      "x_min": 265,
+      "x_max": 306,
+      "y_min": 1473,
+      "y_max": 1506
+    },
+    {
+      "text": "1 KUCUKAYRAN",
+      "confidence": 0.9281594157218933,
+      "x_min": 33,
+      "x_max": 128,
+      "y_min": 1495,
+      "y_max": 1530
+    },
+    {
+      "text": "30.00",
+      "confidence": 0.6590146422386169,
+      "x_min": 266,
+      "x_max": 306,
+      "y_min": 1504,
+      "y_max": 1537
+    },
+    {
+      "text": "1 K.PATATES",
+      "confidence": 0.9206245541572571,
+      "x_min": 33,
+      "x_max": 125,
+      "y_min": 1523,
+      "y_max": 1563
+    },
+    {
+      "text": "80.00",
+      "confidence": 0.819422721862793,
+      "x_min": 265,
+      "x_max": 307,
+      "y_min": 1533,
+      "y_max": 1570
+    },
+    {
+      "text": "KETCAP",
+      "confidence": 0.9736850261688232,
+      "x_min": 44,
+      "x_max": 103,
+      "y_min": 1556,
+      "y_max": 1591
+    },
+    {
+      "text": "10,03",
+      "confidence": 0.5926035046577454,
+      "x_min": 263,
+      "x_max": 309,
+      "y_min": 1563,
+      "y_max": 1600
+    },
+    {
+      "text": "1 MAYONEZ",
+      "confidence": 0.9069337844848633,
+      "x_min": 38,
+      "x_max": 111,
+      "y_min": 1583,
+      "y_max": 1623
+    },
+    {
+      "text": "250.00",
+      "confidence": 0.8334514498710632,
+      "x_min": 257,
+      "x_max": 312,
+      "y_min": 1593,
+      "y_max": 1634
+    },
+    {
+      "text": "110LUONION RIH20",
+      "confidence": 0.7779710292816162,
+      "x_min": 33,
+      "x_max": 196,
+      "y_min": 1612,
+      "y_max": 1661
+    },
+    {
+      "text": "10，00",
+      "confidence": 0.6373440027236938,
+      "x_min": 259,
+      "x_max": 311,
+      "y_min": 1624,
+      "y_max": 1662
+    },
+    {
+      "text": "1+RANCHSOS",
+      "confidence": 0.8734303712844849,
+      "x_min": 39,
+      "x_max": 150,
+      "y_min": 1643,
+      "y_max": 1687
+    },
+    {
+      "text": "×10",
+      "confidence": 0.66888427734375,
+      "x_min": 163,
+      "x_max": 193,
+      "y_min": 1656,
+      "y_max": 1686
+    },
+    {
+      "text": "10,00",
+      "confidence": 0.6786486506462097,
+      "x_min": 259,
+      "x_max": 312,
+      "y_min": 1653,
+      "y_max": 1692
+    },
+    {
+      "text": "1 ISTENMIYOR",
+      "confidence": 0.8794261813163757,
+      "x_min": 30,
+      "x_max": 135,
+      "y_min": 1672,
+      "y_max": 1716
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 164,
+      "x_max": 195,
+      "y_min": 1682,
+      "y_max": 1748
+    },
+    {
+      "text": "1 RODEOPHN",
+      "confidence": 0.7245374917984009,
+      "x_min": 18,
+      "x_max": 121,
+      "y_min": 1700,
+      "y_max": 1743
+    },
+    {
+      "text": "8350.00",
+      "confidence": 0.7707996368408203,
+      "x_min": 245,
+      "x_max": 315,
+      "y_min": 1680,
+      "y_max": 1727
+    },
+    {
+      "text": "1 ROOEOAHPSO",
+      "confidence": 0.7755050659179688,
+      "x_min": 29,
+      "x_max": 140,
+      "y_min": 1730,
+      "y_max": 1773
+    },
+    {
+      "text": "80.00",
+      "confidence": 0.6564231514930725,
+      "x_min": 261,
+      "x_max": 315,
+      "y_min": 1710,
+      "y_max": 1751
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 170,
+      "x_max": 193,
+      "y_min": 1737,
+      "y_max": 1773
+    },
+    {
+      "text": "0,00",
+      "confidence": 0.6877318024635315,
+      "x_min": 263,
+      "x_max": 312,
+      "y_min": 1739,
+      "y_max": 1776
+    },
+    {
+      "text": "IORTKOLAZERO",
+      "confidence": 0.8961312770843506,
+      "x_min": 44,
+      "x_max": 139,
+      "y_min": 1762,
+      "y_max": 1801
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 165,
+      "x_max": 199,
+      "y_min": 1765,
+      "y_max": 1859
+    },
+    {
+      "text": ".03",
+      "confidence": 0.5822331309318542,
+      "x_min": 267,
+      "x_max": 311,
+      "y_min": 1769,
+      "y_max": 1802
+    },
+    {
+      "text": "1 0.PATATES",
+      "confidence": 0.9036698937416077,
+      "x_min": 37,
+      "x_max": 128,
+      "y_min": 1786,
+      "y_max": 1832
+    },
+    {
+      "text": "x0.00",
+      "confidence": 0.7075899839401245,
+      "x_min": 267,
+      "x_max": 312,
+      "y_min": 1797,
+      "y_max": 1832
+    },
+    {
+      "text": "1 KETCAP",
+      "confidence": 0.9113572835922241,
+      "x_min": 43,
+      "x_max": 106,
+      "y_min": 1818,
+      "y_max": 1855
+    },
+    {
+      "text": "20,00",
+      "confidence": 0.6120392680168152,
+      "x_min": 263,
+      "x_max": 315,
+      "y_min": 1822,
+      "y_max": 1862
+    },
+    {
+      "text": "1 MAYONEZ",
+      "confidence": 0.826924741268158,
+      "x_min": 38,
+      "x_max": 114,
+      "y_min": 1844,
+      "y_max": 1883
+    },
+    {
+      "text": "10",
+      "confidence": 0.9156278371810913,
+      "x_min": 168,
+      "x_max": 196,
+      "y_min": 1850,
+      "y_max": 1883
+    },
+    {
+      "text": "150.00",
+      "confidence": 0.7758881449699402,
+      "x_min": 261,
+      "x_max": 315,
+      "y_min": 1851,
+      "y_max": 1889
+    },
+    {
+      "text": "13LU CITIR PEYN",
+      "confidence": 0.9066080451011658,
+      "x_min": 37,
+      "x_max": 172,
+      "y_min": 1871,
+      "y_max": 1913
+    },
+    {
+      "text": "10",
+      "confidence": 0.8998060822486877,
+      "x_min": 166,
+      "x_max": 195,
+      "y_min": 1882,
+      "y_max": 1908
+    },
+    {
+      "text": "20,00",
+      "confidence": 0.6647270321846008,
+      "x_min": 262,
+      "x_max": 317,
+      "y_min": 1876,
+      "y_max": 1918
+    },
+    {
+      "text": "1+RANCHSOS",
+      "confidence": 0.971511721611023,
+      "x_min": 46,
+      "x_max": 154,
+      "y_min": 1898,
+      "y_max": 1938
+    },
+    {
+      "text": "10",
+      "confidence": 0.8904452323913574,
+      "x_min": 167,
+      "x_max": 196,
+      "y_min": 1908,
+      "y_max": 1934
+    },
+    {
+      "text": "1 ISTENMIYOR",
+      "confidence": 0.9098643660545349,
+      "x_min": 35,
+      "x_max": 136,
+      "y_min": 1923,
+      "y_max": 1963
+    },
+    {
+      "text": "0,00",
+      "confidence": 0.4921111762523651,
+      "x_min": 266,
+      "x_max": 315,
+      "y_min": 1905,
+      "y_max": 1945
+    },
+    {
+      "text": "10",
+      "confidence": 0.8971157670021057,
+      "x_min": 169,
+      "x_max": 198,
+      "y_min": 1932,
+      "y_max": 1963
+    },
+    {
+      "text": "0.00",
+      "confidence": 0.5945924520492554,
+      "x_min": 262,
+      "x_max": 317,
+      "y_min": 1929,
+      "y_max": 1971
+    },
+    {
+      "text": "1 ISTENIYOR",
+      "confidence": 0.8494247794151306,
+      "x_min": 37,
+      "x_max": 135,
+      "y_min": 1951,
+      "y_max": 1991
+    },
+    {
+      "text": "10",
+      "confidence": 0.9306002855300903,
+      "x_min": 171,
+      "x_max": 196,
+      "y_min": 1960,
+      "y_max": 1991
+    },
+    {
+      "text": "350.00",
+      "confidence": 0.9262106418609619,
+      "x_min": 249,
+      "x_max": 319,
+      "y_min": 1955,
+      "y_max": 2003
+    },
+    {
+      "text": "1 RODEOHHPN",
+      "confidence": 0.7657091021537781,
+      "x_min": 24,
+      "x_max": 124,
+      "y_min": 1982,
+      "y_max": 2017
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 170,
+      "x_max": 198,
+      "y_min": 1984,
+      "y_max": 2046
+    },
+    {
+      "text": "80.80",
+      "confidence": 0.6021077036857605,
+      "x_min": 262,
+      "x_max": 322,
+      "y_min": 1981,
+      "y_max": 2031
+    },
+    {
+      "text": "1 ROOEONHPSND",
+      "confidence": 0.7726380228996277,
+      "x_min": 34,
+      "x_max": 141,
+      "y_min": 2011,
+      "y_max": 2045
+    },
+    {
+      "text": "0.00",
+      "confidence": 0.6758258938789368,
+      "x_min": 264,
+      "x_max": 321,
+      "y_min": 2009,
+      "y_max": 2056
+    },
+    {
+      "text": "1OSEFTALIBUZCAY",
+      "confidence": 0.8626946210861206,
+      "x_min": 38,
+      "x_max": 162,
+      "y_min": 2037,
+      "y_max": 2074
+    },
+    {
+      "text": "10",
+      "confidence": 0.4884047508239746,
+      "x_min": 170,
+      "x_max": 197,
+      "y_min": 2033,
+      "y_max": 2073
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 169,
+      "x_max": 200,
+      "y_min": 2059,
+      "y_max": 2131
+    },
+    {
+      "text": "20.00",
+      "confidence": 0.6638270616531372,
+      "x_min": 266,
+      "x_max": 320,
+      "y_min": 2038,
+      "y_max": 2083
+    },
+    {
+      "text": "1 0.PATATES",
+      "confidence": 0.9697540402412415,
+      "x_min": 41,
+      "x_max": 129,
+      "y_min": 2069,
+      "y_max": 2101
+    },
+    {
+      "text": "80.00",
+      "confidence": 0.6669448614120483,
+      "x_min": 265,
+      "x_max": 322,
+      "y_min": 2065,
+      "y_max": 2111
+    },
+    {
+      "text": "1 KETCAP",
+      "confidence": 0.9254105091094971,
+      "x_min": 40,
+      "x_max": 108,
+      "y_min": 2097,
+      "y_max": 2130
+    },
+    {
+      "text": "20.00",
+      "confidence": 0.6693505048751831,
+      "x_min": 265,
+      "x_max": 322,
+      "y_min": 2094,
+      "y_max": 2137
+    },
+    {
+      "text": "1 MAYONEZ",
+      "confidence": 0.9207172393798828,
+      "x_min": 37,
+      "x_max": 116,
+      "y_min": 2121,
+      "y_max": 2162
+    },
+    {
+      "text": "10",
+      "confidence": 0.7836735844612122,
+      "x_min": 170,
+      "x_max": 199,
+      "y_min": 2118,
+      "y_max": 2154
+    },
+    {
+      "text": "250,00",
+      "confidence": 0.6277748942375183,
+      "x_min": 261,
+      "x_max": 323,
+      "y_min": 2121,
+      "y_max": 2166
+    },
+    {
+      "text": "13LUCITR PEYN 1",
+      "confidence": 0.7429032921791077,
+      "x_min": 36,
+      "x_max": 202,
+      "y_min": 2144,
+      "y_max": 2192
+    },
+    {
+      "text": "0.00",
+      "confidence": 0.508280336856842,
+      "x_min": 265,
+      "x_max": 323,
+      "y_min": 2147,
+      "y_max": 2192
+    },
+    {
+      "text": "1+RANCHSOS",
+      "confidence": 0.8612520098686218,
+      "x_min": 42,
+      "x_max": 180,
+      "y_min": 2178,
+      "y_max": 2219
+    },
+    {
+      "text": "%10",
+      "confidence": 0.5652430653572083,
+      "x_min": 170,
+      "x_max": 197,
+      "y_min": 2180,
+      "y_max": 2208
+    },
+    {
+      "text": "x0.00",
+      "confidence": 0.6811829209327698,
+      "x_min": 267,
+      "x_max": 324,
+      "y_min": 2176,
+      "y_max": 2220
+    },
+    {
+      "text": "10",
+      "confidence": 0.7612581253051758,
+      "x_min": 170,
+      "x_max": 199,
+      "y_min": 2203,
+      "y_max": 2241
+    },
+    {
+      "text": "1 ISTENMIYOR",
+      "confidence": 0.8437749743461609,
+      "x_min": 36,
+      "x_max": 137,
+      "y_min": 2210,
+      "y_max": 2249
+    },
+    {
+      "text": "x0.00",
+      "confidence": 0.6558709740638733,
+      "x_min": 269,
+      "x_max": 324,
+      "y_min": 2203,
+      "y_max": 2247
+    },
+    {
+      "text": "10",
+      "confidence": 0.6785439848899841,
+      "x_min": 170,
+      "x_max": 200,
+      "y_min": 2229,
+      "y_max": 2265
+    },
+    {
+      "text": "1 ISTENIYOR",
+      "confidence": 0.8025171756744385,
+      "x_min": 36,
+      "x_max": 135,
+      "y_min": 2238,
+      "y_max": 2279
+    },
+    {
+      "text": "x97.73",
+      "confidence": 0.7545163035392761,
+      "x_min": 261,
+      "x_max": 327,
+      "y_min": 2260,
+      "y_max": 2307
+    },
+    {
+      "text": "TOPKDV",
+      "confidence": 0.9824582934379578,
+      "x_min": 20,
+      "x_max": 114,
+      "y_min": 2296,
+      "y_max": 2336
+    },
+    {
+      "text": "x1.075,00",
+      "confidence": 0.8223963975906372,
+      "x_min": 237,
+      "x_max": 330,
+      "y_min": 2288,
+      "y_max": 2345
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.9947256445884705,
+      "x_min": 20,
+      "x_max": 115,
+      "y_min": 2326,
+      "y_max": 2366
+    },
+    {
+      "text": "1.075,00",
+      "confidence": 0.9234160780906677,
+      "x_min": 237,
+      "x_max": 331,
+      "y_min": 2343,
+      "y_max": 2404
+    },
+    {
+      "text": "KREDi KARTI",
+      "confidence": 0.8649040460586548,
+      "x_min": 19,
+      "x_max": 109,
+      "y_min": 2381,
+      "y_max": 2422
+    },
+    {
+      "text": "POS:1Ref/kn:10054",
+      "confidence": 0.7811518907546997,
+      "x_min": 20,
+      "x_max": 168,
+      "y_min": 2406,
+      "y_max": 2452
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 255,
+      "x_max": 275,
+      "y_min": 2409,
+      "y_max": 2431
+    },
+    {
+      "text": "Siparis Numarasi:",
+      "confidence": 0.9487641453742981,
+      "x_min": 44,
+      "x_max": 313,
+      "y_min": 2430,
+      "y_max": 2504
+    },
+    {
+      "text": "1054",
+      "confidence": 0.997066855430603,
+      "x_min": 130,
+      "x_max": 206,
+      "y_min": 2481,
+      "y_max": 2524
+    },
+    {
+      "text": "KasiYer: MUSTAFAYILOIZ",
+      "confidence": 0.8590417504310608,
+      "x_min": 19,
+      "x_max": 199,
+      "y_min": 2527,
+      "y_max": 2576
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 18,
+      "x_max": 341,
+      "y_min": 2535,
+      "y_max": 2609
+    },
+    {
+      "text": "Asaidvsiteinde",
+      "confidence": 0.44779735803604126,
+      "x_min": 16,
+      "x_max": 323,
+      "y_min": 2570,
+      "y_max": 2640
+    },
+    {
+      "text": "King boy secim bedava alin.",
+      "confidence": 0.9142009019851685,
+      "x_min": 17,
+      "x_max": 226,
+      "y_min": 2620,
+      "y_max": 2662
+    },
+    {
+      "text": ".burgerkingdeneyini.com",
+      "confidence": 0.8761166334152222,
+      "x_min": 18,
+      "x_max": 221,
+      "y_min": 2653,
+      "y_max": 2690
+    },
+    {
+      "text": "Sifre:46854010091126",
+      "confidence": 0.8329514265060425,
+      "x_min": 18,
+      "x_max": 198,
+      "y_min": 2678,
+      "y_max": 2722
+    },
+    {
+      "text": "Dogrulama Kodu:",
+      "confidence": 0.8735992312431335,
+      "x_min": 19,
+      "x_max": 138,
+      "y_min": 2706,
+      "y_max": 2750
+    },
+    {
+      "text": "Sifve n",
+      "confidence": 0.5230180621147156,
+      "x_min": 14,
+      "x_max": 305,
+      "y_min": 2731,
+      "y_max": 2784
+    },
+    {
+      "text": "iaren5inull",
+      "confidence": 0.47884365916252136,
+      "x_min": 17,
+      "x_max": 322,
+      "y_min": 2763,
+      "y_max": 2813
+    },
+    {
+      "text": "Sartlarveicerikeb sayfasinddir",
+      "confidence": 0.7752151489257812,
+      "x_min": 17,
+      "x_max": 300,
+      "y_min": 2793,
+      "y_max": 2844
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 17,
+      "x_max": 341,
+      "y_min": 2824,
+      "y_max": 2871
+    },
+    {
+      "text": "HC UST:000",
+      "confidence": 0.7698239088058472,
+      "x_min": 16,
+      "x_max": 126,
+      "y_min": 2851,
+      "y_max": 2899
+    },
+    {
+      "text": "KASIVER:KASIYER2",
+      "confidence": 0.8590105772018433,
+      "x_min": 17,
+      "x_max": 158,
+      "y_min": 2900,
+      "y_max": 2952
+    },
+    {
+      "text": "ISYERIN0:0000004159053",
+      "confidence": 0.8251432180404663,
+      "x_min": 22,
+      "x_max": 220,
+      "y_min": 2981,
+      "y_max": 3022
+    },
+    {
+      "text": "ISLEM:0247/KP0057",
+      "confidence": 0.9143428802490234,
+      "x_min": 76,
+      "x_max": 219,
+      "y_min": 3003,
+      "y_max": 3041
+    },
+    {
+      "text": "POSNO:0259657",
+      "confidence": 0.9358400702476501,
+      "x_min": 205,
+      "x_max": 341,
+      "y_min": 2994,
+      "y_max": 3030
+    },
+    {
+      "text": "SATIS- HUSTERI NUSHAST",
+      "confidence": 0.8540430665016174,
+      "x_min": 81,
+      "x_max": 271,
+      "y_min": 3019,
+      "y_max": 3061
+    },
+    {
+      "text": "LIOCiV",
+      "confidence": 0.6062601208686829,
+      "x_min": 208,
+      "x_max": 285,
+      "y_min": 3014,
+      "y_max": 3041
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 21,
+      "x_max": 85,
+      "y_min": 3035,
+      "y_max": 3060
+    },
+    {
+      "text": "TUTAR1.@75.0O TL",
+      "confidence": 0.7365900278091431,
+      "x_min": 43,
+      "x_max": 316,
+      "y_min": 3050,
+      "y_max": 3102
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 78,
+      "x_max": 95,
+      "y_min": 3047,
+      "y_max": 3059
+    },
+    {
+      "text": "承冰 冰冰2911",
+      "confidence": 0.5957065224647522,
+      "x_min": 86,
+      "x_max": 313,
+      "y_min": 3041,
+      "y_max": 3079
+    },
+    {
+      "text": "VISA AID:A0000031010",
+      "confidence": 0.8673670887947083,
+      "x_min": 78,
+      "x_max": 270,
+      "y_min": 3073,
+      "y_max": 3114
+    },
+    {
+      "text": "ONAYK0DU:804211",
+      "confidence": 0.8894925713539124,
+      "x_min": 38,
+      "x_max": 297,
+      "y_min": 3086,
+      "y_max": 3136
+    },
+    {
+      "text": "TUTAR KARSILIGI MAL VEYA HIZNETI ALDIN",
+      "confidence": 0.9382873177528381,
+      "x_min": 26,
+      "x_max": 332,
+      "y_min": 3106,
+      "y_max": 3155
+    },
+    {
+      "text": "SADECETEMASSIZ",
+      "confidence": 0.9639206528663635,
+      "x_min": 9,
+      "x_max": 337,
+      "y_min": 3126,
+      "y_max": 3175
+    },
+    {
+      "text": "BU BELGEYI SAKLAYINIZ",
+      "confidence": 0.9416665434837341,
+      "x_min": 83,
+      "x_max": 257,
+      "y_min": 3151,
+      "y_max": 3190
+    },
+    {
+      "text": ")Visa payWave",
+      "confidence": 0.8278226852416992,
+      "x_min": 88,
+      "x_max": 237,
+      "y_min": 3174,
+      "y_max": 3223
+    },
+    {
+      "text": "BILSEV GIDA RESTAURANT YIVECEK VE",
+      "confidence": 0.8867092728614807,
+      "x_min": 33,
+      "x_max": 304,
+      "y_min": 3216,
+      "y_max": 3260
+    },
+    {
+      "text": "ICECEK HIZHETLERIANONIN SIRKETI",
+      "confidence": 0.8360194563865662,
+      "x_min": 39,
+      "x_max": 302,
+      "y_min": 3237,
+      "y_max": 3280
+    },
+    {
+      "text": "Ticaret Slell No: 9371",
+      "confidence": 0.8394075632095337,
+      "x_min": 78,
+      "x_max": 263,
+      "y_min": 3263,
+      "y_max": 3298
+    },
+    {
+      "text": "ANKARA CADNO.LPARKBORNVA",
+      "confidence": 0.7753345370292664,
+      "x_min": 36,
+      "x_max": 296,
+      "y_min": 3277,
+      "y_max": 3320
+    },
+    {
+      "text": "AVM.BORN OVA-ZMIR BORNOVA 3500OZMIR",
+      "confidence": 0.8312250971794128,
+      "x_min": 12,
+      "x_max": 328,
+      "y_min": 3301,
+      "y_max": 3338
+    }
+  ]
+}

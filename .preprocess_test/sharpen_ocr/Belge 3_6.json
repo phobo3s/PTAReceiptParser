@@ -1,0 +1,476 @@
+{
+  "detections": [
+    {
+      "text": "BIM BiRIESiK MAGAZALAR A.S.",
+      "confidence": 0.8528409600257874,
+      "x_min": 122,
+      "x_max": 683,
+      "y_min": 5,
+      "y_max": 102
+    },
+    {
+      "text": "Erzene Mah.8.Sok. No:48/A",
+      "confidence": 0.9095884561538696,
+      "x_min": 150,
+      "x_max": 687,
+      "y_min": 73,
+      "y_max": 155
+    },
+    {
+      "text": "Bornova/izmir",
+      "confidence": 0.9787346124649048,
+      "x_min": 277,
+      "x_max": 546,
+      "y_min": 139,
+      "y_max": 202
+    },
+    {
+      "text": "BUYUKMUKELLEFLER VDM 1750051846",
+      "confidence": 0.927702009677887,
+      "x_min": 96,
+      "x_max": 741,
+      "y_min": 190,
+      "y_max": 273
+    },
+    {
+      "text": "TARIH:13.122025",
+      "confidence": 0.9692550301551819,
+      "x_min": 43,
+      "x_max": 438,
+      "y_min": 310,
+      "y_max": 375
+    },
+    {
+      "text": "SAAT:19:16",
+      "confidence": 0.9526645541191101,
+      "x_min": 37,
+      "x_max": 343,
+      "y_min": 360,
+      "y_max": 430
+    },
+    {
+      "text": "FIS NO:0179",
+      "confidence": 0.8619816303253174,
+      "x_min": 35,
+      "x_max": 326,
+      "y_min": 409,
+      "y_max": 482
+    },
+    {
+      "text": "BILGIFISI",
+      "confidence": 0.9533603191375732,
+      "x_min": 261,
+      "x_max": 468,
+      "y_min": 524,
+      "y_max": 592
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 2,
+      "x_max": 80,
+      "y_min": 523,
+      "y_max": 607
+    },
+    {
+      "text": "TUR : E-ARSIV FATURA",
+      "confidence": 0.944553017616272,
+      "x_min": 21,
+      "x_max": 433,
+      "y_min": 614,
+      "y_max": 702
+    },
+    {
+      "text": "MUSTERI VN: 111111",
+      "confidence": 0.795315146446228,
+      "x_min": 18,
+      "x_max": 561,
+      "y_min": 669,
+      "y_max": 756
+    },
+    {
+      "text": "FATURA NO:T122025075045592",
+      "confidence": 0.9629207253456116,
+      "x_min": 14,
+      "x_max": 585,
+      "y_min": 783,
+      "y_max": 865
+    },
+    {
+      "text": "2×26,00",
+      "confidence": 0.900818943977356,
+      "x_min": 11,
+      "x_max": 214,
+      "y_min": 904,
+      "y_max": 972
+    },
+    {
+      "text": "SU 5L",
+      "confidence": 0.903472900390625,
+      "x_min": 12,
+      "x_max": 136,
+      "y_min": 961,
+      "y_max": 1028
+    },
+    {
+      "text": "%01",
+      "confidence": 0.8954704403877258,
+      "x_min": 484,
+      "x_max": 554,
+      "y_min": 961,
+      "y_max": 1020
+    },
+    {
+      "text": "*52,00",
+      "confidence": 0.9312900900840759,
+      "x_min": 709,
+      "x_max": 849,
+      "y_min": 950,
+      "y_max": 1015
+    },
+    {
+      "text": "%20",
+      "confidence": 0.8781126141548157,
+      "x_min": 483,
+      "x_max": 554,
+      "y_min": 1014,
+      "y_max": 1073
+    },
+    {
+      "text": "*0,50",
+      "confidence": 0.9319130182266235,
+      "x_min": 728,
+      "x_max": 849,
+      "y_min": 1005,
+      "y_max": 1067
+    },
+    {
+      "text": "ALISVERiSPOSETi BiM",
+      "confidence": 0.9253218770027161,
+      "x_min": 13,
+      "x_max": 426,
+      "y_min": 1017,
+      "y_max": 1087
+    },
+    {
+      "text": "%01",
+      "confidence": 0.8958942890167236,
+      "x_min": 484,
+      "x_max": 549,
+      "y_min": 1076,
+      "y_max": 1132
+    },
+    {
+      "text": "*114,50",
+      "confidence": 0.9671263694763184,
+      "x_min": 691,
+      "x_max": 849,
+      "y_min": 1061,
+      "y_max": 1128
+    },
+    {
+      "text": "TEREYAG 250G PERVIN",
+      "confidence": 0.9142857789993286,
+      "x_min": 13,
+      "x_max": 406,
+      "y_min": 1080,
+      "y_max": 1142
+    },
+    {
+      "text": "*79,00",
+      "confidence": 0.9401944279670715,
+      "x_min": 705,
+      "x_max": 849,
+      "y_min": 1113,
+      "y_max": 1181
+    },
+    {
+      "text": "%01",
+      "confidence": 0.9423136115074158,
+      "x_min": 481,
+      "x_max": 553,
+      "y_min": 1131,
+      "y_max": 1188
+    },
+    {
+      "text": "YUMURTA 63-72G 15Li",
+      "confidence": 0.9357360005378723,
+      "x_min": 11,
+      "x_max": 417,
+      "y_min": 1131,
+      "y_max": 1200
+    },
+    {
+      "text": "*45,00",
+      "confidence": 0.9505887031555176,
+      "x_min": 707,
+      "x_max": 848,
+      "y_min": 1169,
+      "y_max": 1235
+    },
+    {
+      "text": "%10",
+      "confidence": 0.9400114417076111,
+      "x_min": 480,
+      "x_max": 552,
+      "y_min": 1191,
+      "y_max": 1243
+    },
+    {
+      "text": "KAPI RUZGARONLEYiCi",
+      "confidence": 0.9123774170875549,
+      "x_min": 11,
+      "x_max": 419,
+      "y_min": 1191,
+      "y_max": 1257
+    },
+    {
+      "text": "*59,00",
+      "confidence": 0.9537360072135925,
+      "x_min": 708,
+      "x_max": 847,
+      "y_min": 1223,
+      "y_max": 1286
+    },
+    {
+      "text": "%01",
+      "confidence": 0.8693791031837463,
+      "x_min": 474,
+      "x_max": 551,
+      "y_min": 1241,
+      "y_max": 1301
+    },
+    {
+      "text": "ZENCEFiL250G",
+      "confidence": 0.9764609336853027,
+      "x_min": 13,
+      "x_max": 290,
+      "y_min": 1249,
+      "y_max": 1317
+    },
+    {
+      "text": "*159,00",
+      "confidence": 0.9607900381088257,
+      "x_min": 687,
+      "x_max": 848,
+      "y_min": 1272,
+      "y_max": 1343
+    },
+    {
+      "text": "%20",
+      "confidence": 0.9710143208503723,
+      "x_min": 474,
+      "x_max": 553,
+      "y_min": 1293,
+      "y_max": 1353
+    },
+    {
+      "text": "KAGIT HAVLU 16 LI",
+      "confidence": 0.9274075031280518,
+      "x_min": 11,
+      "x_max": 357,
+      "y_min": 1302,
+      "y_max": 1372
+    },
+    {
+      "text": "*33,68",
+      "confidence": 0.9014039635658264,
+      "x_min": 707,
+      "x_max": 848,
+      "y_min": 1383,
+      "y_max": 1451
+    },
+    {
+      "text": "TOPKDU",
+      "confidence": 0.9216625094413757,
+      "x_min": 29,
+      "x_max": 164,
+      "y_min": 1418,
+      "y_max": 1478
+    },
+    {
+      "text": "*509,00",
+      "confidence": 0.9298791885375977,
+      "x_min": 687,
+      "x_max": 850,
+      "y_min": 1436,
+      "y_max": 1503
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.9963288903236389,
+      "x_min": 27,
+      "x_max": 163,
+      "y_min": 1472,
+      "y_max": 1529
+    },
+    {
+      "text": "*509,00",
+      "confidence": 0.9635055661201477,
+      "x_min": 688,
+      "x_max": 848,
+      "y_min": 1543,
+      "y_max": 1611
+    },
+    {
+      "text": "KREDIKART",
+      "confidence": 0.9783795475959778,
+      "x_min": 42,
+      "x_max": 272,
+      "y_min": 1580,
+      "y_max": 1631
+    },
+    {
+      "text": "Banka Kredi Kart1(1)",
+      "confidence": 0.9188915491104126,
+      "x_min": 0,
+      "x_max": 431,
+      "y_min": 1627,
+      "y_max": 1697
+    },
+    {
+      "text": "GARANTI BANKASI",
+      "confidence": 0.9858918786048889,
+      "x_min": 0,
+      "x_max": 308,
+      "y_min": 1739,
+      "y_max": 1799
+    },
+    {
+      "text": "1:3541628T02509837440293*****2911",
+      "confidence": 0.8613315224647522,
+      "x_min": 0,
+      "x_max": 761,
+      "y_min": 1771,
+      "y_max": 1862
+    },
+    {
+      "text": "13.12.2025 19:16 B:6351 S:6176",
+      "confidence": 0.9626168608665466,
+      "x_min": 0,
+      "x_max": 627,
+      "y_min": 1838,
+      "y_max": 1916
+    },
+    {
+      "text": "Onay No:159259",
+      "confidence": 0.9552302956581116,
+      "x_min": 0,
+      "x_max": 291,
+      "y_min": 1909,
+      "y_max": 1963
+    },
+    {
+      "text": "Ref.No:534771447140",
+      "confidence": 0.9459463357925415,
+      "x_min": 335,
+      "x_max": 742,
+      "y_min": 1888,
+      "y_max": 1961
+    },
+    {
+      "text": "2",
+      "confidence": 0.4820972681045532,
+      "x_min": 553,
+      "x_max": 577,
+      "y_min": 1942,
+      "y_max": 1978
+    },
+    {
+      "text": "954878942",
+      "confidence": 0.9994562864303589,
+      "x_min": 597,
+      "x_max": 809,
+      "y_min": 2040,
+      "y_max": 2114
+    },
+    {
+      "text": "POS:2-249835-P****0*****",
+      "confidence": 0.8752084374427795,
+      "x_min": 0,
+      "x_max": 555,
+      "y_min": 2060,
+      "y_max": 2143
+    },
+    {
+      "text": "GS No:464",
+      "confidence": 0.9296778440475464,
+      "x_min": 575,
+      "x_max": 808,
+      "y_min": 2101,
+      "y_max": 2172
+    },
+    {
+      "text": "7894,ERZENE/BORNOVA",
+      "confidence": 0.9354453086853027,
+      "x_min": 0,
+      "x_max": 437,
+      "y_min": 2124,
+      "y_max": 2199
+    },
+    {
+      "text": "78940021312504640177",
+      "confidence": 0.9990914463996887,
+      "x_min": 59,
+      "x_max": 648,
+      "y_min": 2318,
+      "y_max": 2410
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 391,
+      "x_max": 405,
+      "y_min": 2430,
+      "y_max": 2448
+    },
+    {
+      "text": "IRSALIYE VERINE GECER",
+      "confidence": 0.9275094866752625,
+      "x_min": 116,
+      "x_max": 555,
+      "y_min": 2449,
+      "y_max": 2533
+    },
+    {
+      "text": "1HZA>>",
+      "confidence": 0.6595124006271362,
+      "x_min": 265,
+      "x_max": 447,
+      "y_min": 2581,
+      "y_max": 2647
+    },
+    {
+      "text": "<<",
+      "confidence": 0.6710379123687744,
+      "x_min": 197,
+      "x_max": 250,
+      "y_min": 2591,
+      "y_max": 2637
+    },
+    {
+      "text": "KASIYER:P****0**",
+      "confidence": 0.8670951128005981,
+      "x_min": 0,
+      "x_max": 367,
+      "y_min": 2762,
+      "y_max": 2825
+    },
+    {
+      "text": "EKU NO:0001",
+      "confidence": 0.9097648859024048,
+      "x_min": 613,
+      "x_max": 880,
+      "y_min": 2813,
+      "y_max": 2887
+    },
+    {
+      "text": "Z NO:2347",
+      "confidence": 0.9223650693893433,
+      "x_min": 0,
+      "x_max": 200,
+      "y_min": 2817,
+      "y_max": 2890
+    }
+  ]
+}

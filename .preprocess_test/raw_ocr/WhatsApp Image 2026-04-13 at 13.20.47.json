@@ -1,0 +1,380 @@
+{
+  "detections": [
+    {
+      "text": "HAKAN KARACA",
+      "confidence": 0.964231550693512,
+      "x_min": 225,
+      "x_max": 460,
+      "y_min": 14,
+      "y_max": 63
+    },
+    {
+      "text": "FEVZIPASA MH.210 SK.NO:28/C",
+      "confidence": 0.9572880268096924,
+      "x_min": 99,
+      "x_max": 605,
+      "y_min": 56,
+      "y_max": 113
+    },
+    {
+      "text": "FOCA IZMIR",
+      "confidence": 0.9280589818954468,
+      "x_min": 240,
+      "x_max": 441,
+      "y_min": 106,
+      "y_max": 160
+    },
+    {
+      "text": "TEL:0232 812 3 812-05376307080",
+      "confidence": 0.9809054136276245,
+      "x_min": 63,
+      "x_max": 623,
+      "y_min": 152,
+      "y_max": 207
+    },
+    {
+      "text": "FOCA VD. 37960480894",
+      "confidence": 0.9581499099731445,
+      "x_min": 148,
+      "x_max": 530,
+      "y_min": 200,
+      "y_max": 265
+    },
+    {
+      "text": "TARIH",
+      "confidence": 0.8690212368965149,
+      "x_min": 43,
+      "x_max": 148,
+      "y_min": 277,
+      "y_max": 337
+    },
+    {
+      "text": ":12/04/2026",
+      "confidence": 0.9797657132148743,
+      "x_min": 242,
+      "x_max": 469,
+      "y_min": 281,
+      "y_max": 334
+    },
+    {
+      "text": "SAAT",
+      "confidence": 0.9934349656105042,
+      "x_min": 45,
+      "x_max": 127,
+      "y_min": 338,
+      "y_max": 386
+    },
+    {
+      "text": ":17:02:22",
+      "confidence": 0.9423140287399292,
+      "x_min": 243,
+      "x_max": 437,
+      "y_min": 333,
+      "y_max": 388
+    },
+    {
+      "text": "FiS NO",
+      "confidence": 0.7958459258079529,
+      "x_min": 41,
+      "x_max": 166,
+      "y_min": 385,
+      "y_max": 449
+    },
+    {
+      "text": ":0029",
+      "confidence": 0.9317666292190552,
+      "x_min": 244,
+      "x_max": 362,
+      "y_min": 389,
+      "y_max": 438
+    },
+    {
+      "text": "TEMEL GIDA",
+      "confidence": 0.9612849950790405,
+      "x_min": 44,
+      "x_max": 202,
+      "y_min": 461,
+      "y_max": 504
+    },
+    {
+      "text": "%01",
+      "confidence": 0.9936432242393494,
+      "x_min": 388,
+      "x_max": 446,
+      "y_min": 475,
+      "y_max": 511
+    },
+    {
+      "text": "*1.580,00",
+      "confidence": 0.9347876310348511,
+      "x_min": 459,
+      "x_max": 605,
+      "y_min": 476,
+      "y_max": 520
+    },
+    {
+      "text": "TOPKDV",
+      "confidence": 0.9957243800163269,
+      "x_min": 41,
+      "x_max": 197,
+      "y_min": 551,
+      "y_max": 610
+    },
+    {
+      "text": "*15,64",
+      "confidence": 0.973395586013794,
+      "x_min": 449,
+      "x_max": 610,
+      "y_min": 560,
+      "y_max": 620
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.992987871170044,
+      "x_min": 42,
+      "x_max": 198,
+      "y_min": 612,
+      "y_max": 663
+    },
+    {
+      "text": "*1.580,00",
+      "confidence": 0.9824998378753662,
+      "x_min": 377,
+      "x_max": 608,
+      "y_min": 612,
+      "y_max": 672
+    },
+    {
+      "text": "KREDi",
+      "confidence": 0.9528082013130188,
+      "x_min": 41,
+      "x_max": 142,
+      "y_min": 720,
+      "y_max": 772
+    },
+    {
+      "text": "*1.580,00",
+      "confidence": 0.9804032444953918,
+      "x_min": 436,
+      "x_max": 613,
+      "y_min": 723,
+      "y_max": 778
+    },
+    {
+      "text": "VAKIFBANK",
+      "confidence": 0.9922935962677002,
+      "x_min": 58,
+      "x_max": 230,
+      "y_min": 775,
+      "y_max": 822
+    },
+    {
+      "text": "************2911",
+      "confidence": 0.9198793768882751,
+      "x_min": 58,
+      "x_max": 354,
+      "y_min": 814,
+      "y_max": 873
+    },
+    {
+      "text": "T.SICIL NO:0000",
+      "confidence": 0.9642106890678406,
+      "x_min": 40,
+      "x_max": 337,
+      "y_min": 893,
+      "y_max": 947
+    },
+    {
+      "text": "www.hakangurme.com.",
+      "confidence": 0.9888519644737244,
+      "x_min": 55,
+      "x_max": 404,
+      "y_min": 943,
+      "y_max": 1003
+    },
+    {
+      "text": "EKUNO:0001",
+      "confidence": 0.9621342420578003,
+      "x_min": 38,
+      "x_max": 248,
+      "y_min": 991,
+      "y_max": 1039
+    },
+    {
+      "text": "ZNO:3718",
+      "confidence": 0.9396524429321289,
+      "x_min": 452,
+      "x_max": 624,
+      "y_min": 1000,
+      "y_max": 1041
+    },
+    {
+      "text": "iSYERINO:102300000090333",
+      "confidence": 0.9348037838935852,
+      "x_min": 33,
+      "x_max": 347,
+      "y_min": 1121,
+      "y_max": 1164
+    },
+    {
+      "text": "POS NO:01822869",
+      "confidence": 0.9591019153594971,
+      "x_min": 434,
+      "x_max": 628,
+      "y_min": 1123,
+      "y_max": 1162
+    },
+    {
+      "text": "iSLEMNO:JP0028 BATCH NO:0319",
+      "confidence": 0.9463614225387573,
+      "x_min": 33,
+      "x_max": 409,
+      "y_min": 1158,
+      "y_max": 1202
+    },
+    {
+      "text": "17:02",
+      "confidence": 0.9550743103027344,
+      "x_min": 555,
+      "x_max": 629,
+      "y_min": 1162,
+      "y_max": 1198
+    },
+    {
+      "text": "IDE280~Ver:360-L1DC1V",
+      "confidence": 0.9504685997962952,
+      "x_min": 167,
+      "x_max": 480,
+      "y_min": 1197,
+      "y_max": 1238
+    },
+    {
+      "text": "************2911",
+      "confidence": 0.8412518501281738,
+      "x_min": 77,
+      "x_max": 555,
+      "y_min": 1233,
+      "y_max": 1276
+    },
+    {
+      "text": "SATIS",
+      "confidence": 0.9940093755722046,
+      "x_min": 247,
+      "x_max": 384,
+      "y_min": 1270,
+      "y_max": 1319
+    },
+    {
+      "text": "1.580,00 TL",
+      "confidence": 0.9181213974952698,
+      "x_min": 177,
+      "x_max": 455,
+      "y_min": 1311,
+      "y_max": 1354
+    },
+    {
+      "text": "REFN0:610217893255",
+      "confidence": 0.9735533595085144,
+      "x_min": 196,
+      "x_max": 459,
+      "y_min": 1351,
+      "y_max": 1388
+    },
+    {
+      "text": "AID:A0000000031010（VISA)",
+      "confidence": 0.9003612399101257,
+      "x_min": 145,
+      "x_max": 493,
+      "y_min": 1386,
+      "y_max": 1429
+    },
+    {
+      "text": "TC：8EEF5CA2992FD01A",
+      "confidence": 0.9425252676010132,
+      "x_min": 179,
+      "x_max": 460,
+      "y_min": 1427,
+      "y_max": 1464
+    },
+    {
+      "text": "ONAY K0DU:221623",
+      "confidence": 0.9528814554214478,
+      "x_min": 119,
+      "x_max": 531,
+      "y_min": 1464,
+      "y_max": 1504
+    },
+    {
+      "text": "TUTAR KARSILIGI MAL VEYA HIZMETIALDIM",
+      "confidence": 0.9237111210823059,
+      "x_min": 83,
+      "x_max": 572,
+      "y_min": 1536,
+      "y_max": 1581
+    },
+    {
+      "text": "BU BELGEYiSAKLAYINIZ (MUSTERiNUSHASI)",
+      "confidence": 0.9197089672088623,
+      "x_min": 68,
+      "x_max": 570,
+      "y_min": 1609,
+      "y_max": 1657
+    },
+    {
+      "text": "Visa paywave )))",
+      "confidence": 0.9016262888908386,
+      "x_min": 146,
+      "x_max": 501,
+      "y_min": 1651,
+      "y_max": 1725
+    },
+    {
+      "text": "BUISLEM TEMASSIZ OLARAK GERCEKLESTiRiLMISTIR",
+      "confidence": 0.8978261351585388,
+      "x_min": 32,
+      "x_max": 609,
+      "y_min": 1713,
+      "y_max": 1775
+    },
+    {
+      "text": "2 VakifBank",
+      "confidence": 0.8979101181030273,
+      "x_min": 95,
+      "x_max": 534,
+      "y_min": 1767,
+      "y_max": 1855
+    },
+    {
+      "text": "44407241 www.vakifbank.com.tr",
+      "confidence": 0.9243544936180115,
+      "x_min": 125,
+      "x_max": 530,
+      "y_min": 1848,
+      "y_max": 1905
+    },
+    {
+      "text": "EKU NO:0001",
+      "confidence": 0.9033540487289429,
+      "x_min": 36,
+      "x_max": 242,
+      "y_min": 1932,
+      "y_max": 1989
+    },
+    {
+      "text": "ZNO:3718",
+      "confidence": 0.9560182690620422,
+      "x_min": 450,
+      "x_max": 629,
+      "y_min": 1947,
+      "y_max": 1992
+    },
+    {
+      "text": "NF",
+      "confidence": 0.7649357914924622,
+      "x_min": 208,
+      "x_max": 253,
+      "y_min": 2016,
+      "y_max": 2046
+    }
+  ]
+}

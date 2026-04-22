@@ -1,0 +1,300 @@
+{
+  "detections": [
+    {
+      "text": "BIM BIRLESIR MAGRZALAR A.S.",
+      "confidence": 0.8757187724113464,
+      "x_min": 161,
+      "x_max": 678,
+      "y_min": 0,
+      "y_max": 80
+    },
+    {
+      "text": "1 Bornovo/iznir",
+      "confidence": 0.9344558715820312,
+      "x_min": 286,
+      "x_max": 584,
+      "y_min": 114,
+      "y_max": 171
+    },
+    {
+      "text": "Boyok Mikellflor VOM 1750051846",
+      "confidence": 0.8060144186019897,
+      "x_min": 126,
+      "x_max": 746,
+      "y_min": 158,
+      "y_max": 263
+    },
+    {
+      "text": "GIDER PUSULASI",
+      "confidence": 0.9586640000343323,
+      "x_min": 297,
+      "x_max": 570,
+      "y_min": 292,
+      "y_max": 358
+    },
+    {
+      "text": "NO:352",
+      "confidence": 0.9101006984710693,
+      "x_min": 610,
+      "x_max": 782,
+      "y_min": 415,
+      "y_max": 479
+    },
+    {
+      "text": "15.12.2025 18:39",
+      "confidence": 0.948222815990448,
+      "x_min": 48,
+      "x_max": 368,
+      "y_min": 412,
+      "y_max": 495
+    },
+    {
+      "text": "ETTN7a96529a-808f-3-be26-bd4564ebedd",
+      "confidence": 0.7690125703811646,
+      "x_min": 52,
+      "x_max": 821,
+      "y_min": 463,
+      "y_max": 560
+    },
+    {
+      "text": "FATURA N0:AG02025009310029",
+      "confidence": 0.9397467970848083,
+      "x_min": 54,
+      "x_max": 576,
+      "y_min": 534,
+      "y_max": 621
+    },
+    {
+      "text": "NOSTERI:",
+      "confidence": 0.9106631875038147,
+      "x_min": 54,
+      "x_max": 217,
+      "y_min": 682,
+      "y_max": 748
+    },
+    {
+      "text": "Isim\\Unvan:BERKKILING",
+      "confidence": 0.8948507905006409,
+      "x_min": 71,
+      "x_max": 511,
+      "y_min": 740,
+      "y_max": 814
+    },
+    {
+      "text": "TCKN/VKN:2011******",
+      "confidence": 0.8820451498031616,
+      "x_min": 70,
+      "x_max": 513,
+      "y_min": 807,
+      "y_max": 880
+    },
+    {
+      "text": "Vergi Dairesi:",
+      "confidence": 0.9705401659011841,
+      "x_min": 72,
+      "x_max": 346,
+      "y_min": 878,
+      "y_max": 944
+    },
+    {
+      "text": "Adres:ERZENE HA.",
+      "confidence": 0.9145290851593018,
+      "x_min": 74,
+      "x_max": 370,
+      "y_min": 943,
+      "y_max": 1004
+    },
+    {
+      "text": "11:izmir",
+      "confidence": 0.7807773351669312,
+      "x_min": 71,
+      "x_max": 256,
+      "y_min": 1077,
+      "y_max": 1138
+    },
+    {
+      "text": "Ilge: Bornova",
+      "confidence": 0.8992645740509033,
+      "x_min": 70,
+      "x_max": 329,
+      "y_min": 1144,
+      "y_max": 1206
+    },
+    {
+      "text": "Telefon5058612820",
+      "confidence": 0.9914644956588745,
+      "x_min": 67,
+      "x_max": 439,
+      "y_min": 1204,
+      "y_max": 1270
+    },
+    {
+      "text": "Email",
+      "confidence": 0.8770260810852051,
+      "x_min": 65,
+      "x_max": 212,
+      "y_min": 1276,
+      "y_max": 1342
+    },
+    {
+      "text": "Iade Nedeni:Bozuk / Hatal1 Urin",
+      "confidence": 0.8513243794441223,
+      "x_min": 51,
+      "x_max": 640,
+      "y_min": 1450,
+      "y_max": 1541
+    },
+    {
+      "text": "1644203",
+      "confidence": 0.988937258720398,
+      "x_min": 51,
+      "x_max": 202,
+      "y_min": 1532,
+      "y_max": 1603
+    },
+    {
+      "text": "20",
+      "confidence": 0.8321313858032227,
+      "x_min": 422,
+      "x_max": 513,
+      "y_min": 1583,
+      "y_max": 1645
+    },
+    {
+      "text": "*419.00",
+      "confidence": 0.9787537455558777,
+      "x_min": 639,
+      "x_max": 786,
+      "y_min": 1583,
+      "y_max": 1646
+    },
+    {
+      "text": "YIYEC.ARKADAS.LEGO",
+      "confidence": 0.9561865925788879,
+      "x_min": 55,
+      "x_max": 404,
+      "y_min": 1584,
+      "y_max": 1664
+    },
+    {
+      "text": "*69.83",
+      "confidence": 0.9582881331443787,
+      "x_min": 640,
+      "x_max": 770,
+      "y_min": 1710,
+      "y_max": 1776
+    },
+    {
+      "text": "TOPKDV",
+      "confidence": 0.9130147099494934,
+      "x_min": 54,
+      "x_max": 183,
+      "y_min": 1722,
+      "y_max": 1788
+    },
+    {
+      "text": "*419.00",
+      "confidence": 0.9240861535072327,
+      "x_min": 621,
+      "x_max": 772,
+      "y_min": 1775,
+      "y_max": 1841
+    },
+    {
+      "text": "TOPLAM",
+      "confidence": 0.9014165997505188,
+      "x_min": 53,
+      "x_max": 183,
+      "y_min": 1784,
+      "y_max": 1849
+    },
+    {
+      "text": "Nakit",
+      "confidence": 0.9917657971382141,
+      "x_min": 46,
+      "x_max": 166,
+      "y_min": 1909,
+      "y_max": 1977
+    },
+    {
+      "text": "*419.00",
+      "confidence": 0.9217492938041687,
+      "x_min": 637,
+      "x_max": 787,
+      "y_min": 1903,
+      "y_max": 1974
+    },
+    {
+      "text": "-1NZA--",
+      "confidence": 0.6498734354972839,
+      "x_min": 344,
+      "x_max": 505,
+      "y_min": 2033,
+      "y_max": 2098
+    },
+    {
+      "text": "Misteri",
+      "confidence": 0.8638628125190735,
+      "x_min": 52,
+      "x_max": 195,
+      "y_min": 2106,
+      "y_max": 2163
+    },
+    {
+      "text": "MS/HSV/GT",
+      "confidence": 0.8333644866943359,
+      "x_min": 297,
+      "x_max": 490,
+      "y_min": 2096,
+      "y_max": 2165
+    },
+    {
+      "text": "Personel",
+      "confidence": 0.9815919399261475,
+      "x_min": 631,
+      "x_max": 798,
+      "y_min": 2099,
+      "y_max": 2163
+    },
+    {
+      "text": "Satis Belgesi No:78960011412508190023",
+      "confidence": 0.9611703157424927,
+      "x_min": 43,
+      "x_max": 757,
+      "y_min": 2419,
+      "y_max": 2500
+    },
+    {
+      "text": "Satis Belgesi Tarihi: 14.12.2025",
+      "confidence": 0.900708794593811,
+      "x_min": 45,
+      "x_max": 661,
+      "y_min": 2488,
+      "y_max": 2563
+    },
+    {
+      "text": "19682806******-008100",
+      "confidence": 0.5803969502449036,
+      "x_min": 38,
+      "x_max": 780,
+      "y_min": 2550,
+      "y_max": 2633
+    },
+    {
+      "text": "7896,HOKUMET KONAGI/BORHOVGS NO821",
+      "confidence": 0.8195234537124634,
+      "x_min": 38,
+      "x_max": 788,
+      "y_min": 2604,
+      "y_max": 2704
+    },
+    {
+      "text": "Ref. No:7896011512508210352",
+      "confidence": 0.9259399771690369,
+      "x_min": 130,
+      "x_max": 705,
+      "y_min": 2675,
+      "y_max": 2763
+    }
+  ]
+}

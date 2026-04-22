@@ -1,0 +1,380 @@
+{
+  "detections": [
+    {
+      "text": "FSREF CAN GIDA TUR INS VE TIC",
+      "confidence": 0.9107710123062134,
+      "x_min": 93,
+      "x_max": 895,
+      "y_min": 50,
+      "y_max": 174
+    },
+    {
+      "text": "LD s1",
+      "confidence": 0.6730412244796753,
+      "x_min": 372,
+      "x_max": 602,
+      "y_min": 137,
+      "y_max": 242
+    },
+    {
+      "text": "ERZENE MH ANKARA CAD NO 172",
+      "confidence": 0.9120697379112244,
+      "x_min": 94,
+      "x_max": 864,
+      "y_min": 221,
+      "y_max": 315
+    },
+    {
+      "text": "EGE UNIVERSITESI D ZIRAAT FAK.",
+      "confidence": 0.9474289417266846,
+      "x_min": 89,
+      "x_max": 908,
+      "y_min": 290,
+      "y_max": 398
+    },
+    {
+      "text": "BORNOVA IZMIR",
+      "confidence": 0.8834537863731384,
+      "x_min": 297,
+      "x_max": 674,
+      "y_min": 371,
+      "y_max": 475
+    },
+    {
+      "text": "HASAN TAHSIN VERGI DAIRESI MUD.",
+      "confidence": 0.9329812526702881,
+      "x_min": 65,
+      "x_max": 901,
+      "y_min": 442,
+      "y_max": 547
+    },
+    {
+      "text": "3811047631",
+      "confidence": 0.966621994972229,
+      "x_min": 356,
+      "x_max": 636,
+      "y_min": 541,
+      "y_max": 615
+    },
+    {
+      "text": "18-04-2026",
+      "confidence": 0.9942438006401062,
+      "x_min": 76,
+      "x_max": 351,
+      "y_min": 635,
+      "y_max": 720
+    },
+    {
+      "text": "FiS NO:0",
+      "confidence": 0.7768480181694031,
+      "x_min": 561,
+      "x_max": 838,
+      "y_min": 638,
+      "y_max": 723
+    },
+    {
+      "text": "0055",
+      "confidence": 0.9970269799232483,
+      "x_min": 800,
+      "x_max": 926,
+      "y_min": 642,
+      "y_max": 715
+    },
+    {
+      "text": "",
+      "confidence": 0.0,
+      "x_min": 786,
+      "x_max": 796,
+      "y_min": 669,
+      "y_max": 676
+    },
+    {
+      "text": "SAAT 14:36",
+      "confidence": 0.9627037048339844,
+      "x_min": 71,
+      "x_max": 352,
+      "y_min": 712,
+      "y_max": 801
+    },
+    {
+      "text": "ICECEK",
+      "confidence": 0.9926195740699768,
+      "x_min": 78,
+      "x_max": 249,
+      "y_min": 817,
+      "y_max": 897
+    },
+    {
+      "text": "%10*390,00",
+      "confidence": 0.8975752592086792,
+      "x_min": 621,
+      "x_max": 926,
+      "y_min": 822,
+      "y_max": 900
+    },
+    {
+      "text": "ADATAOIAU",
+      "confidence": 0.7733540534973145,
+      "x_min": 77,
+      "x_max": 325,
+      "y_min": 899,
+      "y_max": 951
+    },
+    {
+      "text": "00000",
+      "confidence": 0.6186896562576294,
+      "x_min": 721,
+      "x_max": 926,
+      "y_min": 900,
+      "y_max": 950
+    },
+    {
+      "text": "KDV",
+      "confidence": 0.9909365177154541,
+      "x_min": 62,
+      "x_max": 199,
+      "y_min": 941,
+      "y_max": 1051
+    },
+    {
+      "text": "￥35,45",
+      "confidence": 0.8181991577148438,
+      "x_min": 688,
+      "x_max": 926,
+      "y_min": 943,
+      "y_max": 1048
+    },
+    {
+      "text": "TOP",
+      "confidence": 0.9624719023704529,
+      "x_min": 64,
+      "x_max": 197,
+      "y_min": 1021,
+      "y_max": 1125
+    },
+    {
+      "text": "￥390,00",
+      "confidence": 0.8144494891166687,
+      "x_min": 656,
+      "x_max": 926,
+      "y_min": 1016,
+      "y_max": 1132
+    },
+    {
+      "text": "EFT-POS",
+      "confidence": 0.954128623008728,
+      "x_min": 71,
+      "x_max": 278,
+      "y_min": 1115,
+      "y_max": 1195
+    },
+    {
+      "text": "*390,00",
+      "confidence": 0.9024491310119629,
+      "x_min": 724,
+      "x_max": 926,
+      "y_min": 1115,
+      "y_max": 1199
+    },
+    {
+      "text": "T.VAKIFLAR BANKASI T.A.0.",
+      "confidence": 0.8677340149879456,
+      "x_min": 252,
+      "x_max": 691,
+      "y_min": 1254,
+      "y_max": 1313
+    },
+    {
+      "text": "19YER1:0040000124355",
+      "confidence": 0.8580590486526489,
+      "x_min": 135,
+      "x_max": 546,
+      "y_min": 1297,
+      "y_max": 1354
+    },
+    {
+      "text": "P0S:01304250",
+      "confidence": 0.9602813124656677,
+      "x_min": 621,
+      "x_max": 848,
+      "y_min": 1305,
+      "y_max": 1355
+    },
+    {
+      "text": "BATCH NO:000609",
+      "confidence": 0.9315587282180786,
+      "x_min": 129,
+      "x_max": 399,
+      "y_min": 1335,
+      "y_max": 1391
+    },
+    {
+      "text": "L11",
+      "confidence": 0.6981816291809082,
+      "x_min": 766,
+      "x_max": 851,
+      "y_min": 1348,
+      "y_max": 1392
+    },
+    {
+      "text": "1SLEM NO:000069",
+      "confidence": 0.8643092513084412,
+      "x_min": 132,
+      "x_max": 398,
+      "y_min": 1378,
+      "y_max": 1428
+    },
+    {
+      "text": "STAN:109680",
+      "confidence": 0.9901958107948303,
+      "x_min": 646,
+      "x_max": 853,
+      "y_min": 1384,
+      "y_max": 1433
+    },
+    {
+      "text": "SN:FT40009879",
+      "confidence": 0.9741449356079102,
+      "x_min": 134,
+      "x_max": 384,
+      "y_min": 1420,
+      "y_max": 1470
+    },
+    {
+      "text": "HGN/T3V",
+      "confidence": 0.7753056287765503,
+      "x_min": 466,
+      "x_max": 613,
+      "y_min": 1417,
+      "y_max": 1483
+    },
+    {
+      "text": "SATIS",
+      "confidence": 0.714420735836029,
+      "x_min": 387,
+      "x_max": 578,
+      "y_min": 1499,
+      "y_max": 1565
+    },
+    {
+      "text": "设 2911",
+      "confidence": 0.7372086048126221,
+      "x_min": 310,
+      "x_max": 646,
+      "y_min": 1577,
+      "y_max": 1634
+    },
+    {
+      "text": "ISLEM VIIARI",
+      "confidence": 0.7647650241851807,
+      "x_min": 260,
+      "x_max": 681,
+      "y_min": 1660,
+      "y_max": 1723
+    },
+    {
+      "text": "390.00",
+      "confidence": 0.891963005065918,
+      "x_min": 326,
+      "x_max": 563,
+      "y_min": 1741,
+      "y_max": 1797
+    },
+    {
+      "text": "TL",
+      "confidence": 0.7625230550765991,
+      "x_min": 565,
+      "x_max": 634,
+      "y_min": 1752,
+      "y_max": 1794
+    },
+    {
+      "text": "OHHY KODU085000",
+      "confidence": 0.7566081881523132,
+      "x_min": 137,
+      "x_max": 426,
+      "y_min": 1826,
+      "y_max": 1880
+    },
+    {
+      "text": "RRN:610825526233",
+      "confidence": 0.9677859544754028,
+      "x_min": 578,
+      "x_max": 883,
+      "y_min": 1830,
+      "y_max": 1887
+    },
+    {
+      "text": "BANKAREER1814044375",
+      "confidence": 0.8692967295646667,
+      "x_min": 234,
+      "x_max": 744,
+      "y_min": 1863,
+      "y_max": 1940
+    },
+    {
+      "text": "VISR",
+      "confidence": 0.781452476978302,
+      "x_min": 421,
+      "x_max": 549,
+      "y_min": 1911,
+      "y_max": 1974
+    },
+    {
+      "text": "ATD:A0000000031010",
+      "confidence": 0.8639786243438721,
+      "x_min": 134,
+      "x_max": 490,
+      "y_min": 1960,
+      "y_max": 2012
+    },
+    {
+      "text": "3BCC9D0BCFA5F74F",
+      "confidence": 0.9604268074035645,
+      "x_min": 472,
+      "x_max": 867,
+      "y_min": 1963,
+      "y_max": 2026
+    },
+    {
+      "text": "ISLEN LMASIZ YPIUMISTIR",
+      "confidence": 0.6388903260231018,
+      "x_min": 258,
+      "x_max": 746,
+      "y_min": 1995,
+      "y_max": 2078
+    },
+    {
+      "text": "ACOUIRERID:0015",
+      "confidence": 0.9037169218063354,
+      "x_min": 341,
+      "x_max": 668,
+      "y_min": 2042,
+      "y_max": 2117
+    },
+    {
+      "text": "T",
+      "confidence": 0.3287661373615265,
+      "x_min": 147,
+      "x_max": 842,
+      "y_min": 2083,
+      "y_max": 2170
+    },
+    {
+      "text": "HUSTERI NUSHASI",
+      "confidence": 0.8071028590202332,
+      "x_min": 341,
+      "x_max": 638,
+      "y_min": 2182,
+      "y_max": 2252
+    },
+    {
+      "text": "BU BEL.GEYISAKLAYINIZ",
+      "confidence": 0.9214411377906799,
+      "x_min": 292,
+      "x_max": 690,
+      "y_min": 2229,
+      "y_max": 2298
+    }
+  ]
+}
