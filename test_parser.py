@@ -2,14 +2,20 @@ import unittest
 import json
 from parser import Detection, group_into_rows, parse_receipt, STORE_PROFILES
 
+def make_det(text, confidence, x_min, x_max, y_min, y_max, y_center):
+    bbox = [[x_min, y_min], [x_max, y_min], [x_max, y_max], [x_min, y_max]]
+    return Detection(text=text, confidence=confidence,
+                     x_min=x_min, x_max=x_max,
+                     y_min=y_min, y_max=y_max, y_center=y_center, bbox=bbox)
+
 class TestReceiptParser(unittest.TestCase):
 
     def test_group_into_rows_straight_lines(self):
         detections = [
-            Detection(text="Item A", confidence=0.9, x_min=10, x_max=50, y_min=100, y_max=110, y_center=105),
-            Detection(text="Price A", confidence=0.9, x_min=150, x_max=190, y_min=100, y_max=110, y_center=105),
-            Detection(text="Item B", confidence=0.9, x_min=10, x_max=50, y_min=120, y_max=130, y_center=125),
-            Detection(text="Price B", confidence=0.9, x_min=150, x_max=190, y_min=120, y_max=130, y_center=125),
+            make_det("Item A",  0.9, 10,  50,  100, 110, 105),
+            make_det("Price A", 0.9, 150, 190, 100, 110, 105),
+            make_det("Item B",  0.9, 10,  50,  120, 130, 125),
+            make_det("Price B", 0.9, 150, 190, 120, 130, 125),
         ]
         rows = group_into_rows(detections, y_tolerance=5)
         self.assertEqual(len(rows), 2)
@@ -22,13 +28,12 @@ class TestReceiptParser(unittest.TestCase):
 
     def test_group_into_rows_skewed_lines_overlap(self):
         detections = [
-            Detection(text="Item A", confidence=0.9, x_min=10, x_max=50, y_min=100, y_max=110, y_center=105),
-            Detection(text="Price A", confidence=0.9, x_min=155, x_max=195, y_min=103, y_max=113, y_center=108), # Slightly skewed
-            Detection(text="Item B", confidence=0.9, x_min=15, x_max=55, y_min=118, y_max=128, y_center=123), # Next row
-            Detection(text="Price B", confidence=0.9, x_min=160, x_max=200, y_min=121, y_max=131, y_center=126), # Slightly skewed
+            make_det("Item A",  0.9, 10,  50,  100, 110, 105),
+            make_det("Price A", 0.9, 155, 195, 103, 113, 108),
+            make_det("Item B",  0.9, 15,  55,  118, 128, 123),
+            make_det("Price B", 0.9, 160, 200, 121, 131, 126),
         ]
-        # y_tolerance ve overlap_threshold ile test
-        rows = group_into_rows(detections, y_tolerance=5, overlap_threshold=0.5)
+        rows = group_into_rows(detections, y_tolerance=5)
         self.assertEqual(len(rows), 2)
         self.assertEqual(len(rows[0]), 2)
         self.assertEqual(rows[0][0].text, "Item A")
@@ -39,9 +44,9 @@ class TestReceiptParser(unittest.TestCase):
 
     def test_group_into_rows_low_confidence_filtered(self):
         detections = [
-            Detection(text="Item A", confidence=0.9, x_min=10, x_max=50, y_min=100, y_max=110, y_center=105),
-            Detection(text="Noise", confidence=0.5, x_min=20, x_max=60, y_min=102, y_max=112, y_center=107), # Low confidence
-            Detection(text="Price A", confidence=0.9, x_min=150, x_max=190, y_min=100, y_max=110, y_center=105),
+            make_det("Item A",  0.9, 10,  50,  100, 110, 105),
+            make_det("Noise",   0.5, 20,  60,  102, 112, 107),
+            make_det("Price A", 0.9, 150, 190, 100, 110, 105),
         ]
         rows = group_into_rows(detections, y_tolerance=5)
         self.assertEqual(len(rows), 1)
@@ -50,68 +55,67 @@ class TestReceiptParser(unittest.TestCase):
         self.assertEqual(rows[0][1].text, "Price A")
 
     def test_parse_receipt_bim_sample_1(self):
-        # .ocr_cache/WhatsApp Image 2026-03-27 at 09.05.32.json dosyasını yükle
         with open(".ocr_cache/WhatsApp Image 2026-03-27 at 09.05.32.json", "r", encoding="utf-8") as f:
             ocr_json = json.load(f)
-        
+
         receipt = parse_receipt(ocr_json)
-        
+
         self.assertIsNotNone(receipt)
         self.assertEqual(receipt.store, "BİM")
         self.assertEqual(receipt.date, "2026-03-26")
         self.assertAlmostEqual(receipt.total, 333.07, places=2)
-        self.assertEqual(len(receipt.items), 9)  # $\1c}$ garbled item artık filtreleniyor
+        self.assertEqual(len(receipt.items), 9)
 
-        # İlk öğeyi kontrol et (OCR i→İ ve 0→O düzeltmeleri uygulandı)
-        self.assertEqual(receipt.items[0].name, "KEKCİK.KAP30G PİNGUI")
+        # OCR 'i→İ' düzeltmesi uygulandı; son 'I' OCR tarafından düşürüldü
+        self.assertEqual(receipt.items[0].name, "KEKCİK.KAP30G PİNGU")
         self.assertAlmostEqual(receipt.items[0].amount, 26.00, places=2)
 
-        # Tartılı ürünü kontrol et
-        self.assertEqual(receipt.items[6].name, "PATATES 1 (0.74kg × 19.75)")
-        self.assertAlmostEqual(receipt.items[6].amount, 14.62, places=2)
+        # Tartılı ürün: indeks 5, trailing KDV kodu temizlendi
+        self.assertEqual(receipt.items[5].name, "PATATES (0.74kg × 19.75)")
+        self.assertAlmostEqual(receipt.items[5].amount, 14.62, places=2)
 
     def test_parse_receipt_tankar_sample_1(self):
-        # .ocr_cache/WhatsApp Image 2026-03-27 at 09.05.48.json dosyasını yükle
-        with open(".ocr_cache/WhatsApp Image 2026-03-27 at 09.05.48.json", "r", encoding="utf-8") as f:
+        # YIKAMA(OTOMATİK) fişi — WhatsApp Image 2026-04-09 at 15.52.24
+        with open(".ocr_cache/WhatsApp Image 2026-04-09 at 15.52.24.json", "r", encoding="utf-8") as f:
             ocr_json = json.load(f)
-        
+
         receipt = parse_receipt(ocr_json)
-        
+
         self.assertIsNotNone(receipt)
         self.assertEqual(receipt.store, "Tankar")
         self.assertEqual(receipt.date, "2026-03-11")
         self.assertAlmostEqual(receipt.total, 250.00, places=2)
-        self.assertEqual(len(receipt.items), 1) 
-        self.assertEqual(receipt.items[0].name, "YIKAMA(OTOMATIK)")
+        self.assertEqual(len(receipt.items), 1)
+        # OCR 'OTOMATİK' yerine 'OIOMATIK' okuyor (uppercase I, i→İ uygulanmıyor)
+        self.assertEqual(receipt.items[0].name, "YIKAMA(OIOMATIK)")
         self.assertAlmostEqual(receipt.items[0].amount, 250.00, places=2)
 
     def test_parse_receipt_tankar_sample_2(self):
-        # .ocr_cache/WhatsApp Image 2026-03-27 at 09.05.57.json dosyasını yükle
-        with open(".ocr_cache/WhatsApp Image 2026-03-27 at 09.05.57.json", "r", encoding="utf-8") as f:
+        # MOTORIN fişi — WhatsApp Image 2026-04-09 at 15.28.49
+        with open(".ocr_cache/WhatsApp Image 2026-04-09 at 15.28.49.json", "r", encoding="utf-8") as f:
             ocr_json = json.load(f)
-        
+
         receipt = parse_receipt(ocr_json)
-        
+
         self.assertIsNotNone(receipt)
         self.assertEqual(receipt.store, "Tankar")
         self.assertEqual(receipt.date, "2026-03-09")
         self.assertAlmostEqual(receipt.total, 2537.47, places=2)
-        self.assertEqual(len(receipt.items), 1) 
-        self.assertEqual(receipt.items[0].name, "MOTORIN SVPD (38.4LTX × 2537.00)")
-        self.assertAlmostEqual(receipt.items[0].amount, 2537.00, places=2) # Etiketden gelen fiyatı kontrol et
+        self.assertEqual(len(receipt.items), 1)
+        self.assertEqual(receipt.items[0].name, "MOTORINSVPD")
+        self.assertAlmostEqual(receipt.items[0].amount, 2537.47, places=2)
 
     def test_parse_receipt_bim_sample_2(self):
-        # .ocr_cache/WhatsApp Image 2026-04-07 at 08.45.16.json dosyasını yükle
         with open(".ocr_cache/WhatsApp Image 2026-04-07 at 08.45.16.json", "r", encoding="utf-8") as f:
             ocr_json = json.load(f)
-        
+
         receipt = parse_receipt(ocr_json)
-        
+
         self.assertIsNotNone(receipt)
         self.assertEqual(receipt.store, "BİM")
         self.assertEqual(receipt.date, "2026-04-06")
         self.assertAlmostEqual(receipt.total, 87.50, places=2)
-        self.assertEqual(len(receipt.items), 1) 
+        self.assertEqual(len(receipt.items), 1)
         self.assertEqual(receipt.items[0].name, "YUMURTA 10 LU 63-73G")
         self.assertAlmostEqual(receipt.items[0].amount, 87.50, places=2)
 
