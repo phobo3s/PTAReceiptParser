@@ -864,6 +864,32 @@ def parse_receipt(ocr_json: dict) -> Receipt:
                 if DEBUG:
                     print(f"    [*] Inline ayırma: isim='{inline_m.group(1).strip()}'")
 
+        # Eğer price_dets boş ama name_dets içinde inline fiyat gömülüyse, ayır
+        # Örnek: 'HIGHIANDPARK12Y070CL%20*1.600,00' → isim + fiyat
+        if not price_dets and name_dets:
+            new_name_dets = []
+            for d in name_dets:
+                raw_t = d.text
+                for _p, _r in PRICE_PREFIX_CLEANUP:
+                    raw_t = re.sub(_p, _r, raw_t)
+                inline_m = re.match(r"^(.+?)\*(-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$", raw_t)
+                if inline_m:
+                    new_name_dets.append(Detection(
+                        text=inline_m.group(1).strip(),
+                        confidence=d.confidence, x_min=d.x_min, x_max=d.x_max,
+                        y_min=d.y_min, y_max=d.y_max, y_center=d.y_center, bbox=d.bbox
+                    ))
+                    price_dets.append(Detection(
+                        text="*" + inline_m.group(2),
+                        confidence=d.confidence, x_min=d.x_min, x_max=d.x_max,
+                        y_min=d.y_min, y_max=d.y_max, y_center=d.y_center, bbox=d.bbox
+                    ))
+                    if DEBUG:
+                        print(f"    [*] Inline ayırma (name): isim='{inline_m.group(1).strip()}', fiyat='*{inline_m.group(2)}'")
+                else:
+                    new_name_dets.append(d)
+            name_dets = new_name_dets
+
         if not price_dets:
             # Fiyatsız satır: profil destekliyorsa pending_name olarak sakla (ör. BUENAS)
             if uses_name_before_price and name_dets:
