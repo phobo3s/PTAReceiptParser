@@ -1,0 +1,63 @@
+crop_img/Belge 3_3_crop_0.jpg	SOHA UNLU MAMUL.GIDA KAFE ISL.
+crop_img/Belge 3_3_crop_1.jpg	INS.SAN.TIC.LTD.STI.
+crop_img/Belge 3_3_crop_2.jpg	ERZENE MH.FEVZI CAKMAK CD.
+crop_img/Belge 3_3_crop_3.jpg	NO:5/E BORNOVA/IZMIR
+crop_img/Belge 3_3_crop_4.jpg	BORNOVA V.D. 7850610793
+crop_img/Belge 3_3_crop_5.jpg	TARIH
+crop_img/Belge 3_3_crop_6.jpg	：18/04/2026
+crop_img/Belge 3_3_crop_7.jpg	SAAT
+crop_img/Belge 3_3_crop_8.jpg	:23:07:16
+crop_img/Belge 3_3_crop_9.jpg	FiS NO
+crop_img/Belge 3_3_crop_10.jpg	:0138
+crop_img/Belge 3_3_crop_11.jpg	Profiterol
+crop_img/Belge 3_3_crop_12.jpg	%10
+crop_img/Belge 3_3_crop_13.jpg	*300,00
+crop_img/Belge 3_3_crop_14.jpg	Profiterol
+crop_img/Belge 3_3_crop_15.jpg	%10
+crop_img/Belge 3_3_crop_16.jpg	*300,00
+crop_img/Belge 3_3_crop_17.jpg	Profiterol
+crop_img/Belge 3_3_crop_18.jpg	%10
+crop_img/Belge 3_3_crop_19.jpg	*300,00
+crop_img/Belge 3_3_crop_20.jpg	Tavukgōguslü Kazandi
+crop_img/Belge 3_3_crop_21.jpg	%10
+crop_img/Belge 3_3_crop_22.jpg	*280,00
+crop_img/Belge 3_3_crop_23.jpg	Su
+crop_img/Belge 3_3_crop_24.jpg	%10
+crop_img/Belge 3_3_crop_25.jpg	*30,00
+crop_img/Belge 3_3_crop_26.jpg	TOPKDV
+crop_img/Belge 3_3_crop_27.jpg	*110,00
+crop_img/Belge 3_3_crop_28.jpg	TOPLAM
+crop_img/Belge 3_3_crop_29.jpg	*1.210,00
+crop_img/Belge 3_3_crop_30.jpg	KREDI
+crop_img/Belge 3_3_crop_31.jpg	*1.210,00
+crop_img/Belge 3_3_crop_32.jpg	ZIRAATBANK
+crop_img/Belge 3_3_crop_33.jpg	************291」
+crop_img/Belge 3_3_crop_34.jpg	MERSIS : 0785061079300001
+crop_img/Belge 3_3_crop_35.jpg	EKU NO:0001
+crop_img/Belge 3_3_crop_36.jpg	ZNO:0088
+crop_img/Belge 3_3_crop_37.jpg	MASA NO:S03
+crop_img/Belge 3_3_crop_38.jpg	CEK NO:#131
+crop_img/Belge 3_3_crop_39.jpg	iSYERI NO:00000001827896
+crop_img/Belge 3_3_crop_40.jpg	POS NO:02656019
+crop_img/Belge 3_3_crop_41.jpg	iSLEM NO:0079/KP0138
+crop_img/Belge 3_3_crop_42.jpg	23:07
+crop_img/Belge 3_3_crop_43.jpg	SATIS
+crop_img/Belge 3_3_crop_44.jpg	************
+crop_img/Belge 3_3_crop_45.jpg	2911
+crop_img/Belge 3_3_crop_46.jpg	TUTAR
+crop_img/Belge 3_3_crop_47.jpg	1.210.00
+crop_img/Belge 3_3_crop_48.jpg	TL
+crop_img/Belge 3_3_crop_49.jpg	AID:000000031010
+crop_img/Belge 3_3_crop_50.jpg	UISA
+crop_img/Belge 3_3_crop_51.jpg	ONAY KODU:289384
+crop_img/Belge 3_3_crop_52.jpg	TUTAR KARSILIGI MAL VEYA HIZMETI ALDIH
+crop_img/Belge 3_3_crop_53.jpg	BUBELGEYI SAKLAVINIZ
+crop_img/Belge 3_3_crop_54.jpg	)visa payWave
+crop_img/Belge 3_3_crop_55.jpg	SUHA UNLU MAMULLERI GIDA KAFE
+crop_img/Belge 3_3_crop_56.jpg	Bi FIRIN ERZENE MAH. FEUZi CAKMAK CD. NO:5E
+crop_img/Belge 3_3_crop_57.jpg	35000B0RN0UA 35000iZHiR
+crop_img/Belge 3_3_crop_58.jpg	ZiraatBankasl
+crop_img/Belge 3_3_crop_59.jpg	KART HANiLI NUSHASIDIR
+crop_img/Belge 3_3_crop_60.jpg	EKU NO:0001
+crop_img/Belge 3_3_crop_61.jpg	ZNO:0088
+crop_img/Belge 3_3_crop_62.jpg	NF 2C 58620796
