@@ -66,6 +66,7 @@ COMMON_SKIP_PATTERNS=[
     r"^POS:",
     r"^GS No",
     r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
+    r"^#+\s",                  # ## ile başlayan POS sistem satırları (ör. ## BarkoPOS-2.0.14.70)
     r"^[BI]:[\d]+",            # B:706 S:9638 gibi
     r"^\d{4,6}\*+\d{4}$",     # kart numarası
     r"^%[\s\d]+\s*$",           # %1, %20, % 2 0 gibi tek başına KDV kodu satırları
@@ -782,10 +783,11 @@ def parse_receipt(ocr_json: dict) -> Receipt:
                             skip_patterns=profile["skip_patterns"],
                             total_pattern=profile["total_pattern"])
 
-    uses_name_before_price = layout.get("name_before_price", False)
+
     items = []
     total = None
-    pending_name_dets = None  # isim-önce formatı için (ör. BUENAS: YIYECEK | %10 *fiyat)
+    pending_name_dets  = None  # isim var, fiyat yok → sonraki satırda fiyat gelince kullanılır
+    pending_price_dets = None  # fiyat var, isim yok/skip → sonraki satırda isim gelince kullanılır
     for row_idx, row in enumerate(rows):
         row_text = " ".join(d.text for d in row)
         row_y = row[0].y_center if row else 0
@@ -848,52 +850,86 @@ def parse_receipt(ocr_json: dict) -> Receipt:
             print(f"    [*] Price dets (): {[d.text for d in price_dets]}")
             print(f"    [*] Name dets (): {[d.text for d in name_dets]}")
 
-        # Eğer name_dets boş ama tek detection (inline isim+fiyat), ayır
+        _INLINE_RE = r"^(.+?)\*(-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$"
+
+        # Sadece name_dets varsa: içinde gömülü fiyat ara
+        if not price_dets and name_dets:
+            new_name_dets = []
+            for d in name_dets:
+                raw_t = d.text
+                for _p, _r in PRICE_PREFIX_CLEANUP:
+                    raw_t = re.sub(_p, _r, raw_t)
+                m = re.match(_INLINE_RE, raw_t)
+                if m:
+                    new_name_dets.append(Detection(
+                        text=m.group(1).strip(),
+                        confidence=d.confidence, x_min=d.x_min, x_max=d.x_max,
+                        y_min=d.y_min, y_max=d.y_max, y_center=d.y_center, bbox=d.bbox
+                    ))
+                    price_dets.append(Detection(
+                        text="*" + m.group(2),
+                        confidence=d.confidence, x_min=d.x_min, x_max=d.x_max,
+                        y_min=d.y_min, y_max=d.y_max, y_center=d.y_center, bbox=d.bbox
+                    ))
+                    if DEBUG:
+                        print(f"    [*] Inline ayırma (name→price): '{m.group(1).strip()}' / '*{m.group(2)}'")
+                else:
+                    new_name_dets.append(d)
+            name_dets = new_name_dets
+
+        # Sadece price_dets varsa: içinde gömülü isim ara
         if not name_dets and len(price_dets) == 1:
             raw_t = price_dets[0].text
             for _p, _r in PRICE_PREFIX_CLEANUP:
                 raw_t = re.sub(_p, _r, raw_t)
-            inline_m = re.match(r"^(.+?)\*(-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$", raw_t)
-            if inline_m:
+            m = re.match(_INLINE_RE, raw_t)
+            if m:
                 d0 = price_dets[0]
                 name_dets = [Detection(
-                    text=inline_m.group(1).strip(),
+                    text=m.group(1).strip(),
                     confidence=d0.confidence, x_min=d0.x_min, x_max=d0.x_max,
                     y_min=d0.y_min, y_max=d0.y_max, y_center=d0.y_center, bbox=d0.bbox
                 )]
                 if DEBUG:
-                    print(f"    [*] Inline ayırma: isim='{inline_m.group(1).strip()}'")
+                    print(f"    [*] Inline ayırma (price→name): '{m.group(1).strip()}'")
 
+        # Hâlâ fiyat yok → pending_price varsa kullan, yoksa name'i pending_name yap
         if not price_dets:
-            # Fiyatsız satır: profil destekliyorsa pending_name olarak sakla (ör. BUENAS)
-            if uses_name_before_price and name_dets:
-                candidate = " ".join(d.text for d in name_dets).strip()
-                if candidate and not should_skip(candidate, profile["skip_patterns"]):
+            name_str = " ".join(d.text for d in name_dets).strip() if name_dets else ""
+            valid_name = name_str and not should_skip(name_str, profile["skip_patterns"])
+            if pending_price_dets is not None and valid_name:
+                price_dets = pending_price_dets
+                pending_price_dets = None
+                if DEBUG:
+                    print(f"    [P] Bekleyen fiyat kullanılıyor")
+                # price var artık, aşağıya devam et
+            else:
+                if valid_name:
                     pending_name_dets = name_dets
                     if DEBUG:
-                        print(f"    [P] Bekleyen isim kaydedildi: '{candidate}'")
-            if DEBUG:
-                print(f"    [-] SKIP: price_dets boş")
-            continue
+                        print(f"    [P] Bekleyen isim kaydedildi: '{name_str}'")
+                if DEBUG:
+                    print(f"    [-] SKIP: price_dets boş")
+                continue
 
-        # Geçerli isim yoksa pending_name dene (sadece destekleyen profillerde)
-        if not name_dets or should_skip(" ".join(d.text for d in name_dets).strip(), profile["skip_patterns"]):
-            if uses_name_before_price and pending_name_dets is not None:
+        # Hâlâ isim yok ya da skip → pending_name varsa kullan, yoksa price'ı pending_price yap
+        name_str = " ".join(d.text for d in name_dets).strip() if name_dets else ""
+        if not name_dets or should_skip(name_str, profile["skip_patterns"]):
+            if pending_name_dets is not None:
                 if DEBUG:
                     print(f"    [P] Bekleyen isim kullanılıyor: '{' '.join(d.text for d in pending_name_dets)}'")
                 name_dets = pending_name_dets
                 pending_name_dets = None
-            elif not name_dets:
-                if DEBUG:
-                    print(f"    [-] SKIP: name_dets boş")
-                continue
             else:
-                # bütün bu noktada arkadaşımızı pending_price gibi bir şeye eklemeliyiz sanırım. ama bu iş giderek karışıyor. pending_name ve price mekanizmasını daha basit bir if else e takmamız lazım.
+                pending_price_dets = price_dets
                 if DEBUG:
-                    print(f"    [-] SKIP: name_dets skip pattern'iyle eşleşti, pending de yok")
+                    reason = "boş" if not name_dets else "skip pattern'iyle eşleşti"
+                    print(f"    [P] Bekleyen fiyat kaydedildi ({reason}): {[d.text for d in price_dets]}")
+                    print(f"    [-] SKIP: name_dets {reason}, fiyat bekletildi")
                 continue
         else:
-            pending_name_dets = None  # Geçerli isim bulundu, pending'i sıfırla
+            pending_name_dets  = None
+            pending_price_dets = None
 
         # Fiyat
         price = None
