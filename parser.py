@@ -62,7 +62,7 @@ COMMON_SKIP_PATTERNS=[
     r"^Ref\.No",
     r"^KDV\s+(MATRAH|TUTAR|DAHIL)",
     r"^(KDV|MATRAH|KOV TUTAR|KOV DAH)",
-    r"TOPKDV",
+    r"TOPKD[VU]",
     r"^POS:",
     r"^GS No",
     r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
@@ -117,7 +117,7 @@ COMMON_SKIP_PATTERNS=[
 ]
 
 PRICE_PREFIX_CLEANUP = [
-    (r"[￥¥$§¢€£₹₽]", "*"),  # OCR garip para birimi → *
+    (r"[￥¥$§¢€£₹₽=]", "*"),  # OCR garip para birimi → *
     (r"%[0-9A-Fa-f]{2}", " "),  # URL encoding: %20 → boşluk (inline fiyat satırlarında)
 ]
 
@@ -126,15 +126,15 @@ COMMON_NAME_CLEANUPS = [
     (r"\s{2,}", " "),                       # çift boşluk
     # OCR, büyük İ'yi küçük i olarak okuyabiliyor; tamamen büyük harf tokenlerinde düzelt
     (r'\S+', lambda m: m.group().replace('i', 'İ')
-             if not re.search(r'[a-zçğşüö]', m.group().replace('i', ''))
-             else m.group()),
+            if not re.search(r'[a-zçğşüö]', m.group().replace('i', ''))
+            else m.group()),
     # OCR, harf bağlamında 0 (sıfır) ile O (harf) karıştırıyor: T0ZU → TOZU
     (r'(?<=[A-ZÇĞŞÜÖİ])0(?=[A-ZÇĞŞÜÖİ])', 'O'),
 ]
 
 COMMON_DATE_PATTERNS = [
     (r"^.*:?(\d{2}([\.\-\/\\])\d{2}\2\d{4})(\s*\d{2}:\d{2})?"),  # 31.12.2026, 31-12-2026
-    (r"^.*?(\d{2}\.(\d{2})\d{4})\b"),                              # 31.122026 (iki delimiter yok, OCR birleştirmiş)
+    (r"^.*?([01]\d{1}\.(20)\d{4})\b"),                              # 31.122026 (iki delimiter yok, OCR birleştirmiş)
     (r"(\d{2})([\.\-]?)(\d{2})\2(\d{4})"),                        # Boşluklu tarihler: "31 . 12 . 2026"
     (r"^.*?(\d{2}([\.\-\/])\d{2}\2\d{2})\b"),                    # 18/04/26 — 2 haneli yıl (20xx)
 ]
@@ -187,7 +187,7 @@ STORE_PROFILES = {
             "header_y_max": 900,    # Belge 3_13 gibi şubeler Y=800-900'de header
             "footer_y_min": 9999,
         },
-        "price_pattern": r"^.*\*(-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
+        "price_pattern": r"^[\*x×](-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
             r"^\([\d）]+\)$",         # (1） gibi
             r"^KOV\s+Z",              # KOV Z20 metadata
@@ -413,8 +413,8 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
 
     Bant, ilk detection'ın tam yüksekliğinden oluşturulur; yeni detection'ların
     orta 1/3'ü bu bantla karşılaştırılır. Böylece:
-      - Tam yükseklik bant: farklı boyutlu detection'ları (ör. fiyat vs. ürün adı) yakalar.
-      - Orta 1/3 kontrol: bitişik satırların kaymasını önler.
+    - Tam yükseklik bant: farklı boyutlu detection'ları (ör. fiyat vs. ürün adı) yakalar.
+    - Orta 1/3 kontrol: bitişik satırların kaymasını önler.
     y_tolerance kesin kesim noktasıdır (>= ile).
     """
     cleaned = [d for d in detections if d.confidence >= 0.60]
@@ -434,13 +434,13 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
             continue
 
         # Kesin y mesafesi kesimi (>= ile, = durumunda da yeni satır)
-        if det.y_center - current_row[-1].y_center >= y_tolerance:
-            rows.append(sorted(current_row, key=lambda d: d.x_min))
-            current_row = [det]
-            tl, tr, br, bl = det.bbox
-            band_m1, band_b1 = get_line_equation_from_two_points(tl, tr)
-            band_m2, band_b2 = get_line_equation_from_two_points(bl, br)
-            continue
+        #if det.y_center - current_row[-1].y_center >= y_tolerance:
+        #    rows.append(sorted(current_row, key=lambda d: d.x_min))
+        #    current_row = [det]
+        #    tl, tr, br, bl = det.bbox
+        #    band_m1, band_b1 = get_line_equation_from_two_points(tl, tr)
+        #    band_m2, band_b2 = get_line_equation_from_two_points(bl, br)
+        #    continue
 
         # Orta 1/3 overlap kontrolü: bitişik satır sızmasını önler
         overlap = check_detection(band_m1, band_b1, band_m2, band_b2, _middle_third_bbox(det.bbox))
@@ -780,8 +780,8 @@ def parse_receipt(ocr_json: dict) -> Receipt:
 
     # Fiyat-isim sıralı satırları birleştir (ör. Tankar yakıt: %20*fiyat | ÜRÜN_ADI)
     rows = merge_orphan_rows(rows, profile["price_pattern"],
-                              skip_patterns=profile["skip_patterns"],
-                              total_pattern=profile["total_pattern"])
+                            skip_patterns=profile["skip_patterns"],
+                            total_pattern=profile["total_pattern"])
 
 
     items = []

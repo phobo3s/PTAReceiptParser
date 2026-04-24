@@ -10,7 +10,7 @@
         "amount": 390.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "Belge 3_13.json": {
     "store": "Migros / Market",
@@ -23,7 +23,7 @@
         "amount": 1600.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "Belge 3_7.json": {
     "store": "BİM",
@@ -44,7 +44,7 @@
         "amount": 1.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "Belge 3_9.json": {
     "store": "BİM",
@@ -121,7 +121,7 @@
         "amount": 79.0
       }
     ],
-    "saved_at": "2026-04-22T17:52:58"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "WhatsApp Image 2026-04-07 at 08.45.16.json": {
     "store": "BİM",
@@ -134,7 +134,7 @@
         "amount": 87.5
       }
     ],
-    "saved_at": "2026-04-22T18:02:20"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "WhatsApp Image 2026-04-09 at 15.28.49.json": {
     "store": "Tankar",
@@ -147,7 +147,7 @@
         "amount": 2537.47
       }
     ],
-    "saved_at": "2026-04-22T17:35:36"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "WhatsApp Image 2026-04-09 at 15.52.24.json": {
     "store": "Tankar",
@@ -156,11 +156,11 @@
     "items_sum": 250.0,
     "items": [
       {
-        "name": "YIKAMA(OTOMATIK)",
+        "name": "YIKAMA(OIOMATIK)",
         "amount": 250.0
       }
     ],
-    "saved_at": "2026-04-22T17:35:36"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "WhatsApp Image 2026-04-13 at 13.20.46 (1).json": {
     "store": "Migros / Market",
@@ -173,7 +173,7 @@
         "amount": 480.0
       }
     ],
-    "saved_at": "2026-04-22T18:02:23"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "WhatsApp Image 2026-04-13 at 13.20.47.json": {
     "store": "Migros / Market",
@@ -186,7 +186,7 @@
         "amount": 1580.0
       }
     ],
-    "saved_at": "2026-04-22T18:02:23"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "Belge 3_11.json": {
     "store": "BİM",
@@ -199,7 +199,7 @@
         "amount": 539.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T13:03:40"
   },
   "Belge 3_12.json": {
     "store": "BİM",
@@ -212,6 +212,155 @@
         "amount": 419.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T13:03:40"
+  },
+  "Belge 3_2.json": {
+    "store": "BUENAS / RESTORAN",
+    "date": "2026-04-18",
+    "total": 2365.0,
+    "items_sum": 2365.0,
+    "items": [
+      {
+        "name": "YIYECEK %10",
+        "amount": 2365.0
+      }
+    ],
+    "saved_at": "2026-04-24T13:03:40"
+  },
+  "Belge 3_10.json": {
+    "store": "BİM",
+    "date": "2025-12-13",
+    "total": 209.5,
+    "items_sum": 209.5,
+    "items": [
+      {
+        "name": "TURK KAHVESI 100G AE",
+        "amount": 49.5
+      },
+      {
+        "name": "EKMEK ODUN",
+        "amount": 60.0
+      },
+      {
+        "name": "TUVALET KAGIDI 12Lİ",
+        "amount": 100.0
+      }
+    ],
+    "saved_at": "2026-04-24T13:03:40"
+  },
+  "Belge 3_3.json": {
+    "store": "Migros / Market",
+    "date": "2026-04-18",
+    "total": 1210.0,
+    "items_sum": 1210.0,
+    "items": [
+      {
+        "name": "Profiterol",
+        "amount": 300.0
+      },
+      {
+        "name": "Profiterol",
+        "amount": 300.0
+      },
+      {
+        "name": "Profiterol",
+        "amount": 300.0
+      },
+      {
+        "name": "Tavukgōğuslu Kazandi",
+        "amount": 280.0
+      },
+      {
+        "name": "Su",
+        "amount": 30.0
+      }
+    ],
+    "saved_at": "2026-04-24T13:03:40"
+  },
+  "Belge 3_6.json": {
+    "store": "BİM",
+    "date": "2025-12-13",
+    "total": 509.0,
+    "items_sum": 509.0,
+    "items": [
+      {
+        "name": "SU5L",
+        "amount": 52.0
+      },
+      {
+        "name": "ALISVERİSPOSETI BİM",
+        "amount": 0.5
+      },
+      {
+        "name": "TEREYAG 250G PERVIN",
+        "amount": 114.5
+      },
+      {
+        "name": "YUMURTA 63-72G 15Lİ",
+        "amount": 79.0
+      },
+      {
+        "name": "KAPI RUZGARONLEYİCI",
+        "amount": 45.0
+      },
+      {
+        "name": "ZENCEFİL250G",
+        "amount": 59.0
+      },
+      {
+        "name": "KAGIT HAVLU 16 LI",
+        "amount": 159.0
+      }
+    ],
+    "saved_at": "2026-04-24T13:03:40"
+  },
+  "WhatsApp Image 2026-03-27 at 09.05.32.json": {
+    "store": "BİM",
+    "date": "2026-03-26",
+    "total": 333.07,
+    "items_sum": 333.07,
+    "items": [
+      {
+        "name": "KEKCİK.KAP30G PİNGU",
+        "amount": 26.0
+      },
+      {
+        "name": "KABARTMA TOZU10*10G",
+        "amount": 29.0
+      },
+      {
+        "name": "SEKERLİ VANİLİN10*5G",
+        "amount": 21.5
+      },
+      {
+        "name": "HİKAYE KITAPLARI",
+        "amount": 65.0
+      },
+      {
+        "name": "HİKAYE KITAPLARI",
+        "amount": 65.0
+      },
+      {
+        "name": "ALISVERİS POSETİ BİN",
+        "amount": 1.0
+      },
+      {
+        "name": "PATATES (0.74kg × 19.75)",
+        "amount": 14.62
+      },
+      {
+        "name": "BIBER KAPYA (0.24kg × 199.00)",
+        "amount": 47.76
+      },
+      {
+        "name": "ELMA GOLDEN 1 (0.26kg × 89.00)",
+        "amount": 23.14
+      },
+      {
+        "name": "ELMA STARKING (0.45kg × 89.00)",
+        "amount": 40.05
+      }
+    ],
+    "saved_at": "2026-04-24T13:03:40"
   }
 }
