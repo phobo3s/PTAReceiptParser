@@ -10,7 +10,7 @@
         "amount": 390.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "Belge 3_13.json": {
     "store": "Migros / Market",
@@ -23,7 +23,7 @@
         "amount": 1600.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "Belge 3_7.json": {
     "store": "BİM",
@@ -44,7 +44,7 @@
         "amount": 1.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "Belge 3_9.json": {
     "store": "BİM",
@@ -121,7 +121,7 @@
         "amount": 79.0
       }
     ],
-    "saved_at": "2026-04-22T17:52:58"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "WhatsApp Image 2026-04-07 at 08.45.16.json": {
     "store": "BİM",
@@ -134,7 +134,7 @@
         "amount": 87.5
       }
     ],
-    "saved_at": "2026-04-22T18:02:20"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "WhatsApp Image 2026-04-09 at 15.28.49.json": {
     "store": "Tankar",
@@ -147,7 +147,7 @@
         "amount": 2537.47
       }
     ],
-    "saved_at": "2026-04-22T17:35:36"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "WhatsApp Image 2026-04-09 at 15.52.24.json": {
     "store": "Tankar",
@@ -156,11 +156,11 @@
     "items_sum": 250.0,
     "items": [
       {
-        "name": "YIKAMA(OTOMATIK)",
+        "name": "YIKAMA(OIOMATIK)",
         "amount": 250.0
       }
     ],
-    "saved_at": "2026-04-22T17:35:36"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "WhatsApp Image 2026-04-13 at 13.20.46 (1).json": {
     "store": "Migros / Market",
@@ -173,7 +173,7 @@
         "amount": 480.0
       }
     ],
-    "saved_at": "2026-04-22T18:02:23"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "WhatsApp Image 2026-04-13 at 13.20.47.json": {
     "store": "Migros / Market",
@@ -186,7 +186,7 @@
         "amount": 1580.0
       }
     ],
-    "saved_at": "2026-04-22T18:02:23"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "Belge 3_11.json": {
     "store": "BİM",
@@ -199,7 +199,7 @@
         "amount": 539.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T11:37:23"
   },
   "Belge 3_12.json": {
     "store": "BİM",
@@ -212,6 +212,19 @@
         "amount": 419.0
       }
     ],
-    "saved_at": "2026-04-22T18:01:20"
+    "saved_at": "2026-04-24T11:37:23"
+  },
+  "Belge 3_2.json": {
+    "store": "BUENAS / RESTORAN",
+    "date": "2026-04-18",
+    "total": 2365.0,
+    "items_sum": 2365.0,
+    "items": [
+      {
+        "name": "YIYECEK",
+        "amount": 2365.0
+      }
+    ],
+    "saved_at": "2026-04-24T11:37:23"
   }
 }
