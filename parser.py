@@ -1010,43 +1010,66 @@ def main():
     global DEBUG
 
     if len(sys.argv) < 2:
-        print("Kullanım: python parser.py <ocr_output.json> [--debug]")
+        print("Kullanım: python parser.py <ocr_output.json> [--debug] [--mismatch-only]")
         sys.exit(1)
 
     DEBUG = "--debug" in sys.argv
+    mismatch_only = "--mismatch-only" in sys.argv
 
     from snapshots import save_snapshot, check_snapshot
     from pathlib import Path
+    import io
 
     def _process(ocr_path: Path):
-        with open(ocr_path, encoding="utf-8") as f:
-            ocr_json = json.load(f)
-        receipt = parse_receipt(ocr_json)
-        print_summary(receipt)
+        buf = io.StringIO() if mismatch_only else None
+        old_stdout = sys.stdout
+        if buf:
+            sys.stdout = buf
 
-        snap_diffs = check_snapshot(ocr_path, receipt)
-        if snap_diffs:
-            print("  [!] SNAPSHOT FARKI TESPIT EDILDI:")
-            for diff in snap_diffs:
-                print(f"      - {diff}")
-            print("  Snapshot guncellensin mi? [e/H] ", end="", flush=True)
-            try:
-                answer = input().strip().lower()
-            except (EOFError, KeyboardInterrupt):
-                answer = "h"
-            if answer == "e":
-                save_snapshot(ocr_path, receipt)
-                print(f"  [snapshot] Guncellendi: {ocr_path.name}")
+        receipt = None
+        try:
+            print(ocr_path.name)
+            with open(ocr_path, encoding="utf-8") as f:
+                ocr_json = json.load(f)
+            receipt = parse_receipt(ocr_json)
+            print_summary(receipt)
+
+            snap_diffs = check_snapshot(ocr_path, receipt)
+            if snap_diffs:
+                print("  [!] SNAPSHOT FARKI TESPIT EDILDI:")
+                for diff in snap_diffs:
+                    print(f"      - {diff}")
+                print("  Snapshot guncellensin mi? [e/H] ", end="", flush=True)
+                sys.stdout = old_stdout
+                try:
+                    answer = input().strip().lower()
+                except (EOFError, KeyboardInterrupt):
+                    answer = "h"
+                if buf:
+                    sys.stdout = buf
+                if answer == "e":
+                    save_snapshot(ocr_path, receipt)
+                    print(f"  [snapshot] Guncellendi: {ocr_path.name}")
+                else:
+                    print(f"  [snapshot] Korundu.")
             else:
-                print(f"  [snapshot] Korundu.")
-        else:
-            saved = save_snapshot(ocr_path, receipt)
-            if saved:
-                print(f"  [snapshot] Kaydedildi: {ocr_path.name}")
+                saved = save_snapshot(ocr_path, receipt)
+                if saved:
+                    print(f"  [snapshot] Kaydedildi: {ocr_path.name}")
+        finally:
+            if buf:
+                sys.stdout = old_stdout
+                calc = sum(i.amount for i in receipt.items) if receipt else 0
+                has_mismatch = (
+                    receipt is None
+                    or not receipt.total
+                    or abs(calc - receipt.total) > 0.02
+                )
+                if has_mismatch:
+                    print(buf.getvalue(), end="")
 
     if os.path.isdir(sys.argv[1]):
         for file in sorted(os.listdir(sys.argv[1])):
-            print(file)
             _process(Path(sys.argv[1]) / file)
     else:
         _process(Path(sys.argv[1]))
