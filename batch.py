@@ -109,9 +109,7 @@ def run_ocr(ocr_engine, image_path: Path, engine_name: str = "paddleocr") -> dic
 
 
 def _run_paddleocr(ocr_engine, image_path: Path, img_array, w: int, h: int) -> dict:
-    print(f"  DEBUG: predict çağrılıyor...")
     result = list(ocr_engine.predict(str(image_path)))
-    print(f"  DEBUG: predict bitti, {len(result)} sonuç")
 
     guided_receipts_dir = Path(".guidedReceipts")
     guided_receipts_dir.mkdir(exist_ok=True)
@@ -130,7 +128,6 @@ def _run_paddleocr(ocr_engine, image_path: Path, img_array, w: int, h: int) -> d
                 bbox = bbox.tolist()
             detections.append([bbox, [text, float(conf)]])
 
-    print(f"  DEBUG: Toplam {len(detections)} detection")
     return {"status": "success", "image_width": w, "image_height": h, "detections": detections}
 
 
@@ -352,8 +349,9 @@ def process_receipt(
         tx = find_matching_transaction(receipt, transactions)
 
         if tx is None:
+            total_str = f"{receipt.total:.2f}" if receipt.total is not None else "bilinmiyor"
             print(f"\n  ❌ hledger: eşleşme bulunamadı!")
-            print(f"     Aranan: {receipt.date}  {receipt.total:.2f} TL  ({receipt.store})")
+            print(f"     Aranan: {receipt.date}  {total_str} TL  ({receipt.store})")
         else:
             print(f"  ✓ hledger: satır {tx.start_line + 1} → {tx.raw_lines[0].strip()}")
             new_lines = build_new_transaction(tx, categorized, receipt)
@@ -376,8 +374,9 @@ def process_receipt(
         from_row, account = find_excel_match(excel_path, receipt, excel_sheet)
 
         if from_row is None:
+            total_str = f"{receipt.total:.2f}" if receipt.total is not None else "bilinmiyor"
             print(f"\n  ❌ Excel: eşleşme bulunamadı!")
-            print(f"     Aranan: {receipt.date}  {receipt.total:.2f} TL")
+            print(f"     Aranan: {receipt.date}  {total_str} TL")
         else:
             print(f"  ✓ Excel: satır {from_row} → {account}")
             preview_excel(categorized, receipt)

@@ -68,7 +68,7 @@ COMMON_SKIP_PATTERNS=[
     r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
     r"^[BI]:[\d]+",            # B:706 S:9638 gibi
     r"^\d{4,6}\*+\d{4}$",     # kart numarası
-    r"^%\s*\d+(\s+%)?",        # %1, %20, % 2 0 gibi yüzde satırları
+    r"^%[\s\d]+\s*$",           # %1, %20, % 2 0 gibi tek başına KDV kodu satırları
 
     r"^\$\d*\.?$",            # $0. — mobile OCR gürültüsü
     r"^[\$各\\]",           # 各1 $c}$ gibi saçma karakterler
@@ -165,7 +165,7 @@ STORE_PROFILES = {
         # Ürün adı temizleme
         "name_cleanup": COMMON_NAME_CLEANUPS + [
             (r"^[=\-]+\s*", ""),                    # baştaki = veya - OCR kalıntısı
-            (r"\s*(?:\d+%|[\$%]\d*\.?)\s*$", ""),      # sondaki KDV kodu: 10% veya %20 veya $0.
+            (r"\s*(?:\d+%|[\$%°]\d*\.?)\s*$", ""),     # sondaki KDV kodu: 10% veya %20 veya $0. veya °1
             (r"\s+\$\\.*?\$\s*$", ""),              # $\1c}$ gibi LaTeX artığı
             (r"\s+\\?\d+\.\s*$", ""),               # sondaki OCR artığı: \11. gibi
             (r"^(\d+[\.,]\d+)\s*kg\s*[Xx×]\s*(\d+[\.,]\d+)\s+", r"(\1kg × \2) "),  # öndeki kg bilgisi
@@ -270,6 +270,7 @@ STORE_PROFILES = {
             "y_tolerance": 15,
             "header_y_max": 800,   # Header Y=700-780'e kadar uzanıyor
             "footer_y_min": 9999,
+            "name_before_price": True,  # Ürün adı fiyat satırından önce geliyor
         },
         "price_pattern": r"^[\*x×](-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2})$",
         "skip_patterns": COMMON_SKIP_PATTERNS + [
@@ -677,6 +678,47 @@ def merge_weight_rows(rows: list[list[Detection]], price_pattern: str) -> list[l
     return result
 
 
+def merge_orphan_rows(
+    rows: list[list[Detection]],
+    price_pattern: str,
+    skip_patterns: list[str] | None = None,
+    total_pattern: str | None = None,
+) -> list[list[Detection]]:
+    """
+    Fiyat-isim satırları ters sırada gelen durumları düzelt:
+
+    Durum: %20*fiyat  →  ÜRÜN_ADI
+    (Tankar yakıt fişi: önce KDV+fiyat satırı, sonra ürün adı)
+
+    Tek detection'dan oluşan ve tamamı fiyat olan bir satır,
+    ardından gelen fiyatsız satırla birleştirilir.
+    Toplam veya skip satırları birleştirilmez.
+    """
+    result = []
+    i = 0
+    while i < len(rows):
+        row = rows[i]
+        # Bu satır tamamen fiyat mı? (tüm detection'lar fiyat, isim yok)
+        if (row_has_price(row, price_pattern)
+                and all(parse_price(d.text, price_pattern) is not None for d in row)):
+            # Sonraki satırda fiyat yok mu? (isim satırı)
+            if i + 1 < len(rows) and not row_has_price(rows[i + 1], price_pattern):
+                next_text = " ".join(d.text for d in rows[i + 1])
+                # Toplam veya skip satırıyla birleştirme — o satır kendi işlenir
+                is_total = total_pattern and re.search(total_pattern, next_text, re.IGNORECASE)
+                is_skip = skip_patterns and any(
+                    re.search(p, next_text, re.IGNORECASE) for p in skip_patterns
+                )
+                if not is_total and not is_skip:
+                    merged = rows[i + 1] + row
+                    result.append(merged)
+                    i += 2
+                    continue
+        result.append(row)
+        i += 1
+    return result
+
+
 def parse_receipt(ocr_json: dict) -> Receipt:
     detections = load_detections(ocr_json)
 
@@ -735,8 +777,15 @@ def parse_receipt(ocr_json: dict) -> Receipt:
     # Tartılı ürün satırlarını birleştir
     rows = merge_weight_rows(rows, profile["price_pattern"])
 
+    # Fiyat-isim sıralı satırları birleştir (ör. Tankar yakıt: %20*fiyat | ÜRÜN_ADI)
+    rows = merge_orphan_rows(rows, profile["price_pattern"],
+                              skip_patterns=profile["skip_patterns"],
+                              total_pattern=profile["total_pattern"])
+
+    uses_name_before_price = layout.get("name_before_price", False)
     items = []
     total = None
+    pending_name_dets = None  # isim-önce formatı için (ör. BUENAS: YIYECEK | %10 *fiyat)
     for row_idx, row in enumerate(rows):
         row_text = " ".join(d.text for d in row)
         row_y = row[0].y_center if row else 0
@@ -748,15 +797,23 @@ def parse_receipt(ocr_json: dict) -> Receipt:
         if re.search(profile["total_pattern"], row_text, re.IGNORECASE):
             if DEBUG:
                 print(f"    [T] TOPLAM satiri (pattern: {profile['total_pattern']})")
+            price = None
             for d in reversed(row):
                 price = parse_price(d.text, profile["price_pattern"])
                 if price:
                     total = price
                     break
-            if price:
+            if total:
                 break
-            else:
-                continue
+            # Fiyat aynı satırda yoksa sonraki satıra bak (ör. TOP | *250,00)
+            if row_idx + 1 < len(rows):
+                next_row = rows[row_idx + 1]
+                if len(next_row) == 1:
+                    p = parse_price(next_row[0].text, profile["price_pattern"])
+                    if p is not None:
+                        total = p
+                        break
+            continue
             
         # Skip listesinde mi?
         skip_reason = None
@@ -807,11 +864,35 @@ def parse_receipt(ocr_json: dict) -> Receipt:
                 if DEBUG:
                     print(f"    [*] Inline ayırma: isim='{inline_m.group(1).strip()}'")
 
-        if not price_dets or not name_dets:
+        if not price_dets:
+            # Fiyatsız satır: profil destekliyorsa pending_name olarak sakla (ör. BUENAS)
+            if uses_name_before_price and name_dets:
+                candidate = " ".join(d.text for d in name_dets).strip()
+                if candidate and not should_skip(candidate, profile["skip_patterns"]):
+                    pending_name_dets = name_dets
+                    if DEBUG:
+                        print(f"    [P] Bekleyen isim kaydedildi: '{candidate}'")
             if DEBUG:
-                reason = "price_dets boş" if not price_dets else "name_dets boş"
-                print(f"    [-] SKIP: {reason}")
+                print(f"    [-] SKIP: price_dets boş")
             continue
+
+        # Geçerli isim yoksa pending_name dene (sadece destekleyen profillerde)
+        if not name_dets or should_skip(" ".join(d.text for d in name_dets).strip(), profile["skip_patterns"]):
+            if uses_name_before_price and pending_name_dets is not None:
+                if DEBUG:
+                    print(f"    [P] Bekleyen isim kullanılıyor: '{' '.join(d.text for d in pending_name_dets)}'")
+                name_dets = pending_name_dets
+                pending_name_dets = None
+            elif not name_dets:
+                if DEBUG:
+                    print(f"    [-] SKIP: name_dets boş")
+                continue
+            else:
+                if DEBUG:
+                    print(f"    [-] SKIP: name_dets skip pattern'iyle eşleşti, pending de yok")
+                continue
+        else:
+            pending_name_dets = None  # Geçerli isim bulundu, pending'i sıfırla
 
         # Fiyat
         price = None
