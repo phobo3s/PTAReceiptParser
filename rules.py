@@ -60,9 +60,11 @@ def append_learned_rule(item_name: str, account: str, path: Path = LEARNED_RULES
     words = base_name.upper().split()[:2]
     pattern = ".*".join(re.escape(w) for w in words)
 
+    # TOML basic string içinde \ geçersiz escape → \\ olarak yaz
+    toml_pattern = pattern.replace('\\', '\\\\')
     entry = (
         f'\n[[rule]]\n'
-        f'item    = "{pattern}"\n'
+        f'item    = "{toml_pattern}"\n'
         f'account = "{account}"\n'
         f'comment = "Otomatik öğrenildi: {item_name}"\n'
     )

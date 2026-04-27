@@ -58,6 +58,7 @@ def get_ocr_engine():
     print("⏳ PaddleOCR yükleniyor (ilk seferinde model indirilebilir)...")
     ocr = PaddleOCR(
         use_textline_orientation=False,
+        lang='tr',
         #use_angle_cls=True,
         #device='cpu',
         # NOT: lang parametresi, model adları verilince ignore ediliyor (UserWarning).
