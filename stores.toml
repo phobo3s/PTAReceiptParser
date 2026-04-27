@@ -1,0 +1,258 @@
+# stores.toml — Market parse profilleri + evrensel kurallar
+#
+# [common]          Tüm marketlere uygulanan evrensel kurallar
+# [store.xxx]       Market-spesifik profil
+#
+# Her store için alanlar:
+#   name            Okunabilir market adı
+#   identifiers     Header'da aranacak regex listesi (case-insensitive)
+#   y_tolerance     Aynı satıra gruplamak için piksel toleransı
+#   header_y_max    Bu Y altından itibaren ürünler başlar
+#   footer_y_min    Bu Y'den sonrası footer (toplam/KDV/banka)
+#   price_pattern   Fiyat tespiti için regex
+#   total_pattern   Toplam satırı tespiti için regex
+#   skip_patterns   Bu market için ek skip satırları (common'a eklenir)
+#   name_cleanup    Bu market için ek temizleme çiftleri (common'a eklenir)
+#   parse_mode      "normal" | "two_line"  (varsayılan: "normal")
+#                   two_line: 1. satır isim, 2. satırın sonu fiyat (Metro gibi)
+
+# ── Evrensel kurallar ─────────────────────────────────────────────────────────
+[common]
+
+# Tüm marketlerde skip edilecek satır desenleri
+skip_patterns = [
+    '^TCKN',
+    '^ETTN',
+    '^FATURA',
+    '^E-Arsiv',
+    '^Sira No',
+    '^Buyuk Mukellef',
+    '^\d{15,}$',                           # barkod numaraları
+    '^TOPLAM\s*K[OD]V',                    # KDV özeti, asıl toplam değil
+    '^Odenecek',
+    '^Banka',
+    '^GARANTI',
+    '^Onay',
+    '^Ref\.No',
+    '^KDV\s+(MATRAH|TUTAR|DAHIL)',
+    '^(KDV|MATRAH|KOV TUTAR|KOV DAH)',
+    'TOPKD[VU]',
+    '^POS:',
+    '^GS No',
+    '^\d{2}\.\d{2}\.\d{4}',               # tarih satırları (ödeme bölümü)
+    '^#+\s',                               # ## BarkoPOS gibi POS sistem satırları
+    '^[BI]:[\d]+',                         # B:706 S:9638 gibi
+    '^\d{4,6}\*+\d{4}$',                  # kart numarası
+    '^%[\s\d]+\s*$',                       # %1, %20, % 2 0 gibi KDV kodu satırları
+    '^\$\d*\.?$',                          # $0. — mobile OCR gürültüsü
+    '^[\$各\\]',                           # 各1 $c}$ gibi saçma karakterler
+    '^\d+\.$',                             # sadece "1."
+    '^\d+[\.,]\d{2}$',                    # sadece sayı (KDV tablo satırları)
+    '^\d+[\.,]\d{2}\s+\d+[\.,]\d{2}',    # KDV tablo satırı
+    '^\([\d）]+\)$',
+    '^AFATOPLAM',                          # Ara toplam (Tankar)
+    '^ARATOPLAM',
+    '^TOP(LAH|PLAH)?$',                    # Sadece "TOP" / "TOPLAH" label'ı
+    '^JOPLAM',                             # OCR hatası: "TOPLAM" → "JOPLAM"
+    '^KDV$',
+    '^SN:',
+    '^EFT-[PF]OS',                         # ödeme yöntemi satırı
+    '^Nakit\b',
+    '^Kredi\s+Kartı\b',
+    '^BROT\s+GIDA',                        # gıda-dışı KDV özet satırı
+    '^BRUT\s+GIDA',                        # Brut gıda satırı (METRO e-Fatura)
+    '^(NET|ODEME|ÖDEM|ÖDEME)\s+TUTARI',
+    '^\d{3}\s+\d+[\.,]\d{2}',             # Ödeme kodu + tutar: "020 71.50"
+    # METRO e-Fatura / genel fatura başlık satırları
+    '^MERKEZ:',
+    '^OLUŞTURMA\s+TARİHİ',
+    '^FİİLİ\s+SEVK\s+TARİHİ',
+    '^METRO\s+FATURA\s+NO',
+    '^İŞLEM\s+NO',
+    '^KASİYER\s+NO',
+    '^MÜŞTERI\s+NO',
+    '^VKN',
+    '^D\d+\s+[A-Z]',                       # METRO barkod+ürün: D123456 XYZ
+    '^[0-9]{8,}[A-Z]',                     # barkod+harf karması
+    # İletişim / web satırları
+    '^TEL[:\s：]',
+    '^FAX[:\s：]',
+    '^www\.',
+    '^ww\.',
+    # Kart / ödeme detay satırları
+    '^KREDI\s+KARTI',
+    '^KART\s+NO',
+    '^RRN:',
+    '^ACQUİRER',
+    '^TUTAR\s+KARŞILAŞTIRI',
+    '^HİZMET\s+ALINDI',
+    '^BU\s+BEL',
+    '^Toplam Koli Mik\.:',
+    '^ARA TOPLAM',
+]
+
+# Fiyat satırlarında para birimi sembollerini normalleştir
+price_prefix_cleanup = [
+    ['[￥¥$§¢€£₹₽=]', '*'],    # OCR garip para birimi → *
+    ['%[0-9A-Fa-f]{2}', ' '],   # URL encoding: %20 → boşluk
+]
+
+# Tüm marketlerde uygulanan ürün adı temizleme (lambda'sız, sözlük ayrıca gelecek)
+name_cleanup = [
+    ['[一-鿿㐀-䶿]+', ''],            # Çince karakter temizliği
+    ['\s{2,}', ' '],                                    # çift boşluk → tek boşluk
+    ['(?<=[A-ZÇĞŞÜÖİ])0(?=[A-ZÇĞŞÜÖİ])', 'O'],  # T0ZU → TOZU (0 ile O karışımı)
+]
+
+# Tarih tespiti için regex desenleri
+date_patterns = [
+    '^.*:?(\d{2}([\.\-\/\\])\d{2}\2\d{4})(\s*\d{2}:\d{2})?',   # 31.12.2026, 31-12-2026
+    '^.*?([01]\d{1}\.(20)\d{4})\b',                               # 31.122026 (delimiter yok)
+    '(\d{2})([\.\-]?)(\d{2})\2(\d{4})',                           # Boşluklu: "31 . 12 . 2026"
+    '^.*?(\d{2}([\.\-\/])\d{2}\2\d{2})\b',                       # 18/04/26 — 2 haneli yıl
+]
+
+# ── BİM ───────────────────────────────────────────────────────────────────────
+[store.bim]
+name = "BİM"
+identifiers = [
+    'BIM BIRLESIK',
+    'BİM BİRLEŞİK',
+    'BiM\s+Bi[Rr]',
+    'SIM BIRLESIK',
+    'BIM A\.S',
+]
+y_tolerance   = 20
+header_y_max  = 640
+footer_y_min  = 9999
+price_pattern = '^\*(\d+[\.,]\d{2})$'
+total_pattern = '^(Odenecek K[OD]V Dahil|TOPLAM(?!\s*K[OD]V)|KRED[iİI] KARTI)'
+skip_patterns = []
+name_cleanup = [
+    ['^[=\-]+\s*', ''],
+    ['\s*(?:\d+%|[\$%°]\d*\.?)\s*$', ''],
+    ['\s+\$\\.*?\$\s*$', ''],
+    ['\s+\\?\d+\.\s*$', ''],
+    ['^(\d+[\.,]\d+)\s*kg\s*[Xx×]\s*(\d+[\.,]\d+)\s+', '(\1kg × \2) '],
+]
+parse_mode = "normal"
+
+# ── Migros / Market ───────────────────────────────────────────────────────────
+[store.migros]
+name = "Migros / Market"
+identifiers = [
+    'MIGROS',
+    'MİGROS',
+    'HAKAN KARACA',
+    'CAN MARKET',
+    'DUFREL',
+    'GIDA\s+SAN',
+]
+y_tolerance   = 15
+header_y_max  = 900
+footer_y_min  = 9999
+price_pattern = '^[\*x×](-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$'
+total_pattern = '^TOPLAM|^EFT-[PF]OS'
+skip_patterns = [
+    '^KOV\s+Z',       # KOV Z20 metadata
+    '^%\d+\s+%',      # %25 % iNDiRiM gürültüsü
+]
+name_cleanup = [
+    ['^[=\-]+\s*', ''],
+    ['\s*(?:\d+%|%\d+)\s*$', ''],
+]
+parse_mode = "normal"
+
+# ── Tankar / Akaryakıt ────────────────────────────────────────────────────────
+[store.tankar]
+name = "Tankar"
+identifiers = [
+    'TANKAR',
+    'TANKRR',
+    '\bANKAR\b',
+]
+y_tolerance   = 20
+header_y_max  = 330
+footer_y_min  = 9999
+price_pattern = '^.*\*([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$'
+total_pattern = '^TOPLAM|^TOP|^K.KARTI|^EFT-[PF]OS'
+skip_patterns = []
+name_cleanup  = []
+parse_mode = "normal"
+
+# ── METRO / ETRD GrosMarket ───────────────────────────────────────────────────
+[store.metro]
+name = "METRO / ETRD GrosMarket"
+identifiers = [
+    'METRO',
+    'ETRD',
+    'ETRDGROSMARET',
+    'FETRO',
+    'ETRO\s+GROS',
+    'metro-tr',
+]
+y_tolerance   = 15
+header_y_max  = 1500
+footer_y_min  = 9999
+price_pattern = '^[\*x×](-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2})$'
+total_pattern = '^(NET\s+TOPLAM)'
+skip_patterns = []   # barkod+harf common'da zaten var
+name_cleanup = [
+    ['^[0-9]{8,}[A-Z]?', ''],
+]
+# Metro fişi: 1. satır ürün adı, 2. satırın sonu fiyat
+parse_mode = "two_line"
+
+# ── FSREF CAN GIDA ────────────────────────────────────────────────────────────
+[store.fsref]
+name = "FSREF CAN GIDA"
+identifiers = [
+    'FSREF',
+    'CAN\s+GIDA',
+]
+y_tolerance   = 18
+header_y_max  = 400
+footer_y_min  = 9999
+price_pattern = '^.*\*([\d\.]+,\d{2}|[\d]+[\.,]\d{2})$'
+total_pattern = '^(TOPLAM|TOP|EFT-[PF]OS)'
+skip_patterns = []
+name_cleanup = [
+    ['^[=\-]+\s*', ''],
+]
+parse_mode = "normal"
+
+# ── Buenas / Restoran ─────────────────────────────────────────────────────────
+[store.buenas]
+name = "BUENAS / RESTORAN"
+identifiers = [
+    'BUENAS',
+]
+y_tolerance   = 15
+header_y_max  = 800
+footer_y_min  = 9999
+price_pattern = '^[\*x×](-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2})$'
+total_pattern = '^(NET\s+TOPLAM|ODENE|[ÖO]DENE|TOPLAM(?!\s+K[DO]V))'
+skip_patterns = []   # barkod+harf common'da zaten var
+name_cleanup = [
+    ['^[0-9]{8,}[A-Z]?', ''],
+]
+parse_mode = "normal"
+
+# ── CafeGurup / Restoran ──────────────────────────────────────────────────────
+[store.cafegurup]
+name = "CAFEGURUP / Restoran"
+identifiers = [
+    'CAFEGURUP',
+    'GASTRONOMI',
+    'SANAYIVE\s+TİCARET',
+]
+y_tolerance   = 18
+header_y_max  = 400
+footer_y_min  = 9999
+price_pattern = '^[\*x×]?(\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|\d+[.,]\d{2})\s*(?:TL)?$'
+total_pattern = '^(TOPLAM(?!\s*K[DO]V)|GENEL\s+TOPLAM|OPLAM)'
+skip_patterns = [
+    '^[A-Z\s]+[İiI]\s*[Ss].*[Tt][iI]',
+]
+name_cleanup = []
+parse_mode = "normal"

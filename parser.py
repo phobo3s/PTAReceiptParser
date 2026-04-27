@@ -7,7 +7,9 @@ import json
 import re
 import sys
 import os
+import tomllib
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 from shapely.geometry import Polygon
 
@@ -45,265 +47,45 @@ class Receipt:
     raw_detections: list[Detection]
 
 
-# ── Market profilleri ──────────────────────────────────────────────────────────
-COMMON_SKIP_PATTERNS=[
-    r"^TCKN",
-    r"^ETTN",
-    r"^FATURA",
-    r"^E-Arsiv",
-    r"^Sira No",
-    r"^Buyuk Mukellef",
-    r"^\d{15,}$",              # barkod numaraları
-    r"^TOPLAM\s*K[OD]V",        # "TOPLAM KDV" / "TOPLAMKDV" / "TOPLAMKOV" (KDV özeti, asıl toplam değil)
-    r"^Odenecek",
-    r"^Banka",
-    r"^GARANTI",
-    r"^Onay",
-    r"^Ref\.No",
-    r"^KDV\s+(MATRAH|TUTAR|DAHIL)",
-    r"^(KDV|MATRAH|KOV TUTAR|KOV DAH)",
-    r"TOPKD[VU]",
-    r"^POS:",
-    r"^GS No",
-    r"^\d{2}\.\d{2}\.\d{4}",  # tarih satırları (ödeme bölümü)
-    r"^#+\s",                  # ## ile başlayan POS sistem satırları (ör. ## BarkoPOS-2.0.14.70)
-    r"^[BI]:[\d]+",            # B:706 S:9638 gibi
-    r"^\d{4,6}\*+\d{4}$",     # kart numarası
-    r"^%[\s\d]+\s*$",           # %1, %20, % 2 0 gibi tek başına KDV kodu satırları
+# ── Market profilleri (stores.toml'dan yuklenir) ─────────────────────────────
 
-    r"^\$\d*\.?$",            # $0. — mobile OCR gürültüsü
-    r"^[\$各\\]",           # 各1 $c}$ gibi saçma karakterler
-    r"^\d+\.$",               # sadece "1."
-    r"^\d+[\.,]\d{2}$",       # sadece sayı (KDV tablo satırları)
-    r"^\d+[\.,]\d{2}\s+\d+[\.,]\d{2}",  # KDV tablo satırı
-    r"^\([\d）]+\)$",
-    r"^AFATOPLAM",  # Ara toplam (Tankar)
-    r"^ARATOPLAM",
-    r"^TOP(LAH|PLAH)?$",  # Sadece "TOP" / "TOPLAH" / "TOPPLAH" label'ı
-    r"^JOPLAM",             # OCR hatası: "TOPLAM" → "JOPLAM"
-    r"^KDV$",  # KDV satırı (TOPLAM değil)
-    r"^SN:",
-    r"^EFT-[PF]OS",  # ödeme yöntemi satırı (toplam değil)
-    r"^Nakit\b",           # "Nakit" ödeme yöntemi
-    r"^Kredi\s+Kartı\b",   # "Kredi Kartı" ödeme yöntemi
-    r"^BROT\s+GIDA",  # gıda-dışı KDV özet satırı
-    r"^BRUT\s+GIDA",  # Brut gıda satırı (METRO e-Fatura)
-    r"^(NET|ODEME|ÖDEM|ÖDEME)\s+TUTARI",  # Özet tutarı satırları
-    r"^\d{3}\s+\d+[\.,]\d{2}",  # Ödeme kodu + tutar: "020 71.50", "610 91.82"
-    # METRO e-Fatura / genel fatura başlık satırları
-    r"^MERKEZ:",
-    r"^OLUŞTURMA\s+TARİHİ",
-    r"^FİİLİ\s+SEVK\s+TARİHİ",
-    r"^METRO\s+FATURA\s+NO",
-    r"^İŞLEM\s+NO",
-    r"^KASİYER\s+NO",
-    r"^MÜŞTERI\s+NO",
-    r"^VKN",
-    r"^D\d+\s+[A-Z]",        # METRO barkod+ürün: D123456 XYZ
-    r"^[0-9]{8,}[A-Z]",      # barkod+harf karması
-    # İletişim / web satırları
-    r"^TEL[:\s：]",
-    r"^FAX[:\s：]",
-    r"^www\.",
-    r"^ww\.",
-    # Kart / ödeme detay satırları
-    r"^KREDI\s+KARTI",
-    r"^KART\s+NO",
-    r"^RRN:",
-    r"^ACQUİRER",
-    r"^TUTAR\s+KARŞILAŞTIRI",
-    r"^HİZMET\s+ALINDI",
-    r"^BU\s+BEL",
-]
+def _load_config() -> tuple[dict, list]:
+    """stores.toml'dan market profillerini ve evrensel ayarları yükle.
+    Döndürür: (STORE_PROFILES, PRICE_PREFIX_CLEANUP)
+    """
+    stores_file = Path(__file__).parent / "stores.toml"
+    with open(stores_file, "rb") as f:
+        data = tomllib.load(f)
 
-PRICE_PREFIX_CLEANUP = [
-    (r"[￥¥$§¢€£₹₽=]", "*"),  # OCR garip para birimi → *
-    (r"%[0-9A-Fa-f]{2}", " "),  # URL encoding: %20 → boşluk (inline fiyat satırlarında)
-]
+    common = data.get("common", {})
+    common_skip     = common.get("skip_patterns", [])
+    common_date     = common.get("date_patterns", [])
+    common_cleanup  = [(p, r) for p, r in common.get("name_cleanup", [])]
+    price_prefix    = [(p, r) for p, r in common.get("price_prefix_cleanup", [])]
 
-COMMON_NAME_CLEANUPS = [
-    (r"[\u4e00-\u9fff\u3400-\u4dbf]+",""), # Çince falan temizliği
-    (r"\s{2,}", " "),                       # çift boşluk
-    # OCR, büyük İ'yi küçük i olarak okuyabiliyor; tamamen büyük harf tokenlerinde düzelt
-    (r'\S+', lambda m: m.group().replace('i', 'İ')
-            if not re.search(r'[a-zçğşüö]', m.group().replace('i', ''))
-            else m.group()),
-    # OCR, harf bağlamında 0 (sıfır) ile O (harf) karıştırıyor: T0ZU → TOZU
-    (r'(?<=[A-ZÇĞŞÜÖİ])0(?=[A-ZÇĞŞÜÖİ])', 'O'),
-]
+    profiles = {}
+    for key, s in data["store"].items():
+        profiles[key] = {
+            "name": s["name"],
+            "identifiers": s["identifiers"],
+            "layout": {
+                "y_tolerance": s["y_tolerance"],
+                "header_y_max": s["header_y_max"],
+                "footer_y_min": s.get("footer_y_min", 9999),
+            },
+            "price_pattern": s["price_pattern"],
+            "skip_patterns": common_skip + s.get("skip_patterns", []),
+            "total_pattern": s["total_pattern"],
+            "date_pattern": common_date,
+            "name_cleanup": common_cleanup + [
+                (p, r) for p, r in s.get("name_cleanup", [])
+            ],
+            "parse_mode": s.get("parse_mode", "normal"),
+        }
+    return profiles, price_prefix
 
-COMMON_DATE_PATTERNS = [
-    (r"^.*:?(\d{2}([\.\-\/\\])\d{2}\2\d{4})(\s*\d{2}:\d{2})?"),  # 31.12.2026, 31-12-2026
-    (r"^.*?([01]\d{1}\.(20)\d{4})\b"),                              # 31.122026 (iki delimiter yok, OCR birleştirmiş)
-    (r"(\d{2})([\.\-]?)(\d{2})\2(\d{4})"),                        # Boşluklu tarihler: "31 . 12 . 2026"
-    (r"^.*?(\d{2}([\.\-\/])\d{2}\2\d{2})\b"),                    # 18/04/26 — 2 haneli yıl (20xx)
-]
 
-STORE_PROFILES = {
-    "bim": {
-        "name": "BİM",
-        "identifiers": [
-            r"BIM BIRLESIK",
-            r"BİM BİRLEŞİK",
-            r"BiM\s+Bi[Rr]",   # OCR bozukluğu: BiM BiRIESiK / BiRLESiK
-            r"SIM BIRLESIK",    # S↔B OCR karışması
-            r"BIM A\.S",
-        ],
-        "layout": {
-            # Aynı satır toleransı (piksel)
-            "y_tolerance": 20,
-            # Header bölgesi: bu Y'nin altından itibaren ürünler başlar
-            "header_y_max": 640,
-            # Footer bölgesi: bu Y'den sonrası toplam/KDV/banka bilgisi
-            "footer_y_min": 9999,
-        },
-        "price_pattern": r"^\*(\d+[\.,]\d{2})$",
-        "skip_patterns": COMMON_SKIP_PATTERNS + [
-            r"^\([\d）]+\)$"          # (1） gibi
-        ],
-        "total_pattern": r"^(Odenecek K[OD]V Dahil|TOPLAM(?!\s*K[OD]V)|KRED[iİI] KARTI)",
-        "date_pattern": COMMON_DATE_PATTERNS,  # boşluksuz da yakala, arkasından saat de gelebilir.
-        # Ürün adı temizleme
-        "name_cleanup": COMMON_NAME_CLEANUPS + [
-            (r"^[=\-]+\s*", ""),                    # baştaki = veya - OCR kalıntısı
-            (r"\s*(?:\d+%|[\$%°]\d*\.?)\s*$", ""),     # sondaki KDV kodu: 10% veya %20 veya $0. veya °1
-            (r"\s+\$\\.*?\$\s*$", ""),              # $\1c}$ gibi LaTeX artığı
-            (r"\s+\\?\d+\.\s*$", ""),               # sondaki OCR artığı: \11. gibi
-            (r"^(\d+[\.,]\d+)\s*kg\s*[Xx×]\s*(\d+[\.,]\d+)\s+", r"(\1kg × \2) "),  # öndeki kg bilgisi
-        ],
-    },
-    "migros": {
-        "name": "Migros / Market",
-        "identifiers": [
-            r"MIGROS",
-            r"MİGROS",
-            r"HAKAN KARACA",
-            r"CAN MARKET",
-            r"DUFREL",              # Migros şube markası
-            r"GIDA\s+SAN",         # Gıda şirketleri
-        ],
-        "layout": {
-            "y_tolerance": 15,
-            "header_y_max": 900,    # Belge 3_13 gibi şubeler Y=800-900'de header
-            "footer_y_min": 9999,
-        },
-        "price_pattern": r"^[\*x×](-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$",
-        "skip_patterns": COMMON_SKIP_PATTERNS + [
-            r"^\([\d）]+\)$",         # (1） gibi
-            r"^KOV\s+Z",              # KOV Z20 metadata
-            r"^%\d+\s+%",            # %25 % iNDiRiM gürültüsü
-        ],
-        "total_pattern": r"^TOPLAM|^EFT-[PF]OS",
-        "date_pattern": COMMON_DATE_PATTERNS,
-        "name_cleanup": COMMON_NAME_CLEANUPS + [
-            (r"^[=\-]+\s*", ""),                        # baştaki = veya - OCR kalıntısı
-            (r"\s*(?:\d+%|%\d+)\s*$", ""),           # sondaki KDV kodu: %20 %1 %01 veya 10%
-        ],
-    },
-    "tankar": {
-        "name": "Tankar",
-        "identifiers": [
-            r"TANKAR",
-            r"TANKRR",
-            r"\bANKAR\b",            # OCR bazen baştaki T'yi düşürüyor
-        ],
-        "layout": {
-            "y_tolerance": 20,  # Standart row tolerance
-            "header_y_max": 330,  # Ürünler Y>650'de başlıyor
-            "footer_y_min": 9999,  # KDV Y~799 include et, TOPLAM Y=843 include et
-        },
-        "price_pattern": r"^.*\*([\d\.]+,\d{2}|[\d]+[\.,]\d{2}|[\d]{3,})$",  # 2537.47, 250,00, 250 (3+ digit)
-        "skip_patterns": COMMON_SKIP_PATTERNS,
-        "total_pattern": r"^TOPLAM|^TOP|^K.KARTI|^EFT-[PF]OS",  # TOPLAM, TOP satır başında, veya TOP ortada
-        "date_pattern": COMMON_DATE_PATTERNS,
-        "name_cleanup": COMMON_NAME_CLEANUPS + [],
-    },
-    "metro": {
-        "name": "METRO / ETRD GrosMarket",
-        "identifiers": [
-            r"METRO",
-            r"ETRD",
-            r"ETRDGROSMARET",
-            r"FETRO",             # OCR F↔M hatası
-            r"ETRO\s+GROS",      # "ETRO GROSMARKET" OCR kırpması
-            r"metro-tr",          # Web adresi
-        ],
-        "layout": {
-            "y_tolerance": 15,
-            "header_y_max": 1500,  # e-Fatura header'ı Y=1140+'a kadar uzanabiliyor
-            "footer_y_min": 9999,
-        },
-        "price_pattern": r"^[\*x×](-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2})$",
-        "skip_patterns": COMMON_SKIP_PATTERNS + [
-            r"^[0-9]{8,}[A-Z]",
-        ],
-        "total_pattern": r"^(NET\s+TOPLAM|ODENE|[ÖO]DENE|TOPLAM(?!\s+K[DO]V))",
-        "date_pattern": COMMON_DATE_PATTERNS,
-        "name_cleanup": COMMON_NAME_CLEANUPS + [
-            (r"^[0-9]{8,}[A-Z]?", ""),
-        ],
-    },
-    "fsref": {
-        "name": "FSREF CAN GIDA",
-        "identifiers": [
-            r"FSREF",
-            r"CAN\s+GIDA",
-        ],
-        "layout": {
-            "y_tolerance": 18,
-            "header_y_max": 400,
-            "footer_y_min": 9999,
-        },
-        "price_pattern": r"^.*\*([\d\.]+,\d{2}|[\d]+[\.,]\d{2})$",
-        "skip_patterns": COMMON_SKIP_PATTERNS,
-        "total_pattern": r"^(TOPLAM|TOP|EFT-[PF]OS)",
-        "date_pattern": COMMON_DATE_PATTERNS,
-        "name_cleanup": COMMON_NAME_CLEANUPS + [
-            (r"^[=\-]+\s*", ""),
-        ],
-    },
-    "buenas": {
-        "name": "BUENAS / RESTORAN",
-        "identifiers": [
-            r"BUENAS",
-        ],
-        "layout": {
-            "y_tolerance": 15,
-            "header_y_max": 800,   # Header Y=700-780'e kadar uzanıyor
-            "footer_y_min": 9999,
-            "name_before_price": True,  # Ürün adı fiyat satırından önce geliyor
-        },
-        "price_pattern": r"^[\*x×](-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2})$",
-        "skip_patterns": COMMON_SKIP_PATTERNS + [
-            r"^[0-9]{8,}[A-Z]",
-        ],
-        "total_pattern": r"^(NET\s+TOPLAM|ODENE|[ÖO]DENE|TOPLAM(?!\s+K[DO]V))",
-        "date_pattern": COMMON_DATE_PATTERNS,
-        "name_cleanup": COMMON_NAME_CLEANUPS + [
-            (r"^[0-9]{8,}[A-Z]?", ""),
-        ],
-    },
-    "cafegurup": {
-        "name": "CAFEGURUP / Restoran",
-        "identifiers": [
-            r"CAFEGURUP",
-            r"GASTRONOMI",
-            r"SANAYIVE\s+TİCARET",
-        ],
-        "layout": {
-            "y_tolerance": 18,
-            "header_y_max": 400,
-            "footer_y_min": 9999,
-        },
-        "price_pattern": r"^[\*x×]?(\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|\d+[.,]\d{2})\s*(?:TL)?$",
-        "skip_patterns": COMMON_SKIP_PATTERNS + [
-            r"^[A-Z\s]+[İiI]\s*[Ss].*[Tt][iI]",
-        ],
-        "total_pattern": r"^(TOPLAM(?!\s*K[DO]V)|GENEL\s+TOPLAM|OPLAM)",
-        "date_pattern": COMMON_DATE_PATTERNS,
-        "name_cleanup": COMMON_NAME_CLEANUPS,
-    },
-}
+STORE_PROFILES, PRICE_PREFIX_CLEANUP = _load_config()
 
 # TODO: Genel olarak performans bence yeterli ancak preprocessing tamamen bilmediğim bir alan. Android'deki ClearScan uygulaması
 # bütün preprocessing adımlarını yapıyor. Tamamen otomatik. Eğer Whatsapp üzerinden gönderilecekse telefon çekimindense bu uygulama
@@ -511,21 +293,30 @@ def parse_price(text: str, price_pattern: str) -> Optional[float]:
     cleaned = text.strip()
     for pattern, repl in PRICE_PREFIX_CLEANUP:
         cleaned = re.sub(pattern, repl, cleaned)
-    m = re.match(price_pattern, cleaned)
-    if m:
-        price_str = m.group(1)
-        if "," in price_str:
-            # Türkçe format: 2.537,47 → 2537.47
-            price_str = price_str.replace(".", "").replace(",", ".")
-        elif price_str.count(".") >= 2:
-            # OCR virgül→nokta hatası: 1.439.00 → gerçekte 1.439,00 → 1439.00
-            parts = price_str.rsplit(".", 1)
-            price_str = parts[0].replace(".", "") + "." + parts[1]
-        # else: İngilizce format 14.62 — olduğu gibi bırak
-        try:
-            return float(price_str)
-        except ValueError:
-            return None
+
+    # OCR hatası: son nokta virgül yerine yazılmış olabilir (2.777.63 → 2.777,63)
+    # Pattern match'ten önce her iki versiyonu dene
+    candidates = [cleaned]
+    dot_fixed = re.sub(r'\.(\d{2})$', r',\1', cleaned)
+    if dot_fixed != cleaned:
+        candidates.append(dot_fixed)
+
+    for candidate in candidates:
+        m = re.match(price_pattern, candidate)
+        if m:
+            price_str = m.group(1)
+            if "," in price_str:
+                # Türkçe format: 2.537,47 → 2537.47
+                price_str = price_str.replace(".", "").replace(",", ".")
+            elif price_str.count(".") >= 2:
+                # OCR virgül→nokta hatası: 1.439.00 → gerçekte 1.439,00 → 1439.00
+                parts = price_str.rsplit(".", 1)
+                price_str = parts[0].replace(".", "") + "." + parts[1]
+            # else: İngilizce format 14.62 — olduğu gibi bırak
+            try:
+                return float(price_str)
+            except ValueError:
+                continue
     return None
 
 
@@ -547,6 +338,103 @@ def parse_weight_line(text: str) -> Optional[tuple[float, float]]:
 
 def row_has_price(row, price_pattern: str) -> bool:
     return any(parse_price(d.text, price_pattern) is not None for d in row)
+
+
+def _try_inline_split(
+    d: Detection,
+    price_pattern: str,
+) -> tuple[Optional[Detection], Optional[Detection]]:
+    """
+    'ÜRÜN ADI *19,90' veya 'NET TOPLAM: *2.777,63' gibi tek bir detection'ı
+    isim ve fiyat parçalarına ayır.
+
+    PRICE_PREFIX_CLEANUP normalleştirmesi sonrası '*' üzerinden böler,
+    sağ parçayı parse_price() ile doğrular (double-dot OCR fix dahil).
+    Başarısız olursa (None, None) döndürür.
+    """
+    cleaned = d.text.strip()
+    for p, r in PRICE_PREFIX_CLEANUP:
+        cleaned = re.sub(p, r, cleaned)
+
+    star_idx = cleaned.rfind('*')
+    if star_idx < 0:
+        return None, None
+
+    left  = cleaned[:star_idx].strip()
+    right = cleaned[star_idx:]          # '*' dahil
+
+    if parse_price(right, price_pattern) is None:
+        return None, None
+
+    price_det = Detection(
+        text=right, confidence=d.confidence,
+        x_min=d.x_min, x_max=d.x_max,
+        y_min=d.y_min, y_max=d.y_max, y_center=d.y_center, bbox=d.bbox,
+    )
+    if left:
+        name_det = Detection(
+            text=left, confidence=d.confidence,
+            x_min=d.x_min, x_max=d.x_max,
+            y_min=d.y_min, y_max=d.y_max, y_center=d.y_center, bbox=d.bbox,
+        )
+        return name_det, price_det
+    return None, price_det
+
+
+def split_row_into_name_price(
+    row: list[Detection],
+    price_pattern: str,
+) -> tuple[list[Detection], list[Detection]]:
+    """
+    Bir satırı (name_dets, price_dets) olarak ayır.
+
+    Aşama 1 — Standart split:
+      Sağdan sola tara, parse_price() ile doğrudan fiyat bul.
+      Fiyat detection'ından soluna kadar olan kısım isimdir.
+
+    Aşama 2 — name_dets'te inline ara:
+      price_dets boşsa her name detection'ında _try_inline_split dene.
+      (Örn: 'ÜRÜN ADI *19,90' tek blob halinde gelmiş)
+
+    Aşama 3 — price_dets'te inline ara:
+      name_dets boşsa ve price tek detectionsa _try_inline_split dene.
+      (Örn: OCR 'NET TOPLAM: *2.777,63' gibi karıştırmış)
+    """
+    # Aşama 1
+    first_price_idx = None
+    for i in range(len(row) - 1, -1, -1):
+        if parse_price(row[i].text, price_pattern) is not None:
+            first_price_idx = i
+            break
+
+    if first_price_idx is not None:
+        name_dets = list(row[:first_price_idx])
+        price_dets = list(row[first_price_idx:])
+    else:
+        name_dets = list(row)
+        price_dets = []
+
+    # Aşama 2
+    if not price_dets and name_dets:
+        new_name_dets: list[Detection] = []
+        for d in name_dets:
+            name_part, price_part = _try_inline_split(d, price_pattern)
+            if price_part is not None:
+                if name_part:
+                    new_name_dets.append(name_part)
+                price_dets.append(price_part)
+            else:
+                new_name_dets.append(d)
+        name_dets = new_name_dets
+
+    # Aşama 3
+    if not name_dets and len(price_dets) == 1:
+        name_part, price_part = _try_inline_split(price_dets[0], price_pattern)
+        if name_part and price_part:
+            name_dets = [name_part]
+            price_dets = [price_part]
+
+    return name_dets, price_dets
 
 
 def merge_weight_rows(rows: list[list[Detection]], price_pattern: str) -> list[list[Detection]]:
@@ -720,6 +608,55 @@ def merge_orphan_rows(
     return result
 
 
+def merge_two_line_rows(
+    rows: list[list[Detection]],
+    price_pattern: str,
+    total_pattern: str | None = None,
+) -> list[list[Detection]]:
+    """
+    Metro gibi iki satırlı ürün formatını birleştir:
+
+    Durum: ÜRÜN_ADI  →  (barkod/miktar bilgisi) *fiyat
+    1. satır: saf isim, fiyat yok
+    2. satır: sona yakın fiyat var (barkod/KDV gibi gürültü olabilir)
+
+    Fiyatsız satır tespit edilince, hemen ardından gelen satırdan
+    sadece son fiyat detection'ı alınır ve isim satırına eklenir.
+    2. satırın geri kalanı (barkod vb.) göz ardı edilir.
+    Toplam satırları birleştirilmez.
+    """
+    result = []
+    i = 0
+    while i < len(rows):
+        row = rows[i]
+        row_text = " ".join(d.text for d in row)
+        is_total = total_pattern and re.search(total_pattern, row_text, re.IGNORECASE)
+
+        # Bu satırda fiyat yok ve toplam değil → bir sonraki satırdan fiyat çek
+        if not is_total and not row_has_price(row, price_pattern) and i + 1 < len(rows):
+            next_row = rows[i + 1]
+            next_text = " ".join(d.text for d in next_row)
+            next_is_total = total_pattern and re.search(total_pattern, next_text, re.IGNORECASE)
+
+            if not next_is_total and row_has_price(next_row, price_pattern):
+                # Sadece son fiyat detection'ını al (barkod/gürültü bırak)
+                price_det = None
+                for d in reversed(next_row):
+                    if parse_price(d.text, price_pattern) is not None:
+                        price_det = d
+                        break
+                if price_det is not None:
+                    if DEBUG:
+                        print(f"  [TWO_LINE] isim='{row_text[:40]}' + fiyat='{price_det.text}'")
+                    result.append(row + [price_det])
+                    i += 2
+                    continue
+
+        result.append(row)
+        i += 1
+    return result
+
+
 def parse_receipt(ocr_json: dict) -> Receipt:
     detections = load_detections(ocr_json)
 
@@ -783,6 +720,10 @@ def parse_receipt(ocr_json: dict) -> Receipt:
                             skip_patterns=profile["skip_patterns"],
                             total_pattern=profile["total_pattern"])
 
+    # İki satırlı format: 1. satır isim, 2. satırın sonu fiyat (ör. Metro)
+    if profile.get("parse_mode") == "two_line":
+        rows = merge_two_line_rows(rows, profile["price_pattern"],
+                                   total_pattern=profile["total_pattern"])
 
     items = []
     total = None
@@ -799,9 +740,10 @@ def parse_receipt(ocr_json: dict) -> Receipt:
         if re.search(profile["total_pattern"], row_text, re.IGNORECASE):
             if DEBUG:
                 print(f"    [T] TOPLAM satiri (pattern: {profile['total_pattern']})")
-            price = None
-            for d in reversed(row):
-                price = parse_price(d.text, profile["price_pattern"])
+            # split_row_into_name_price: tek blob 'NET TOPLAM: *2.777,63' durumunu da yakalar
+            _, price_dets_t = split_row_into_name_price(row, profile["price_pattern"])
+            for pd in reversed(price_dets_t):
+                price = parse_price(pd.text, profile["price_pattern"])
                 if price:
                     total = price
                     break
@@ -816,7 +758,7 @@ def parse_receipt(ocr_json: dict) -> Receipt:
                         total = p
                         break
             continue
-            
+
         # Skip listesinde mi?
         skip_reason = None
         for pattern in profile["skip_patterns"]:
@@ -828,70 +770,13 @@ def parse_receipt(ocr_json: dict) -> Receipt:
             if DEBUG:
                 print(f"    [-] SKIP (pattern: {skip_reason})")
             continue
-        
-        # Fiyat ve isim detection'larını ayır
-        first_price_idx=None
-        # Listenin en sonundan (len-1) başına doğru (-1) adım adım (-1) gidiyoruz
-        for i in range(len(row) - 1, -1, -1):
-            if parse_price(row[i].text, profile["price_pattern"]) is not None:
-                first_price_idx = i
-                break 
-        if first_price_idx is not None:
-            # Bulduğumuz indekse kadar olanlar isim, o ve sonrası fiyattır
-            name_dets = row[:first_price_idx]
-            price_dets = row[first_price_idx:]
-        else:
-            # Hiç fiyat yoksa her şey isimdir
-            name_dets = row
-            price_dets = []
 
+        # Fiyat ve isim detection'larını ayır (inline split dahil)
+        name_dets, price_dets = split_row_into_name_price(row, profile["price_pattern"])
 
         if DEBUG:
-            print(f"    [*] Price dets (): {[d.text for d in price_dets]}")
-            print(f"    [*] Name dets (): {[d.text for d in name_dets]}")
-
-        _INLINE_RE = r"^(.+?)\*(-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$"
-
-        # Sadece name_dets varsa: içinde gömülü fiyat ara
-        if not price_dets and name_dets:
-            new_name_dets = []
-            for d in name_dets:
-                raw_t = d.text
-                for _p, _r in PRICE_PREFIX_CLEANUP:
-                    raw_t = re.sub(_p, _r, raw_t)
-                m = re.match(_INLINE_RE, raw_t)
-                if m:
-                    new_name_dets.append(Detection(
-                        text=m.group(1).strip(),
-                        confidence=d.confidence, x_min=d.x_min, x_max=d.x_max,
-                        y_min=d.y_min, y_max=d.y_max, y_center=d.y_center, bbox=d.bbox
-                    ))
-                    price_dets.append(Detection(
-                        text="*" + m.group(2),
-                        confidence=d.confidence, x_min=d.x_min, x_max=d.x_max,
-                        y_min=d.y_min, y_max=d.y_max, y_center=d.y_center, bbox=d.bbox
-                    ))
-                    if DEBUG:
-                        print(f"    [*] Inline ayırma (name→price): '{m.group(1).strip()}' / '*{m.group(2)}'")
-                else:
-                    new_name_dets.append(d)
-            name_dets = new_name_dets
-
-        # Sadece price_dets varsa: içinde gömülü isim ara
-        if not name_dets and len(price_dets) == 1:
-            raw_t = price_dets[0].text
-            for _p, _r in PRICE_PREFIX_CLEANUP:
-                raw_t = re.sub(_p, _r, raw_t)
-            m = re.match(_INLINE_RE, raw_t)
-            if m:
-                d0 = price_dets[0]
-                name_dets = [Detection(
-                    text=m.group(1).strip(),
-                    confidence=d0.confidence, x_min=d0.x_min, x_max=d0.x_max,
-                    y_min=d0.y_min, y_max=d0.y_max, y_center=d0.y_center, bbox=d0.bbox
-                )]
-                if DEBUG:
-                    print(f"    [*] Inline ayırma (price→name): '{m.group(1).strip()}'")
+            print(f"    [*] Name dets: {[d.text for d in name_dets]}")
+            print(f"    [*] Price dets: {[d.text for d in price_dets]}")
 
         # Hâlâ fiyat yok → pending_price varsa kullan, yoksa name'i pending_name yap
         if not price_dets:
