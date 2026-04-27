@@ -1,0 +1,110 @@
+# corrections.toml — OCR düzeltme sözlüğü
+# build_corrections.py tarafından otomatik oluşturulur/güncellenir.
+# Elle de düzenlenebilir.
+#
+# wrong  = OCR'ın ürettiği hatalı metin
+# right  = doğru metin
+
+[[correction]]
+wrong = "SOHA UNLU MAMUL.GIDA KAFE ISL."
+right = "SÜHA UNLU MAMÜL.GIDA KAFE İŞL."
+
+[[correction]]
+wrong = "INS.SAN.TIC.LTD.STI."
+right = "İNŞ.SAN.TİC.LTD.ŞTİ."
+
+[[correction]]
+wrong = "ERZENE MH.FEVZI CAKMAK CD."
+right = "ERZENE MH.FEVZİ ÇAKMAK CD."
+
+[[correction]]
+wrong = "NO:5/E BORNOVA/IZMIR"
+right = "NO:5/E BORNOVA/İZMİR"
+
+[[correction]]
+wrong = "TARIH"
+right = "TARİH"
+
+[[correction]]
+wrong = "FiS NO"
+right = "FİŞ NO"
+
+[[correction]]
+wrong = "Profiterol"
+right = "Profıterol"
+
+[[correction]]
+wrong = "Tavukgōguslü Kazandi"
+right = "Tavukgōğüslü Kazandi"
+
+[[correction]]
+wrong = "KREDI"
+right = "KREDİ"
+
+[[correction]]
+wrong = "ZIRAATBANK"
+right = "ZİRAATBANK"
+
+[[correction]]
+wrong = "************291」"
+right = "************2911"
+
+[[correction]]
+wrong = "EKU NO:0001"
+right = "EKÜ NO:0001"
+
+[[correction]]
+wrong = "ZNO:0088"
+right = "Z NO:0088"
+
+[[correction]]
+wrong = "CEK NO:#131"
+right = "ÇEK NO:#131"
+
+[[correction]]
+wrong = "iSYERI NO:0000001827896"
+right = "İŞYERİ NO:00000001827896"
+
+[[correction]]
+wrong = "iSLEM NO:0079/KP0138"
+right = "İŞLEM NO:0079/KP0138"
+
+[[correction]]
+wrong = "SATIS"
+right = "SATIŞ"
+
+[[correction]]
+wrong = "1.210,00"
+right = "1.210.00"
+
+[[correction]]
+wrong = "UISA"
+right = "VISA"
+
+[[correction]]
+wrong = "TUTAR KARSILIGI MAL VEYA HIZMETI ALDIH"
+right = "TUTAR KARŞILIĞI MAL VEYA HİZMETİ ALDIM"
+
+[[correction]]
+wrong = "BUBELGEYI SAKLAVINIZ"
+right = "BU BELGEYİ SAKLAYINIZ"
+
+[[correction]]
+wrong = "visa payWave"
+right = ")visa payWave"
+
+[[correction]]
+wrong = "BI FIRIN ERZENE MAH. FEUZi CAKMAK CD.NO:5E"
+right = "Bİ FIRIN ERZENE MAH. FEVZi CAKMAK CD. NO:5E"
+
+[[correction]]
+wrong = "35000B0RN0UA35000iZHiR"
+right = "35000B0RN0UA 35000iZHiR"
+
+[[correction]]
+wrong = "ZiraatBankasl"
+right = "ZiraatBankası"
+
+[[correction]]
+wrong = "NE 2C 58620796"
+right = "NF 2C 58620796"

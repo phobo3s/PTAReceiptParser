@@ -87,6 +87,21 @@ def _load_config() -> tuple[dict, list]:
 
 STORE_PROFILES, PRICE_PREFIX_CLEANUP = _load_config()
 
+
+# ── OCR düzeltme sözlüğü (corrections.toml) ──────────────────────────────────
+
+def _load_corrections() -> dict[str, str]:
+    """corrections.toml varsa yükle, yoksa boş dict döndür."""
+    path = Path(__file__).parent / "corrections.toml"
+    if not path.exists():
+        return {}
+    with open(path, "rb") as f:
+        data = tomllib.load(f)
+    return {c["wrong"]: c["right"] for c in data.get("correction", [])}
+
+
+CORRECTIONS: dict[str, str] = _load_corrections()
+
 # TODO: Genel olarak performans bence yeterli ancak preprocessing tamamen bilmediğim bir alan. Android'deki ClearScan uygulaması
 # bütün preprocessing adımlarını yapıyor. Tamamen otomatik. Eğer Whatsapp üzerinden gönderilecekse telefon çekimindense bu uygulama
 # üzerinden görsel alınırsa, bir ton ince ayara gerek kalmıyor. Bu preProcessing'leri ben yapana kadar bunları sözü edilen uygulamaya
@@ -100,15 +115,21 @@ STORE_PROFILES, PRICE_PREFIX_CLEANUP = _load_config()
 # ── OCR çıktısını parse et ────────────────────────────────────────────────────
 
 def load_detections(ocr_json: dict) -> list[Detection]:
-    """PaddleOCR JSON çıktısını Detection listesine çevir."""
+    """PaddleOCR JSON çıktısını Detection listesine çevir.
+    corrections.toml'daki düzeltmeler burada exact-match ile uygulanır.
+    """
     detections = []
     for item in ocr_json.get("detections", []):
         bbox, (text, confidence) = item[0], item[1]
         # bbox: [[x1,y1],[x2,y2],[x3,y3],[x4,y4]] (dörtgen köşeleri)
         xs = [p[0] for p in bbox]
         ys = [p[1] for p in bbox]
+        text = text.strip()
+        # OCR düzeltmesi: exact match
+        if text in CORRECTIONS:
+            text = CORRECTIONS[text]
         detections.append(Detection(
-            text=text.strip(),
+            text=text,
             confidence=confidence,
             x_min=min(xs),
             x_max=max(xs),
