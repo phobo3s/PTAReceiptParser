@@ -183,6 +183,15 @@ def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[s
                     year = parts[2]
                     if len(year) == 2:
                         year = "20" + year  # "26" → "2026"
+                    # Imkansiz tarih degerlerini reddet (orn. "33-34-35-36"den gelen 33/34/2035)
+                    try:
+                        day_v, mon_v = int(parts[0]), int(parts[1])
+                        if not (1 <= day_v <= 31 and 1 <= mon_v <= 12):
+                            if DEBUG:
+                                print(f"    [-] INVALID: day={day_v} month={mon_v}")
+                            continue
+                    except ValueError:
+                        continue
                     result = f"{year}-{parts[1]}-{parts[0]}"
                     if DEBUG:
                         print(f"    [+] ACCEPT: '{date_str}' -> {result}")
@@ -958,7 +967,7 @@ def main():
     DEBUG = "--debug" in sys.argv
     mismatch_only = "--mismatch-only" in sys.argv
 
-    from snapshots import save_snapshot, check_snapshot
+    from snapshots import save_snapshot, check_snapshot, totals_match
     from pathlib import Path
     import io
 
@@ -977,7 +986,7 @@ def main():
             print_summary(receipt)
 
             snap_diffs = check_snapshot(ocr_path, receipt)
-            if snap_diffs:
+            if snap_diffs and totals_match(receipt):
                 print("  [!] SNAPSHOT FARKI TESPIT EDILDI:")
                 for diff in snap_diffs:
                     print(f"      - {diff}")
