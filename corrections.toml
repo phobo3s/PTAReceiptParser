@@ -74,10 +74,6 @@ wrong = "SATIS"
 right = "SATIŞ"
 
 [[correction]]
-wrong = "1.210,00"
-right = "1.210.00"
-
-[[correction]]
 wrong = "UISA"
 right = "VISA"
 
@@ -108,3 +104,39 @@ right = "ZiraatBankası"
 [[correction]]
 wrong = "NE 2C 58620796"
 right = "NF 2C 58620796"
+
+[[correction]]
+wrong = "FSREF CAN GIDA TUR INS VE TIC"
+right = "EŞREF CAN GIDA TUR INŞ VE TIC"
+
+[[correction]]
+wrong = "HiKAYE KITAPLARI"
+right = "HiKAYE KiTAPLARI"
+
+[[correction]]
+wrong = "BIN BIRLESIK MAGAZALAR A.S."
+right = "BIM BIRLESIK MAGAZALAR A.S."
+
+[[correction]]
+wrong = "99,99"
+right = "*99,99"
+
+[[correction]]
+wrong = "*9999"
+right = "*99,99"
+
+[[correction]]
+wrong = "2104-2026"
+right = "21-04-2026"
+
+[[correction]]
+wrong = "70,00"
+right = "*70,00"
+
+[[correction]]
+wrong = "*70, 00"
+right = "*70,00"
+
+[[correction]]
+wrong = "TOPKV"
+right = "TOPKDV"

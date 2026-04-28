@@ -36,7 +36,7 @@ skip_patterns = [
     '^Ref\.No',
     '^KDV\s+(MATRAH|TUTAR|DAHIL)',
     '^(KDV|MATRAH|KOV TUTAR|KOV DAH)',
-    'TOPKD[VU]',
+    'TOPK[DO][VU]',
     '^POS:',
     '^GS No',
     '^\d{2}\.\d{2}\.\d{4}',               # tarih satırları (ödeme bölümü)
@@ -155,7 +155,6 @@ price_pattern = '^[\*x×](-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}
 total_pattern = '^TOPLAM|^EFT-[PF]OS'
 skip_patterns = [
     '^KOV\s+Z',       # KOV Z20 metadata
-    '^%\d+\s+%',      # %25 % iNDiRiM gürültüsü
 ]
 name_cleanup = [
     ['^[=\-]+\s*', ''],

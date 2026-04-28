@@ -57,16 +57,14 @@ def _receipt_to_snapshot(receipt: Receipt) -> dict:
         "saved_at": datetime.now().isoformat(timespec="seconds"),
     }
 
+# ── Dışarıya açık API ─────────────────────────────────────────────────────────
 
-def _totals_match(receipt: Receipt) -> bool:
+def totals_match(receipt: Receipt) -> bool:
     """Hesaplanan toplam ile fişteki toplam örtüşüyor mu?"""
     if receipt.total is None:
         return False
     calc = sum(i.amount for i in receipt.items)
     return abs(calc - receipt.total) <= AMOUNT_TOLERANCE
-
-
-# ── Dışarıya açık API ─────────────────────────────────────────────────────────
 
 def save_snapshot(ocr_path: Path, receipt: Receipt) -> bool:
     """
@@ -74,7 +72,7 @@ def save_snapshot(ocr_path: Path, receipt: Receipt) -> bool:
     Daha önce kaydedilmişse üzerine yazar (güncelleme).
     Döndürür: kaydedildiyse True, atlandıysa False.
     """
-    if not _totals_match(receipt):
+    if not totals_match(receipt):
         return False
 
     key = ocr_path.name
