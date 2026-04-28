@@ -58,7 +58,7 @@ def append_learned_rule(item_name: str, account: str, path: Path = LEARNED_RULES
     """Kullanıcının/Claude'un verdiği cevabı learned rules dosyasına ekle."""
     base_name = re.sub(r'\s*\(.*\)\s*$', '', item_name)  # parantezi at
     words = base_name.upper().split()[:2]
-    pattern = ".*".join(re.escape(w) for w in words)
+    pattern = "^" + " ".join(re.escape(w) for w in words)
 
     # TOML basic string içinde \ geçersiz escape → \\ olarak yaz
     toml_pattern = pattern.replace('\\', '\\\\')
