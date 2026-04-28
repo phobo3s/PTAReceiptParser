@@ -181,7 +181,7 @@ To add a new store, add a `[store.xxx]` block to `stores.toml`. Each profile def
 
 | Engine | Install | Notes |
 |---|---|---|
-| **PaddleOCR** (default) | `pip install paddleocr` | Best `*` detection and character accuracy |
+| **PaddleOCR** (default-recommended) | `pip install paddleocr` | Best `*` detection and character accuracy |
 | **Tesseract** | `winget install UB-Mannheim.TesseractOCR` + `pip install pytesseract` | Requires language pack for your locale |
 | **Windows OCR** | `pip install winocr` | Built-in on Windows 10/11, no extra install |
 
@@ -202,3 +202,211 @@ The parser is locale-agnostic at its core. Turkish-specific behavior is isolated
 | OCR language | `ocr_engine.py` — change `lang=` in `load_paddle()` or Tesseract config |
 
 The coordinate-based row grouping, price extraction, and two-line parse mode work independently of language. Any receipt where prices are right-aligned and items are left-aligned will parse correctly with the right store profile.
+
+---
+
+## CLI Reference
+
+### `batch.py` — Main batch processor
+
+```
+py batch.py <receipt_folder> [options]
+```
+
+| Argument | Description |
+|---|---|
+| `receipt_folder` | Folder containing `.jpg` / `.jpeg` / `.png` receipt images |
+| `--hledger <file.hledger>` | Update this hledger journal file |
+| `--excel <file.xlsx>` | Update this Excel ledger file |
+| `--sheet <SheetName>` | Excel sheet name (default: first sheet) |
+| `--api-key sk-ant-...` | Anthropic API key for automatic item categorization. Also reads `ANTHROPIC_API_KEY` env var. |
+| `--engine paddleocr\|easyocr` | OCR engine (default: `paddleocr`) |
+| `--preprocess` | Run `preProcess.py` on images before OCR |
+
+**Examples:**
+```bash
+py batch.py Receipts/ --hledger budget.hledger
+py batch.py Receipts/ --excel budget.xlsx --sheet Expenses
+py batch.py Receipts/ --hledger budget.hledger --excel budget.xlsx --api-key sk-ant-...
+py batch.py Receipts/ --engine easyocr --hledger budget.hledger
+```
+
+**Categorization priority:** `rules_learned.toml` → `rules.toml` → Claude API (if `--api-key` given) → manual prompt.
+
+---
+
+### `parser.py` — Parse a single receipt or folder
+
+```
+py parser.py <ocr_cache.json|folder> [options]
+```
+
+| Argument | Description |
+|---|---|
+| `<path>` | A single `.ocr_cache/*.json` file, or a folder to parse all JSON files in it |
+| `--debug` | Print detailed row-by-row parse trace: layout bounds, detection grouping, skip reasons, price matches |
+| `--mismatch-only` | Suppress output for receipts where calculated total matches receipt total — only show failures |
+
+**Examples:**
+```bash
+# Parse one file with full debug trace
+py parser.py .ocr_cache/"Belge 4_1.json" --debug
+
+# Batch parse entire cache, show only broken receipts
+py parser.py .ocr_cache/ --mismatch-only
+
+# Quick sanity check on all cached receipts
+py parser.py .ocr_cache/
+```
+
+---
+
+### `preProcess.py` — Image pre-processing
+
+```
+py preProcess.py <folder|image> [options]
+```
+
+| Argument | Description |
+|---|---|
+| `<target>` | Folder of images or a single image file |
+| `--engine paddle\|tesseract` | Target OCR engine — affects binarization step (default: `paddle`) |
+| `--gamma <float>` | Gamma correction, e.g. `0.7` to brighten dark receipts (default: off) |
+| `--sharpen` | Apply unsharp masking for sharper text edges |
+| `--output <dir>` | Output directory (default: `.processedReceipts/`) |
+| `--no-debug` | Skip saving per-step debug images |
+
+**Examples:**
+```bash
+py preProcess.py Receipts/
+py preProcess.py Receipts/ --gamma 0.7 --sharpen
+py preProcess.py Receipts/ --engine tesseract --output .processed_tess
+```
+
+---
+
+### `snapshots.py` — Regression tests
+
+```
+py snapshots.py --regression [options]
+```
+
+| Argument | Description |
+|---|---|
+| `--regression` | Re-parse all snapshots and compare against saved results |
+| `--cache-dir <dir>` | OCR cache directory to read from (default: `.ocr_cache/`) |
+
+Snapshots are saved automatically during `batch.py` and `parser.py` runs whenever the calculated total matches the receipt total. After changing regex patterns or parser logic, run regression to catch unintended breakage.
+
+```bash
+py snapshots.py --regression
+py snapshots.py --regression --cache-dir .ocr_cache
+```
+
+---
+
+### `build_corrections.py` — Build OCR correction dictionary
+
+```
+py build_corrections.py [Cache.cach] [Label.txt] [corrections.toml]
+```
+
+| Argument | Default | Description |
+|---|---|---|
+| `Cache.cach` | `PPOCRLabel_Data/Receipts/Cache.cach` | PPOCRLabel auto-OCR output (the "wrong" side) |
+| `Label.txt` | `PPOCRLabel_Data/Receipts/Label.txt` | User-corrected transcriptions (the "right" side) |
+| `corrections.toml` | `corrections.toml` | Output file — new pairs are appended, existing ones kept |
+
+```bash
+py build_corrections.py
+py build_corrections.py PPOCRLabel_Data/Receipts/Cache.cach PPOCRLabel_Data/Receipts/Label.txt corrections.toml
+```
+
+---
+
+### `import_labels.py` — Import PPOCRLabel ground truth into cache
+
+```
+py import_labels.py [Label.txt] [output_dir]
+```
+
+| Argument | Default | Description |
+|---|---|---|
+| `Label.txt` | `PPOCRLabel_Data/Receipts/Label.txt` | Corrected label file |
+| `output_dir` | `.ocr_cache/` | Where to write `{stem}.json` cache files |
+
+Existing cache files are **not overwritten** — delete the relevant `.json` first if you want to re-import.
+
+---
+
+## PPOCRLabel Workflow
+
+PPOCRLabel is a GUI annotation tool that lets you visually inspect and correct OCR output on receipt images. Use it to build ground truth data that feeds `corrections.toml` and `.ocr_cache/`.
+
+### Setup
+
+1. Install: `pip install PPOCRLabel`
+2. Launch: `PPOCRLabel --lang en` (or `--lang ch` for the full UI)
+3. Open folder: **File → Open Dir** → select `PPOCRLabel_Data/Receipts/`
+
+### Typical workflow for a new batch of receipts
+
+```
+1. Copy new receipt images into PPOCRLabel_Data/Receipts/
+
+2. Open folder in PPOCRLabel
+   File → Open Dir → PPOCRLabel_Data/Receipts/
+
+3. Auto-detect all images
+   View → Auto Recognition
+
+   PPOCRLabel runs its built-in OCR on every image and fills
+   transcriptions automatically. Raw results saved to Cache.cach.
+
+4. Correct transcription errors
+   Click each detection box on screen.
+   Edit the transcription text in the right panel.
+   Save: Ctrl+S  (updates Label.txt, not Cache.cach)
+
+   Focus on items and totals — header/footer errors don't affect parsing.
+   Rule of thumb:
+     - OCR character error (TARIH, UISA) → fix here → build_corrections.py
+     - Layout/price issue                 → fix in stores.toml instead
+
+5. Export corrected data
+   File → Export Recognition Results  (writes rec_gt.txt, optional)
+
+6. Build correction dictionary
+   py build_corrections.py
+   → Diffs Cache.cach (auto) vs Label.txt (corrected)
+   → Appends new pairs to corrections.toml
+
+7. Import corrected cache (optional — use corrected data as OCR cache)
+   Delete existing cache files for affected images:
+     del .ocr_cache\Belge4_1.json
+   Then:
+     py import_labels.py
+   → Writes Label.txt data into .ocr_cache/ with confidence=1.0
+
+8. Run regression test to verify nothing broke
+   py snapshots.py --regression
+```
+
+### Key files in PPOCRLabel_Data/Receipts/
+
+| File | Written by | Content |
+|---|---|---|
+| `Cache.cach` | PPOCRLabel auto-OCR | Raw (uncorrected) detections — same format as Label.txt |
+| `Label.txt` | User corrections | Corrected transcriptions — one line per image |
+| `rec_gt.txt` | PPOCRLabel export | Crop + text pairs for model training (optional) |
+| `crop_img/` | PPOCRLabel | Individual word/phrase crops |
+
+### What to correct vs what to leave
+
+| Situation | Action |
+|---|---|
+| OCR misread a character (`TARIH`, `UISA`, `SOHA`) | Correct in PPOCRLabel → `build_corrections.py` |
+| Price not detected (missing `*`) | Leave — fix `price_pattern` in `stores.toml` |
+| Wrong row grouping | Leave — adjust `y_tolerance` in `stores.toml` |
+| Footer/header noise | Leave — handled by `skip_patterns` in `stores.toml` |
+| Product name has garbage suffix | Leave — handled by `name_cleanup` in `stores.toml` |
