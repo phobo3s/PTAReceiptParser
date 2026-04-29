@@ -61,15 +61,19 @@ def parse_excel_amount(value) -> Optional[float]:
         return None
 
 
-def format_excel_amount(amount: float) -> str:
+def format_excel_amount(amount: Optional[float]) -> str:
     """
     Float'ı Türk formatına çevirir.
     2194.32 → '2.194,32'
     -194.0  → '-194,00'
     """
+    if amount is None:
+        return "0,00"
     # Binlik ayraç olarak nokta, ondalık olarak virgül
     formatted = f"{abs(amount):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    return f"-{formatted}" if amount < 0 else formatted
+    if amount < 0:
+        formatted = f"-{formatted}"
+    return f"{formatted}" 
 
 
 # ── Yardımcı: Tarih dönüşümleri ───────────────────────────────────────────────
@@ -190,7 +194,10 @@ def find_excel_match(
         ws = wb[sheet_name]
     else:
         ws = wb.active
-
+        
+    if ws is None:
+        return None,None
+    
     from_row = find_excel_transaction(ws, receipt)
     if from_row is None:
         return None, None
@@ -257,7 +264,9 @@ def update_excel(
         ws = wb[sheet_name]
     else:
         ws = wb.active
-
+    if ws is None:
+        return False
+    
     # 1. Eşleşen from-account satırını bul
     from_row = find_excel_transaction(ws, receipt)
     if from_row is None:

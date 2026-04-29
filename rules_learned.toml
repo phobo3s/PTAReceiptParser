@@ -44,7 +44,7 @@ account = "Gider:Market:Gıda"
 comment = "Otomatik öğrenildi: ZENCEFİL250G"
 
 [[rule]]
-item    = "^GURMEPACK KBK"
+item    = "^GURMEPACK"
 account = "Gider:Market:Gıda"
 comment = "Otomatik öğrenildi: GURMEPACK KBK.MUCVER"
 
@@ -54,7 +54,7 @@ account = "Gider:Market:Gıda"
 comment = "Otomatik öğrenildi: DANONE MIX CLKYO"
 
 [[rule]]
-item    = "^GIDA"
+item    = "^GIDA$"
 account = "Gider:Market:Gıda"
 comment = "Otomatik öğrenildi: GIDA"
 
@@ -66,17 +66,17 @@ comment = "Otomatik öğrenildi: 13LU CITIR PEYN"
 
 # ── İçecek ────────────────────────────────────────────────────────────────────
 [[rule]]
-item    = "^ICECEK"
+item    = "^ICECEK "
 account = "Gider:Market:İçecek"
 comment = "Otomatik öğrenildi: ICECEK"
 
 [[rule]]
-item    = "^SU5L"
-account = "Gider:Market:Su"
+item    = "^SU5L "
+account = "Gider:Market:İçecek"
 comment = "Otomatik öğrenildi: SU5L"
 
 [[rule]]
-item    = "^SU"
+item    = "^SU "
 account = "Gider:Market:İçecek"
 comment = "Otomatik öğrenildi: Su"
 
@@ -110,7 +110,7 @@ comment = "Otomatik öğrenildi: KAPI RUZGARONLEYİCI"
 # ── Kozmetik ──────────────────────────────────────────────────────────────────
 [[rule]]
 item    = "^ORAL WHITE"
-account = "Gider:Kozmetik"
+account = "Gider:Market:Kozmetik"
 comment = "Otomatik öğrenildi: ORAL WHITE REGULAR C"
 
 # ── Mutfak Eşyası ─────────────────────────────────────────────────────────────
@@ -151,7 +151,7 @@ account = "Gider:Market:Alkol"
 comment = "Otomatik öğrenildi: ESMALT DEPOZITOLU"
 
 [[rule]]
-item    = "^HIGHIANDPARK12Y070CL"
+item    = "^HIGH[IL]ANDPARK"
 account = "Gider:Alkol"
 comment = "Otomatik öğrenildi: HIGHIANDPARK12Y070CL"
 
@@ -243,6 +243,92 @@ account = "Gider:Market:İçecek"
 comment = "Otomatik öğrenildi: RIOBA LADY GREY CAY 75G"
 
 [[rule]]
+item    = "^AYVA"
+account = "Gider:Market:Meyve"
+comment = "Otomatik öğrenildi: AYVA"
+
+[[rule]]
+item    = "^DUYGU EGITIMI KITABI"
+account = "Gider:Kitap"
+comment = "Otomatik öğrenildi: DUYGU EGiTiMi KiTABI"
+
+[[rule]]
+item    = "^FEFES PILSEN"
+account = "Gider:Alkol"
+comment = "Otomatik öğrenildi: FEFES PILSEN KUTU"
+
+[[rule]]
+item    = "^SAKA DOGAL"
+account = "Gider:Market:Su"
+comment = "Otomatik öğrenildi: SAKA DOGAL MINER.SU"
+
+[[rule]]
+item    = "^FROCX KAGIT"
+account = "Gider:Kırtasiye"
+comment = "Otomatik öğrenildi: FROCX KAGIT IP 10M"
+
+[[rule]]
+item    = "^YIKAMA\\(OIOMATIK\\) 20"
+account = "Gider:Otomobil:Yıkama"
+comment = "Otomatik öğrenildi: YIKAMA(OIOMATIK) 20"
+
+[[rule]]
+item    = "^ESGLUTENSIZ BIRA"
+account = "Gider:Alkol"
+comment = "Otomatik öğrenildi: ESGLUTENSIZ BIRA (3.0kg × 144.00)"
+
+[[rule]]
+item    = "^KOCAMANMARINEHAMSI"
+account = "Gider:Market:Gıda"
+comment = "Otomatik öğrenildi: KOCAMANMARINEHAMSI"
+
+[[rule]]
+item    = "^ESMALTDEPOZITOLU"
+account = "Gider:Alkol"
+comment = "Otomatik öğrenildi: ESMALTDEPOZITOLU"
+
+[[rule]]
+item    = "^JSMANIYEYERFISTIGI"
+account = "Gider:Market:Atıştırmalık"
+comment = "Otomatik öğrenildi: JSMANIYEYERFISTIGI"
+
+[[rule]]
+item    = "^KAVRULMUSCEREZ"
+account = "Gider:Market:Atıştırmalık"
+comment = "Otomatik öğrenildi: KAVRULMUSCEREZ"
+
+[[rule]]
+item    = "^ESPILSEN GREEN"
+account = "Gider:Alkol"
+comment = "Otomatik öğrenildi: ESPILSEN GREEN"
+
+[[rule]]
+item    = "^TEMEI GIDA"
+account = "Gider:Market:Gıda"
+comment = "Otomatik öğrenildi: TEMEI GIDA"
+
+# ── Bilinmeyen ─────────────────────────────────────────────────────────────────────
+[[rule]]
+item    = "^%50 %INDIRIM"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: %50 %iNDiRiM"
+
+[[rule]]
+item    = "^%25%INDIRIM"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: %25%iNDiRiM"
+
+[[rule]]
+item    = "^INDIRIMLER:"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: INDIRIMLER: -47,98"
+
+[[rule]]
+item    = "^1\\.727\\.09"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 1.727.09"
+
+[[rule]]
 item    = "^YANKO HYPOESTES"
 account = "Gider:Bilinmeyen"
 comment = "Otomatik öğrenildi: YANKO HYPOESTES Q8.5"
@@ -251,3 +337,93 @@ comment = "Otomatik öğrenildi: YANKO HYPOESTES Q8.5"
 item    = "^YIYECEK"
 account = "Gider:Bilinmeyen"
 comment = "Otomatik öğrenildi: YIYECEK"
+
+[[rule]]
+item    = "^1 KETCAP"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 1 KETCAP"
+
+[[rule]]
+item    = "^1 ISTENHIYOR"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 1 ISTENHIYOR 10"
+
+[[rule]]
+item    = "^1 MAYONEZ"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 1 MAYONEZ 10"
+
+[[rule]]
+item    = "^1 ISTENIYOR"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 1 ISTENIYOR 10"
+
+[[rule]]
+item    = "^1 KETCAP"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 1 KETCAP 10"
+
+[[rule]]
+item    = "^1 MAYONEZ"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 1 MAYONEZ ×10"
+
+[[rule]]
+item    = "^1 ISTENMIYOR"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 1 ISTENMIYOR"
+
+[[rule]]
+item    = "^\\*188\\.02 \\*1ADX1\\*188\\.02%1"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: *188.02 *1ADX1*188.02%1"
+
+[[rule]]
+item    = "^\\*188,02 \\*1ADX1\\*188\\.02%1"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: *188,02 *1ADX1*188.02%1"
+
+[[rule]]
+item    = "^X1\\*237\\.5221\\*239,90"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: X1*237.5221*239,90"
+
+[[rule]]
+item    = "^\\*RIOBA LADY"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: *RIOBA LADY GREY CAY 75G"
+
+[[rule]]
+item    = "^\\*237\\.521AD X1237,52"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: *237.521AD X1237,52 %1"
+
+[[rule]]
+item    = "^0373999 K25"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 0373999 K25 ACTIVE SFTSHL MNT YKL S-XL"
+
+[[rule]]
+item    = "^909,00\\*1ADX1909\\.00"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: 909,00*1ADX1909.00"
+
+[[rule]]
+item    = "^\\*818\\.09"
+account = "Gider:Bilinmeyen"
+comment = "Otomatik öğrenildi: *818.09"
+
+[[rule]]
+item    = "^ICECEK"
+account = "Gider:Market"
+comment = "Otomatik öğrenildi: ICECEK"
+
+[[rule]]
+item    = "^SU"
+account = "Gider:İçecek"
+comment = "Otomatik öğrenildi: Su"
+
+[[rule]]
+item    = "^SU5L"
+account = "Gider:Market:İçecek"
+comment = "Otomatik öğrenildi: SU5L"
