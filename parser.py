@@ -987,11 +987,10 @@ def main():
     rules = None
     if journal_path or excel_path:
         from rules import load_rules
-        from update_journal import RULES_FILE
+        from config import RULES_FILE, RULES_LEARNED
         rules = load_rules(RULES_FILE)
-        learned_file = Path("rules_learned.toml")
-        if learned_file.exists():
-            rules = load_rules(learned_file) + rules
+        if RULES_LEARNED.exists():
+            rules = load_rules(RULES_LEARNED) + rules
 
     from snapshots import save_snapshot, check_snapshot, totals_match
     from processed import is_processed, mark_processed

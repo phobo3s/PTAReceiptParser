@@ -1,0 +1,16 @@
+# PTA Receipt Parser — Makine-spesifik ayarlar
+# Bu dosyayı config.toml olarak kopyalayın ve düzenleyin.
+# config.toml .gitignore'dadır, repoya girmez.
+
+[paths]
+# OCR cache klasörü — ayrı data repo kullanıyorsanız tam path verin
+# ocr_cache = "C:/PTAReceiptParser-data/.ocr_cache"
+ocr_cache       = ".ocr_cache"
+
+# Kural dosyaları
+# rules         = "C:/PTAReceiptParser-data/rules.toml"
+rules           = "rules.toml"
+rules_learned   = "rules_learned.toml"
+
+# Varsayılan hesap adı (kural eşleşmezse)
+default_account = "Gider:Bilinmeyen"

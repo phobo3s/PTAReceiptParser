@@ -13,7 +13,7 @@ from parser import parse_receipt, Receipt, ReceiptItem
 from rules import load_rules, find_account, append_learned_rule, DEFAULT_ACCOUNT
 
 
-RULES_FILE = Path("rules.toml")
+from config import RULES_FILE
 AMOUNT_TOLERANCE = 0.02  # TL cinsinden eşleşme toleransı
 
 

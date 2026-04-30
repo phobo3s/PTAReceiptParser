@@ -27,7 +27,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-PROCESSED_FILE = Path(".ocr_cache/processed.json")
+from config import PROCESSED_FILE
 
 
 def _load() -> dict:

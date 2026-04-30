@@ -8,8 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-DEFAULT_ACCOUNT = "Gider:Bilinmeyen"
-LEARNED_RULES_FILE = Path("rules_learned.toml")
+from config import DEFAULT_ACCOUNT, RULES_LEARNED as LEARNED_RULES_FILE
 
 @dataclass
 class Rule:
