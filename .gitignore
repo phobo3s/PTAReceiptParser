@@ -3,3 +3,4 @@ __pycache__/
 .claude
 CLAUDE.md
 GEMINI.md
+.ocr_cache/processed.json

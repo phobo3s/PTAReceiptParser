@@ -109,6 +109,20 @@ def receipt_date_to_excel(receipt_date: str) -> str:
     return f"{dt.day}.{dt.month:02d}.{dt.year}"
 
 
+# ── Yardımcı: Merged cell güvenli silme/ekleme ────────────────────────────────
+
+def _unmerge_rows(ws, first_row: int, last_row: int) -> None:
+    """Verilen satır aralığıyla çakışan tüm merged cell'leri unmerge eder.
+    delete_rows / insert_rows öncesi çağrılmazsa openpyxl geçersiz XML üretir."""
+    to_unmerge = [
+        str(mc)
+        for mc in list(ws.merged_cells.ranges)
+        if mc.min_row <= last_row and mc.max_row >= first_row
+    ]
+    for mc_str in to_unmerge:
+        ws.unmerge_cells(mc_str)
+
+
 # ── Excel transaction eşleştirme ──────────────────────────────────────────────
 
 def find_excel_transaction(ws, receipt: Receipt, tolerance: float = AMOUNT_TOLERANCE) -> Optional[int]:
@@ -186,7 +200,8 @@ def find_excel_match(
         print(f"  ❌ Excel dosyası bulunamadı: {excel_path}")
         return None, None
 
-    wb = load_workbook(str(excel_path))
+    keep_vba = str(excel_path).lower().endswith(".xlsm")
+    wb = load_workbook(str(excel_path), keep_vba=keep_vba)
     if sheet_name:
         if sheet_name not in wb.sheetnames:
             print(f"  ❌ Sheet bulunamadı: '{sheet_name}'")
@@ -194,9 +209,9 @@ def find_excel_match(
         ws = wb[sheet_name]
     else:
         ws = wb.active
-        
+
     if ws is None:
-        return None,None
+        return None, None
     
     from_row = find_excel_transaction(ws, receipt)
     if from_row is None:
@@ -204,6 +219,53 @@ def find_excel_match(
 
     account = ws.cell(row=from_row, column=8).value  # H sütunu
     return from_row, str(account) if account else ""
+
+
+# ── Mevcut to-account okuma ───────────────────────────────────────────────────
+
+def read_excel_to_accounts(
+    excel_path: Path,
+    receipt: Receipt,
+    sheet_name: Optional[str] = None,
+) -> dict[float, str]:
+    """
+    Excel'deki mevcut to-account satırlarını okur.
+    Döndürür: {tutar: hesap_adı} — eşleşme bulunamazsa boş dict.
+    Birden fazla satır aynı tutara sahipse sonuncusu kazanır.
+    """
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        return {}
+
+    if not excel_path.exists():
+        return {}
+
+    keep_vba = str(excel_path).lower().endswith(".xlsm")
+    wb = load_workbook(str(excel_path), keep_vba=keep_vba, read_only=True)
+    if sheet_name:
+        ws = wb[sheet_name] if sheet_name in wb.sheetnames else None
+    else:
+        ws = wb.active
+    if ws is None:
+        return {}
+
+    from_row = find_excel_transaction(ws, receipt)
+    if from_row is None:
+        return {}
+
+    first_to, last_to = get_to_account_rows(ws, from_row)
+    if last_to < first_to:
+        return {}
+
+    result: dict[float, str] = {}
+    for r in range(first_to, last_to + 1):
+        account = ws.cell(row=r, column=8).value  # H
+        amount  = parse_excel_amount(ws.cell(row=r, column=9).value)  # I
+        if account and amount is not None:
+            result[round(amount, 2)] = str(account)
+
+    return result
 
 
 # ── Önizleme ──────────────────────────────────────────────────────────────────
@@ -223,86 +285,97 @@ def preview_excel(categorized: list[tuple[ReceiptItem, str]], receipt: Receipt):
 
 # ── Ana güncelleme fonksiyonu ─────────────────────────────────────────────────
 
+def _apply_to_ws(ws, receipt: Receipt, categorized: list[tuple[ReceiptItem, str]]) -> Optional[int]:
+    """Tek bir fişi açık worksheet'e yazar. Kaydetmez.
+    Başarılıysa from_row (int) döner, bulunamazsa None."""
+    from_row = find_excel_transaction(ws, receipt)
+    if from_row is None:
+        print(f"  ❌ Excel'de eşleşen satır bulunamadı!")
+        total_str = f"{receipt.total:.2f} TL" if receipt.total else "toplam bilinmiyor"
+        print(f"     Aranan: {receipt.date}  {total_str}")
+        return None
+
+    print(f"  ✓ Eşleşen satır: {from_row}  ({ws.cell(row=from_row, column=1).value}  {ws.cell(row=from_row, column=8).value})")
+
+    first_to, last_to = get_to_account_rows(ws, from_row)
+    existing_to_count = max(0, last_to - first_to + 1)
+
+    # Mevcut to-account'ları silmeden önce D sütununa yedekle
+    if existing_to_count > 0:
+        from datetime import date as _date
+        parts = []
+        for r in range(first_to, last_to + 1):
+            acc = ws.cell(row=r, column=8).value  # H
+            from_acc = ws.cell(row=from_row, column=8).value  # H (from-account)
+            if acc and acc != from_acc:
+                parts.append(str(acc))
+        if parts:
+            ws.cell(row=from_row, column=4).value = f"[{_date.today()}] " + " | ".join(parts)
+
+        _unmerge_rows(ws, first_to, last_to)
+        ws.delete_rows(first_to, existing_to_count)
+
+    new_count = len(categorized)
+    if new_count > 0:
+        _unmerge_rows(ws, first_to, first_to)
+        ws.insert_rows(first_to, new_count)
+
+    for idx, (item, account) in enumerate(categorized):
+        r = first_to + idx
+        ws.cell(row=r, column=8).value = account
+        cell_i = ws.cell(row=r, column=9)
+        cell_i.value = round(item.amount, 2)
+        cell_i.number_format = '#,##0.00'
+        ws.cell(row=r, column=10).value = "1"
+        ws.cell(row=r, column=7).value = item.name
+
+    return from_row
+
+
 def update_excel(
     excel_path: Path,
     receipt: Receipt,
     categorized: list[tuple[ReceiptItem, str]],
     sheet_name: Optional[str] = None,
 ) -> bool:
+    """Tek fiş için: aç → yaz → kaydet."""
+    return update_excel_batch(excel_path, [(receipt, categorized)], sheet_name)
+
+
+def update_excel_batch(
+    excel_path: Path,
+    items: list[tuple[Receipt, list[tuple[ReceiptItem, str]]]],
+    sheet_name: Optional[str] = None,
+) -> list[Optional[int]]:
     """
-    Excel dosyasındaki eşleşen transaction'ın to-account satırlarını
-    kategorize edilmiş fiş kalemleriyle günceller.
-
-    Adımlar:
-    1. Workbook aç
-    2. Sheet seç (sheet_name veya ilk sheet)
-    3. from-account satırını bul (tarih + tutar)
-    4. Mevcut to-account satırlarını tespit et
-    5. Eski to-account satırlarını sil
-    6. Yeni kalem satırlarını ekle
-    7. Kaydet
-
-    Başarılıysa True, hata varsa False döner.
+    Birden fazla fişi tek load+save ile yazar.
+    Döndürür: her fiş için from_row (başarılıysa int, bulunamazsa None).
     """
     try:
         from openpyxl import load_workbook
     except ImportError:
         print("  ❌ openpyxl kurulu değil. Kurmak için: pip install openpyxl")
-        return False
+        return [None] * len(items)
 
     if not excel_path.exists():
         print(f"  ❌ Excel dosyası bulunamadı: {excel_path}")
-        return False
+        return [None] * len(items)
 
-    wb = load_workbook(str(excel_path))
+    keep_vba = str(excel_path).lower().endswith(".xlsm")
+    wb = load_workbook(str(excel_path), keep_vba=keep_vba)
 
     if sheet_name:
         if sheet_name not in wb.sheetnames:
             print(f"  ❌ Sheet bulunamadı: '{sheet_name}'")
             print(f"     Mevcut sheetler: {', '.join(wb.sheetnames)}")
-            return False
+            return [None] * len(items)
         ws = wb[sheet_name]
     else:
         ws = wb.active
     if ws is None:
-        return False
-    
-    # 1. Eşleşen from-account satırını bul
-    from_row = find_excel_transaction(ws, receipt)
-    if from_row is None:
-        print(f"  ❌ Excel'de eşleşen satır bulunamadı!")
-        print(f"     Aranan: {receipt.date}  {receipt.total:.2f} TL")
-        return False
+        return [None] * len(items)
 
-    print(f"  ✓ Eşleşen satır: {from_row}  ({ws.cell(row=from_row, column=1).value}  {ws.cell(row=from_row, column=8).value})")
-
-    # 2. Mevcut to-account satırlarını tespit et
-    first_to, last_to = get_to_account_rows(ws, from_row)
-    existing_to_count = max(0, last_to - first_to + 1)
-
-    # from-row'dan E sütununu al (CURRENCY::TRY) — kopyalanacak
-    currency_val = ws.cell(row=from_row, column=5).value  # E sütunu
-
-    # 3. Mevcut to-account satırlarını sil
-    if existing_to_count > 0:
-        ws.delete_rows(first_to, existing_to_count)
-
-    # 4. Yeni kalem satırları için yer aç
-    new_count = len(categorized)
-    if new_count > 0:
-        ws.insert_rows(first_to, new_count)
-
-    # 5. Yeni satırları doldur
-    for idx, (item, account) in enumerate(categorized):
-        r = first_to + idx
-        # H: hesap adı
-        ws.cell(row=r, column=8).value = account
-        # I: tutar (pozitif, Türk formatı string olarak)
-        ws.cell(row=r, column=9).value = format_excel_amount(item.amount)
-        # J: rate
-        ws.cell(row=r, column=10).value = "1"
-        # G: ürün adı (yorum/not olarak)
-        ws.cell(row=r, column=7).value = item.name
+    results = [_apply_to_ws(ws, receipt, categorized) for receipt, categorized in items]
 
     wb.save(str(excel_path))
-    return True
+    return results

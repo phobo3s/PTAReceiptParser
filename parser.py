@@ -1,6 +1,6 @@
 """
 Fiş Parser - Koordinat tabanlı, çoklu market desteği
-Kullanım: python parser.py ocr_output.json [--hledger] [--debug]
+Kullanım: python parser.py ocr_output.json [--hledger journal.hledger] [--excel muhasebe.xlsm] [--sheet SheetAdı] [--debug] [--mismatch-only]
 """
 
 import json
@@ -960,16 +960,41 @@ def print_summary(receipt: Receipt):
 def main():
     global DEBUG
 
-    if len(sys.argv) < 2:
-        print("Kullanım: python parser.py <ocr_output.json> [--debug] [--mismatch-only]")
-        sys.exit(1)
+    import argparse
+    import io
 
-    DEBUG = "--debug" in sys.argv
-    mismatch_only = "--mismatch-only" in sys.argv
+    ap = argparse.ArgumentParser(
+        description="Fiş parser — OCR JSON'dan fiş çıkarır, isteğe bağlı hledger/Excel günceller."
+    )
+    ap.add_argument("input", help="OCR JSON dosyası veya klasör")
+    ap.add_argument("--hledger", metavar="JOURNAL", help="hledger journal dosyası (güncelleme için)")
+    ap.add_argument("--excel", metavar="EXCEL", help="Excel dosyası (güncelleme için)")
+    ap.add_argument("--sheet", metavar="SHEET", help="Excel sheet adı (--excel ile kullanılır)")
+    ap.add_argument("--debug", action="store_true")
+    ap.add_argument("--mismatch-only", action="store_true")
+    ap.add_argument("--force", action="store_true", help="Daha önce işlenmiş fişleri tekrar güncelle")
+    args = ap.parse_args()
+
+    DEBUG = args.debug
+    mismatch_only = args.mismatch_only
+    force = args.force
+
+    journal_path = Path(args.hledger) if args.hledger else None
+    excel_path   = Path(args.excel)   if args.excel   else None
+    sheet_name   = args.sheet
+
+    # Kuralları bir kez yükle (hledger veya excel aktifse)
+    rules = None
+    if journal_path or excel_path:
+        from rules import load_rules
+        from update_journal import RULES_FILE
+        rules = load_rules(RULES_FILE)
+        learned_file = Path("rules_learned.toml")
+        if learned_file.exists():
+            rules = load_rules(learned_file) + rules
 
     from snapshots import save_snapshot, check_snapshot, totals_match
-    from pathlib import Path
-    import io
+    from processed import is_processed, mark_processed
 
     def _process(ocr_path: Path):
         buf = io.StringIO() if mismatch_only else None
@@ -1019,11 +1044,131 @@ def main():
                 if has_mismatch:
                     print(buf.getvalue(), end="")
 
-    if os.path.isdir(sys.argv[1]):
-        for file in sorted(os.listdir(sys.argv[1])):
-            _process(Path(sys.argv[1]) / file)
+        if receipt is None:
+            return None
+
+        ocr_name = ocr_path.name
+        hledger_pending = None  # (ocr_name, tx, new_lines)
+        excel_pending   = None  # (ocr_name, receipt, categorized)
+
+        # ── hledger önizleme + onay toplama ───────────────────────────────────
+        if journal_path:
+            from update_journal import (
+                parse_journal, find_matching_transaction,
+                build_new_transaction, preview, categorize_items,
+            )
+            already = is_processed(ocr_name, "hledger")
+            if already and not force:
+                print(f"  ⚠️  hledger: zaten işlendi ({already.get('updated_at', '?')}, "
+                      f"{already.get('total', '?')} TL) — atlanıyor")
+            else:
+                categorized  = categorize_items(receipt, rules)
+                transactions = parse_journal(journal_path)
+                tx           = find_matching_transaction(receipt, transactions)
+                if tx is None:
+                    print(f"  ❌ hledger: eşleşen transaction bulunamadı "
+                          f"({receipt.date}  {receipt.total:.2f} TL)")
+                else:
+                    new_lines = build_new_transaction(tx, categorized, receipt)
+                    preview(new_lines)
+                    print("\nJournal güncellensin mi? [e/H] ", end="")
+                    try:
+                        answer = input().strip().lower()
+                    except (EOFError, KeyboardInterrupt):
+                        answer = "h"
+                    if answer == "e":
+                        hledger_pending = (ocr_name, tx, new_lines)
+
+        # ── Excel önizleme + onay toplama ─────────────────────────────────────
+        if excel_path:
+            from update_journal import categorize_items
+            from update_excel import preview_excel, read_excel_to_accounts
+            from rules import DEFAULT_ACCOUNT
+            already = is_processed(ocr_name, "excel")
+            if already and not force:
+                print(f"  ⚠️  Excel: zaten işlendi ({already.get('updated_at', '?')}, "
+                      f"{already.get('total', '?')} TL) — atlanıyor")
+            else:
+                categorized = categorize_items(receipt, rules)
+
+                # Default atanan kalemleri Excel'deki mevcut to-account ile doldur
+                excel_accounts = read_excel_to_accounts(excel_path, receipt, sheet_name)
+                if excel_accounts:
+                    categorized = [
+                        (item, excel_accounts.get(round(item.amount, 2), account)
+                               if account == DEFAULT_ACCOUNT else account)
+                        for item, account in categorized
+                    ]
+
+                preview_excel(categorized, receipt)
+                print("\nExcel güncellensin mi? [e/H] ", end="")
+                try:
+                    answer = input().strip().lower()
+                except (EOFError, KeyboardInterrupt):
+                    answer = "h"
+                if answer == "e":
+                    excel_pending = (ocr_name, receipt, categorized)
+
+        return hledger_pending, excel_pending
+
+    # ── Dosyaları topla ────────────────────────────────────────────────────────
+    input_path = Path(args.input)
+    if input_path.is_dir():
+        ocr_files = sorted(
+            p for p in input_path.iterdir()
+            if p.suffix.lower() == ".json" and p.name != "processed.json"
+        )
     else:
-        _process(Path(sys.argv[1]))
+        ocr_files = [input_path]
+
+    # Faz 1: parse + önizle + onay topla
+    pending_hledger: list = []  # [(ocr_name, tx, new_lines), ...]
+    pending_excel:   list = []  # [(ocr_name, receipt, categorized), ...]
+
+    for ocr_file in ocr_files:
+        result = _process(ocr_file)
+        if result is None:
+            continue
+        h, e = result
+        if h:
+            pending_hledger.append(h)
+        if e:
+            pending_excel.append(e)
+
+    # Faz 2: toplu güncelleme
+    if pending_hledger:
+        from update_journal import update_journal
+        print(f"\n── hledger güncelleniyor ({len(pending_hledger)} transaction) ──")
+        for ocr_name, tx, new_lines in pending_hledger:
+            update_journal(journal_path, tx, new_lines)
+            total_str = f"{tx.total:.2f} TL" if tx.total else "?"
+            print(f"  ✓ {tx.date}  {total_str}")
+            mark_processed(ocr_name, "hledger", {
+                "store":   tx.description,
+                "date":    tx.date,
+                "total":   tx.total,
+                "tx_line": tx.start_line + 1,
+            })
+        print(f"  Toplam {len(pending_hledger)} transaction güncellendi → {journal_path}")
+
+    if pending_excel:
+        from update_excel import update_excel_batch
+        print(f"\n── Excel güncelleniyor ({len(pending_excel)} fiş) ──")
+        receipts_and_cats = [(r, c) for _, r, c in pending_excel]
+        results = update_excel_batch(excel_path, receipts_and_cats, sheet_name)
+        ok_count = 0
+        for (ocr_name, receipt, _), from_row in zip(pending_excel, results):
+            if from_row is not None:
+                ok_count += 1
+                mark_processed(ocr_name, "excel", {
+                    "store":  receipt.store,
+                    "date":   receipt.date,
+                    "total":  receipt.total,
+                    "items":  len(receipt.items),
+                    "sheet":  sheet_name or "active",
+                    "row":    from_row,
+                })
+        print(f"  Toplam {ok_count}/{len(pending_excel)} fiş güncellendi → {excel_path}")
 
 if __name__ == "__main__":
     main()
