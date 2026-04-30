@@ -966,7 +966,7 @@ def main():
     ap = argparse.ArgumentParser(
         description="Fiş parser — OCR JSON'dan fiş çıkarır, isteğe bağlı hledger/Excel günceller."
     )
-    ap.add_argument("input", help="OCR JSON dosyası veya klasör")
+    ap.add_argument("input", nargs="?", help="OCR JSON dosyası veya klasör (verilmezse config'deki ocr_cache kullanılır)")
     ap.add_argument("--hledger", metavar="JOURNAL", help="hledger journal dosyası (güncelleme için)")
     ap.add_argument("--excel", metavar="EXCEL", help="Excel dosyası (güncelleme için)")
     ap.add_argument("--sheet", metavar="SHEET", help="Excel sheet adı (--excel ile kullanılır)")
@@ -992,6 +992,7 @@ def main():
         if RULES_LEARNED.exists():
             rules = load_rules(RULES_LEARNED) + rules
 
+    from config import OCR_CACHE_DIR
     from snapshots import save_snapshot, check_snapshot, totals_match
     from processed import is_processed, mark_processed
 
@@ -1111,7 +1112,11 @@ def main():
         return hledger_pending, excel_pending
 
     # ── Dosyaları topla ────────────────────────────────────────────────────────
-    input_path = Path(args.input)
+    input_path = Path(args.input) if args.input else OCR_CACHE_DIR
+    if not input_path.exists():
+        print(f"❌ Path bulunamadı: {input_path.resolve()}")
+        print(f"   İpucu: OCR cache için config.toml'daki ocr_cache değeri: {OCR_CACHE_DIR}")
+        sys.exit(1)
     if input_path.is_dir():
         ocr_files = sorted(
             p for p in input_path.iterdir()
