@@ -95,7 +95,11 @@ def get_easyocr_engine():
 
 
 def get_trocr_engine():
-    """PaddleOCR detection + TrOCR large-printed recognition pipeline."""
+    """PaddleOCR detection + TrOCR large-printed recognition pipeline.
+
+    trocr_adapter/ klasörü varsa (train_trocr.py ile oluşturulur) LoRA
+    adapter'ı otomatik yükler — Türkçe fiş tanıma giderek iyileşir.
+    """
     try:
         from transformers import TrOCRProcessor, VisionEncoderDecoderModel
         import torch  # noqa: F401
@@ -121,11 +125,28 @@ def get_trocr_engine():
         use_doc_unwarping=False,
     )
 
-    # Recognition: TrOCR large-printed
-    MODEL_ID = "microsoft/trocr-large-printed"
-    print(f"⏳ TrOCR yükleniyor ({MODEL_ID}, ilk seferinde ~1.4GB indirilebilir)...")
+    # Recognition: TrOCR large-printed (+ opsiyonel LoRA adapter)
+    MODEL_ID    = "microsoft/trocr-large-printed"
+    ADAPTER_DIR = Path("trocr_adapter")
+
+    print(f"⏳ TrOCR yükleniyor ({MODEL_ID})...")
     processor = TrOCRProcessor.from_pretrained(MODEL_ID)
-    model = VisionEncoderDecoderModel.from_pretrained(MODEL_ID)
+    model     = VisionEncoderDecoderModel.from_pretrained(MODEL_ID)
+
+    # trocr_adapter/ varsa otomatik yükle
+    if (ADAPTER_DIR / "adapter_config.json").exists():
+        try:
+            from peft import PeftModel
+            model = PeftModel.from_pretrained(model, str(ADAPTER_DIR))
+            print(f"  + LoRA adapter yüklendi: {ADAPTER_DIR}/")
+        except ImportError:
+            print(f"  ⚠️  trocr_adapter/ var ama peft yüklü değil — temel model kullanılıyor")
+            print(f"      pip install peft  ile kurabilirsin")
+        except Exception as e:
+            print(f"  ⚠️  LoRA adapter yüklenemedi ({e}) — temel model kullanılıyor")
+    else:
+        print(f"  (trocr_adapter/ yok — temel model kullanılıyor)")
+
     model.eval()
     print("+ TrOCR hazır (PaddleOCR det + TrOCR rec)\n")
     return (paddle, processor, model)
