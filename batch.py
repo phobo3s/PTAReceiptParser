@@ -42,8 +42,9 @@ logging.basicConfig(level=logging.WARNING)  # PaddleOCR loglarını sustur
 
 from config import RULES_FILE, RULES_LEARNED as LEARNED_RULES_FILE, OCR_CACHE_DIR
 
-SUPPORTED_EXTS     = {".jpg", ".jpeg", ".png"}
-OCR_CACHE_DIR_EASY = Path(".ocr_cache_easyocr")  # EasyOCR cache (Türkçe karakter desteği)
+SUPPORTED_EXTS      = {".jpg", ".jpeg", ".png"}
+OCR_CACHE_DIR_EASY  = Path(".ocr_cache_easyocr")   # EasyOCR cache (Türkçe karakter desteği)
+OCR_CACHE_DIR_TROCR = Path(".ocr_cache_trocr")     # TrOCR cache
 
 
 # ── OCR ───────────────────────────────────────────────────────────────────────
@@ -93,6 +94,87 @@ def get_easyocr_engine():
     return reader
 
 
+def get_trocr_engine():
+    """TrOCR large-printed modelini yükle. Türkçe baskılı fişler için."""
+    try:
+        from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+        import torch  # noqa: F401
+    except ImportError:
+        print("❌ transformers/torch yüklü değil: pip install transformers torch")
+        sys.exit(1)
+    MODEL_ID = "microsoft/trocr-large-printed"
+    print(f"⏳ TrOCR yükleniyor ({MODEL_ID}, ilk seferinde ~1.4GB indirilebilir)...")
+    processor = TrOCRProcessor.from_pretrained(MODEL_ID)
+    model = VisionEncoderDecoderModel.from_pretrained(MODEL_ID)
+    model.eval()
+    print("+ TrOCR hazır\n")
+    return (processor, model)
+
+
+def _detect_text_lines_opencv(img_gray, w: int, h: int) -> list:
+    """Yatay morfoloji + kontur analizi ile metin satırlarını tespit et.
+    (x1, y1, x2, y2) koordinat tupleleri döndürür."""
+    import cv2
+    import numpy as np
+
+    _, binary = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    # Aynı satırdaki kelimeleri yatayda birleştir
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(1, w // 6), 1))
+    dilated = cv2.dilate(binary, kernel, iterations=3)
+
+    contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    lines = []
+    for cnt in contours:
+        x, y, cw, ch = cv2.boundingRect(cnt)
+        if cw < w * 0.05 or ch < 4:
+            continue
+        padding = max(2, ch // 4)
+        y1 = max(0, y - padding)
+        y2 = min(h, y + ch + padding)
+        lines.append((0, y1, w, y2))
+
+    lines.sort(key=lambda b: b[1])
+    return lines
+
+
+def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
+    """TrOCR ile OCR. OpenCV satır tespiti + TrOCR tanıma."""
+    import torch
+    import numpy as np
+    from PIL import ImageDraw
+
+    processor, model = engine_tuple
+    img_gray = np.array(img.convert("L"))
+    line_bboxes = _detect_text_lines_opencv(img_gray, w, h)
+
+    detections = []
+    for (x1, y1, x2, y2) in line_bboxes:
+        crop = img.crop((x1, y1, x2, y2))
+        if crop.width < 10 or crop.height < 4:
+            continue
+        pixel_values = processor(images=crop, return_tensors="pt").pixel_values
+        with torch.no_grad():
+            generated_ids = model.generate(pixel_values)
+        text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
+        if not text:
+            continue
+        bbox = [[x1, y1], [x2, y1], [x2, y2], [x1, y2]]
+        detections.append([bbox, [text, 0.95]])
+
+    # Görselleştirme (.guidedReceipts/ klasörüne)
+    guided_receipts_dir = Path(".guidedReceipts")
+    guided_receipts_dir.mkdir(exist_ok=True)
+    vis = img.copy()
+    draw = ImageDraw.Draw(vis)
+    for det in detections:
+        pts = [(p[0], p[1]) for p in det[0]]
+        draw.polygon(pts, outline="blue")
+    vis.save(str(guided_receipts_dir / image_path.name))
+
+    print(f"  TrOCR: Toplam {len(detections)} detection")
+    return {"status": "success", "image_width": w, "image_height": h, "detections": detections}
+
+
 def run_ocr(ocr_engine, image_path: Path, engine_name: str = "paddleocr") -> dict:
     """OCR çalıştır ve parser'ın beklediği ortak formatta döndür."""
     import numpy as np
@@ -104,6 +186,8 @@ def run_ocr(ocr_engine, image_path: Path, engine_name: str = "paddleocr") -> dic
 
     if engine_name == "easyocr":
         return _run_easyocr(ocr_engine, image_path, img, w, h)
+    elif engine_name == "trocr":
+        return _run_trocr(ocr_engine, image_path, img, w, h)
     else:
         return _run_paddleocr(ocr_engine, image_path, img_array, w, h)
 
@@ -163,7 +247,12 @@ def _run_easyocr(reader, image_path: Path, img, w: int, h: int) -> dict:
 
 def ocr_with_cache(ocr_engine, image_path: Path, engine_name: str = "paddleocr") -> dict:
     """Cache'te varsa OCR'ı tekrar yapmaz. Her engine'in ayrı cache klasörü var."""
-    cache_dir = OCR_CACHE_DIR_EASY if engine_name == "easyocr" else OCR_CACHE_DIR
+    if engine_name == "easyocr":
+        cache_dir = OCR_CACHE_DIR_EASY
+    elif engine_name == "trocr":
+        cache_dir = OCR_CACHE_DIR_TROCR
+    else:
+        cache_dir = OCR_CACHE_DIR
     cache_dir.mkdir(exist_ok=True)
     cache_file = cache_dir / (image_path.stem + ".json")
 
@@ -510,13 +599,15 @@ def main():
         idx = sys.argv.index("--engine")
         if idx + 1 < len(sys.argv):
             engine_name = sys.argv[idx + 1].lower()
-    if engine_name not in ("paddleocr", "easyocr"):
-        print(f"❌ Bilinmeyen engine: {engine_name}  (paddleocr veya easyocr olmalı)")
+    if engine_name not in ("paddleocr", "easyocr", "trocr"):
+        print(f"❌ Bilinmeyen engine: {engine_name}  (paddleocr, easyocr veya trocr olmalı)")
         sys.exit(1)
 
     print(f"🔧 OCR engine: {engine_name}")
     if engine_name == "easyocr":
         ocr_engine = get_easyocr_engine()
+    elif engine_name == "trocr":
+        ocr_engine = get_trocr_engine()
     else:
         ocr_engine = get_ocr_engine()
 
