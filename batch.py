@@ -95,71 +95,79 @@ def get_easyocr_engine():
 
 
 def get_trocr_engine():
-    """TrOCR large-printed modelini yükle. Türkçe baskılı fişler için."""
+    """PaddleOCR detection + TrOCR large-printed recognition pipeline."""
     try:
         from transformers import TrOCRProcessor, VisionEncoderDecoderModel
         import torch  # noqa: F401
     except ImportError:
         print("❌ transformers/torch yüklü değil: pip install transformers torch")
         sys.exit(1)
+
+    # Detection: fişler için fine-tune edilmiş PaddleOCR detector
+    import os
+    os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'
+    from paddleocr import PaddleOCR
+    os.environ["FLAGS_use_mkldnn"] = "0"
+    print("⏳ PaddleOCR detector yükleniyor...")
+    paddle = PaddleOCR(
+        use_textline_orientation=False,
+        lang='tr',
+        text_detection_model_name="PP-OCRv5_mobile_det",
+        text_recognition_model_name="PP-OCRv5_mobile_rec",
+        enable_mkldnn=(platform.system() == "Linux"),
+        text_det_unclip_ratio=1.6,
+        text_det_box_thresh=0.5,
+        text_det_thresh=0.3,
+        use_doc_unwarping=False,
+    )
+
+    # Recognition: TrOCR large-printed
     MODEL_ID = "microsoft/trocr-large-printed"
     print(f"⏳ TrOCR yükleniyor ({MODEL_ID}, ilk seferinde ~1.4GB indirilebilir)...")
     processor = TrOCRProcessor.from_pretrained(MODEL_ID)
     model = VisionEncoderDecoderModel.from_pretrained(MODEL_ID)
     model.eval()
-    print("+ TrOCR hazır\n")
-    return (processor, model)
-
-
-def _detect_text_lines_opencv(img_gray, w: int, h: int) -> list:
-    """Yatay morfoloji + kontur analizi ile metin satırlarını tespit et.
-    (x1, y1, x2, y2) koordinat tupleleri döndürür."""
-    import cv2
-    import numpy as np
-
-    _, binary = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    # Aynı satırdaki kelimeleri yatayda birleştir
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(1, w // 6), 1))
-    dilated = cv2.dilate(binary, kernel, iterations=3)
-
-    contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    lines = []
-    for cnt in contours:
-        x, y, cw, ch = cv2.boundingRect(cnt)
-        if cw < w * 0.05 or ch < 4:
-            continue
-        padding = max(2, ch // 4)
-        y1 = max(0, y - padding)
-        y2 = min(h, y + ch + padding)
-        lines.append((0, y1, w, y2))
-
-    lines.sort(key=lambda b: b[1])
-    return lines
+    print("+ TrOCR hazır (PaddleOCR det + TrOCR rec)\n")
+    return (paddle, processor, model)
 
 
 def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
-    """TrOCR ile OCR. OpenCV satır tespiti + TrOCR tanıma."""
+    """PaddleOCR detection → crop → TrOCR recognition pipeline."""
     import torch
-    import numpy as np
     from PIL import ImageDraw
 
-    processor, model = engine_tuple
-    img_gray = np.array(img.convert("L"))
-    line_bboxes = _detect_text_lines_opencv(img_gray, w, h)
+    paddle, processor, model = engine_tuple
+
+    # PaddleOCR detection: bbox'ları al, PaddleOCR'ın kendi recognition'ını yoksay
+    result = list(paddle.predict(str(image_path)))
 
     detections = []
-    for (x1, y1, x2, y2) in line_bboxes:
-        crop = img.crop((x1, y1, x2, y2))
-        if crop.width < 10 or crop.height < 4:
+    for ocr_result in result:
+        boxes = ocr_result.get("dt_polys") or ocr_result.get("boxes")
+        if boxes is None:
             continue
-        pixel_values = processor(images=crop, return_tensors="pt").pixel_values
-        with torch.no_grad():
-            generated_ids = model.generate(pixel_values)
-        text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
-        if not text:
-            continue
-        bbox = [[x1, y1], [x2, y1], [x2, y2], [x1, y2]]
-        detections.append([bbox, [text, 0.95]])
+        for bbox in boxes:
+            if hasattr(bbox, "tolist"):
+                bbox = bbox.tolist()
+
+            xs = [p[0] for p in bbox]
+            ys = [p[1] for p in bbox]
+            x1 = max(0, int(min(xs)))
+            y1 = max(0, int(min(ys)))
+            x2 = min(w, int(max(xs)))
+            y2 = min(h, int(max(ys)))
+
+            crop = img.crop((x1, y1, x2, y2))
+            if crop.width < 4 or crop.height < 4:
+                continue
+
+            pixel_values = processor(images=crop, return_tensors="pt").pixel_values
+            with torch.no_grad():
+                generated_ids = model.generate(pixel_values)
+            text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
+            if not text:
+                continue
+            detections.append([bbox, [text, 0.95]])
 
     # Görselleştirme (.guidedReceipts/ klasörüne)
     guided_receipts_dir = Path(".guidedReceipts")
