@@ -102,7 +102,7 @@ def get_trocr_engine():
     """
     try:
         from transformers import TrOCRProcessor, VisionEncoderDecoderModel
-        import torch  # noqa: F401
+        import torch
     except ImportError:
         print("❌ transformers/torch yüklü değil: pip install transformers torch")
         sys.exit(1)
@@ -131,7 +131,7 @@ def get_trocr_engine():
 
     print(f"⏳ TrOCR yükleniyor ({MODEL_ID})...")
     processor = TrOCRProcessor.from_pretrained(MODEL_ID)
-    model     = VisionEncoderDecoderModel.from_pretrained(MODEL_ID)
+    model     = VisionEncoderDecoderModel.from_pretrained(MODEL_ID, torch_dtype=torch.float16)
 
     # trocr_adapter/ varsa otomatik yükle
     if (ADAPTER_DIR / "adapter_config.json").exists():
@@ -153,16 +153,16 @@ def get_trocr_engine():
 
 
 def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
-    """PaddleOCR detection → crop → TrOCR recognition pipeline."""
+    """PaddleOCR detection → batch crop → TrOCR recognition pipeline."""
     import torch
     from PIL import ImageDraw
 
     paddle, processor, model = engine_tuple
 
-    # PaddleOCR detection: bbox'ları al, PaddleOCR'ın kendi recognition'ını yoksay
+    # PaddleOCR detection: bbox'ları al
     result = list(paddle.predict(str(image_path)))
 
-    detections = []
+    bboxes, crops = [], []
     for ocr_result in result:
         boxes = ocr_result.get("dt_polys") or ocr_result.get("boxes")
         if boxes is None:
@@ -170,25 +170,30 @@ def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
         for bbox in boxes:
             if hasattr(bbox, "tolist"):
                 bbox = bbox.tolist()
-
             xs = [p[0] for p in bbox]
             ys = [p[1] for p in bbox]
             x1 = max(0, int(min(xs)))
             y1 = max(0, int(min(ys)))
             x2 = min(w, int(max(xs)))
             y2 = min(h, int(max(ys)))
-
             crop = img.crop((x1, y1, x2, y2))
             if crop.width < 4 or crop.height < 4:
                 continue
+            bboxes.append(bbox)
+            crops.append(crop)
 
-            pixel_values = processor(images=crop, return_tensors="pt").pixel_values
-            with torch.no_grad():
-                generated_ids = model.generate(pixel_values)
-            text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
-            if not text:
-                continue
-            detections.append([bbox, [text, 0.95]])
+    # Tüm crop'ları tek seferde TrOCR'a gönder (batch inference)
+    detections = []
+    if crops:
+        pixel_values = processor(images=crops, return_tensors="pt", padding=True).pixel_values
+        pixel_values = pixel_values.to(dtype=torch.float16)
+        with torch.no_grad():
+            generated_ids = model.generate(pixel_values)
+        texts = processor.batch_decode(generated_ids, skip_special_tokens=True)
+        for bbox, text in zip(bboxes, texts):
+            text = text.strip()
+            if text:
+                detections.append([bbox, [text, 0.95]])
 
     # Görselleştirme (.guidedReceipts/ klasörüne)
     guided_receipts_dir = Path(".guidedReceipts")
