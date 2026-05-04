@@ -126,7 +126,7 @@ def get_trocr_engine():
     )
 
     # Recognition: TrOCR large-printed (+ opsiyonel LoRA adapter)
-    MODEL_ID    = "microsoft/trocr-large-printed"
+    MODEL_ID    = "microsoft/trocr-base-printed"
     ADAPTER_DIR = Path("trocr_adapter")
 
     print(f"⏳ TrOCR yükleniyor ({MODEL_ID})...")
