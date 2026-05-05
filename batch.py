@@ -131,7 +131,9 @@ def get_trocr_engine():
 
     print(f"⏳ TrOCR yükleniyor ({MODEL_ID})...")
     processor = TrOCRProcessor.from_pretrained(MODEL_ID)
-    model     = VisionEncoderDecoderModel.from_pretrained(MODEL_ID, torch_dtype=torch.float16)
+    device    = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    dtype     = torch.float16 if device.type == "cuda" else torch.float32
+    model     = VisionEncoderDecoderModel.from_pretrained(MODEL_ID, torch_dtype=dtype)
 
     # trocr_adapter/ varsa otomatik yükle
     if (ADAPTER_DIR / "adapter_config.json").exists():
@@ -147,9 +149,10 @@ def get_trocr_engine():
     else:
         print(f"  (trocr_adapter/ yok — temel model kullanılıyor)")
 
+    model.to(device)
     model.eval()
-    print("+ TrOCR hazır (PaddleOCR det + TrOCR rec)\n")
-    return (paddle, processor, model)
+    print(f"+ TrOCR hazır — cihaz: {device} (PaddleOCR det + TrOCR rec)\n")
+    return (paddle, processor, model, device)
 
 
 def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
@@ -157,7 +160,7 @@ def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
     import torch
     from PIL import ImageDraw
 
-    paddle, processor, model = engine_tuple
+    paddle, processor, model, device = engine_tuple
 
     # PaddleOCR detection: bbox'ları al
     result = list(paddle.predict(str(image_path)))
@@ -186,7 +189,7 @@ def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
     detections = []
     if crops:
         pixel_values = processor(images=crops, return_tensors="pt", padding=True).pixel_values
-        pixel_values = pixel_values.to(dtype=torch.float16)
+        pixel_values = pixel_values.to(device)
         with torch.no_grad():
             generated_ids = model.generate(pixel_values=pixel_values)
         texts = processor.batch_decode(generated_ids, skip_special_tokens=True)
