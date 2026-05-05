@@ -186,7 +186,7 @@ def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
             crops.append(crop)
 
     # Crop'ları küçük gruplar halinde gönder (GPU timeout önleme)
-    INFERENCE_BATCH = 8
+    INFERENCE_BATCH = 4
     detections = []
     for i in range(0, len(crops), INFERENCE_BATCH):
         batch_crops  = crops[i:i + INFERENCE_BATCH]
