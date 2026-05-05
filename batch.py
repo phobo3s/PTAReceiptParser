@@ -185,15 +185,18 @@ def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
             bboxes.append(bbox)
             crops.append(crop)
 
-    # Tüm crop'ları tek seferde TrOCR'a gönder (batch inference)
+    # Crop'ları küçük gruplar halinde gönder (GPU timeout önleme)
+    INFERENCE_BATCH = 8
     detections = []
-    if crops:
-        pixel_values = processor(images=crops, return_tensors="pt", padding=True).pixel_values
+    for i in range(0, len(crops), INFERENCE_BATCH):
+        batch_crops  = crops[i:i + INFERENCE_BATCH]
+        batch_bboxes = bboxes[i:i + INFERENCE_BATCH]
+        pixel_values = processor(images=batch_crops, return_tensors="pt", padding=True).pixel_values
         pixel_values = pixel_values.to(device)
         with torch.no_grad():
             generated_ids = model.generate(pixel_values=pixel_values)
         texts = processor.batch_decode(generated_ids, skip_special_tokens=True)
-        for bbox, text in zip(bboxes, texts):
+        for bbox, text in zip(batch_bboxes, texts):
             text = text.strip()
             if text:
                 detections.append([bbox, [text, 0.95]])
