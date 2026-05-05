@@ -188,7 +188,7 @@ def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
         pixel_values = processor(images=crops, return_tensors="pt", padding=True).pixel_values
         pixel_values = pixel_values.to(dtype=torch.float16)
         with torch.no_grad():
-            generated_ids = model.generate(pixel_values)
+            generated_ids = model.generate(pixel_values=pixel_values)
         texts = processor.batch_decode(generated_ids, skip_special_tokens=True)
         for bbox, text in zip(bboxes, texts):
             text = text.strip()
