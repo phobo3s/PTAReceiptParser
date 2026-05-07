@@ -74,14 +74,20 @@ def convert(label_txt_path: Path, output_dir: Path, base_dir: Path | None = None
 
 
 if __name__ == "__main__":
-    # --all-caches: hem paddleocr hem trocr cache'ine yaz
-    if "--all-caches" in sys.argv:
-        label_txt = PPOCR_DATA_DIR / "Label.txt"
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("label_txt", nargs="?", default=None, help="Label.txt yolu")
+    ap.add_argument("output",    nargs="?", default=None, help="Çıktı cache klasörü")
+    ap.add_argument("--all-caches", action="store_true", help="Hem paddleocr hem trocr cache'ine yaz")
+    args = ap.parse_args()
+
+    label_txt = Path(args.label_txt) if args.label_txt else PPOCR_DATA_DIR / "Label.txt"
+
+    if args.all_caches:
         print("=== paddleocr cache (.ocr_cache/) ===")
         convert(label_txt, Path(".ocr_cache"))
         print("\n=== trocr cache (.ocr_cache_trocr/) ===")
         convert(label_txt, Path(".ocr_cache_trocr"))
     else:
-        label_txt = Path(sys.argv[1]) if len(sys.argv) > 1 else PPOCR_DATA_DIR / "Label.txt"
-        output    = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(".ocr_cache")
+        output = Path(args.output) if args.output else Path(".ocr_cache")
         convert(label_txt, output)
