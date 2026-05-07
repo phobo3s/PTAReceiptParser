@@ -32,8 +32,10 @@ from pathlib import Path
 import sys
 import traceback
 
+from config import PROCESSED_RECEIPTS_DIR
+
 SUPPORTED_EXTS = {".jpg", ".jpeg", ".png"}
-OUTPUT_DIR     = Path(".processedReceipts")
+OUTPUT_DIR     = PROCESSED_RECEIPTS_DIR
 DEBUG_DIR      = OUTPUT_DIR / "debug"
 
 MIN_WIDTH = 800   # px — dar görüntüleri bu genişliğe büyüt

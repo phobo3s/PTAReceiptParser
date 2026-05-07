@@ -103,5 +103,6 @@ def correct_label_txt(label_txt_path: Path):
 
 
 if __name__ == "__main__":
-    label_txt = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("PPOCRLabel_Data/Receipts/Label.txt")
+    from config import PPOCR_DATA_DIR
+    label_txt = Path(sys.argv[1]) if len(sys.argv) > 1 else PPOCR_DATA_DIR / "Label.txt"
     correct_label_txt(label_txt)

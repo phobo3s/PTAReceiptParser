@@ -7,9 +7,10 @@ Cache: .ocr_cache/{stem}_tesseract.json
 
 from pathlib import Path
 from ocr_engine import load_engine, run_ocr
+from config import OCR_CACHE_DIR, GUIDED_RECEIPTS_DIR
 
-CACHE_DIR   = Path(".ocr_cache")
-IMAGE_DIRS  = [Path("Receipts"), Path(".guidedReceipts")]
+CACHE_DIR   = OCR_CACHE_DIR
+IMAGE_DIRS  = [Path("Receipts"), GUIDED_RECEIPTS_DIR]
 IMG_EXTS    = {".jpg", ".jpeg", ".png"}
 
 # Tüm görselleri bul: stem → path
@@ -47,7 +48,7 @@ for stem in sorted(paddle_stems):
         print(f"  ✗ Görsel bulunamadı: {stem!r}")
         continue
 
-    run_ocr(engine, "tesseract", img_path, CACHE_DIR, guided_dir=Path(".guidedReceipts"))
+    run_ocr(engine, "tesseract", img_path, CACHE_DIR, guided_dir=GUIDED_RECEIPTS_DIR)
     done += 1
 
 print(f"\n{'─'*60}")

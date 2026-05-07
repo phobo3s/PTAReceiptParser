@@ -9,15 +9,22 @@ Varolan .ocr_cache dosyalarına dokunmaz. Üzerine yazmak istiyorsan
 
 Kullanım:
     python import_labels.py [Label.txt yolu] [çıktı klasörü]
+    python import_labels.py --all-caches      # paddleocr + trocr cache birlikte
 
 Varsayılanlar:
     Label.txt → PPOCRLabel_Data/Receipts/Label.txt
     çıktı    → .ocr_cache/
+
+--all-caches: hem .ocr_cache/ hem .ocr_cache_trocr/ klasörlerine yazar.
+Günlük iş akışında etiketli fişlerin her iki engine için de ground truth
+olarak kullanılmasını sağlar.
 """
 
 import json
 import sys
 from pathlib import Path
+
+from config import PPOCR_DATA_DIR, OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR
 
 
 def convert(label_txt_path: Path, output_dir: Path, base_dir: Path | None = None):
@@ -67,6 +74,20 @@ def convert(label_txt_path: Path, output_dir: Path, base_dir: Path | None = None
 
 
 if __name__ == "__main__":
-    label_txt = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("PPOCRLabel_Data/Receipts/Label.txt")
-    output    = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(".ocr_cache")
-    convert(label_txt, output)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("label_txt", nargs="?", default=None, help="Label.txt yolu")
+    ap.add_argument("output",    nargs="?", default=None, help="Çıktı cache klasörü")
+    ap.add_argument("--all-caches", action="store_true", help="Hem paddleocr hem trocr cache'ine yaz")
+    args = ap.parse_args()
+
+    label_txt = Path(args.label_txt) if args.label_txt else PPOCR_DATA_DIR / "Label.txt"
+
+    if args.all_caches:
+        print(f"=== paddleocr cache ({OCR_CACHE_DIR}/) ===")
+        convert(label_txt, OCR_CACHE_DIR)
+        print(f"\n=== trocr cache ({OCR_CACHE_DIR_TROCR}/) ===")
+        convert(label_txt, OCR_CACHE_DIR_TROCR)
+    else:
+        output = Path(args.output) if args.output else OCR_CACHE_DIR
+        convert(label_txt, output)

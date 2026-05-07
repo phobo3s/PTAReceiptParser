@@ -8,8 +8,9 @@ import json
 import statistics
 from pathlib import Path
 from parser import parse_receipt
+from config import OCR_CACHE_DIR
 
-CACHE = Path(".ocr_cache")
+CACHE = OCR_CACHE_DIR
 
 # Paddle json'larını bul (suffix içermeyen = paddle)
 paddle_files = sorted([

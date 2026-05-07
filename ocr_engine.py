@@ -27,14 +27,16 @@ Kurulum:
 Kullanım:
     from ocr_engine import run_ocr, load_engine
     engine = load_engine("tesseract")
-    result = run_ocr(engine, Path("fis.jpg"), cache_dir=Path(".ocr_cache"),
-                     guided_dir=Path(".guidedReceipts"))
+    result = run_ocr(engine, Path("fis.jpg"), cache_dir=_OCR_CACHE_DIR,
+                     guided_dir=_GUIDED_DIR)
 """
 
 import json
 import platform
 from pathlib import Path
 from typing import Optional
+
+from config import GUIDED_RECEIPTS_DIR as _GUIDED_DIR, OCR_CACHE_DIR as _OCR_CACHE_DIR
 
 # ── Renk kodları (guided receipt overlay) ─────────────────────────────────────
 # Her motor farklı renk → aynı fiş üzerinde karşılaştırma yapılabilir
@@ -72,7 +74,7 @@ def save_guided_receipt(
     detections: list,
     engine: str,
     guided_dir: Path,
-) -> None:
+) -> _GUIDED_DIR:
     """
     Her detection'ın bbox'ını ve confidence'ını görsel üzerine çiz.
     Confidence rengi: yeşil (≥0.80) / sarı (≥0.60) / kırmızı (<0.60)
@@ -124,7 +126,7 @@ def ocr_with_cache(
     image_path: Path,
     engine_name: str,
     cache_dir: Path,
-    guided_dir: Optional[Path] = None,
+    guided_dir: Optional[Path] = _GUIDED_DIR,
 ) -> dict:
     """
     Cache'te varsa OCR'ı tekrar yapmaz.
@@ -142,7 +144,7 @@ def ocr_with_cache(
 
     cache_file.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    if guided_dir is not None:
+    if guided_dir is not _GUIDED_DIR:
         save_guided_receipt(image_path, result["detections"], engine_name, guided_dir)
 
     return result
@@ -199,7 +201,7 @@ def _run_paddle(ocr, image_path: Path) -> dict:
         boxes  = ocr_result.get("dt_polys") or ocr_result.get("boxes")
         texts  = ocr_result.get("rec_texts") or ocr_result.get("texts")
         scores = ocr_result.get("rec_scores") or ocr_result.get("scores")
-        if boxes is None or texts is None or scores is None:
+        if boxes is _GUIDED_DIR or texts is _GUIDED_DIR or scores is _GUIDED_DIR:
             continue
         for bbox, text, conf in zip(boxes, texts, scores):
             if hasattr(bbox, "tolist"):
@@ -360,8 +362,8 @@ def run_ocr(
     engine_obj,
     engine_name: str,
     image_path: Path,
-    cache_dir: Path = Path(".ocr_cache"),
-    guided_dir: Optional[Path] = Path(".guidedReceipts"),
+    cache_dir: Path = _OCR_CACHE_DIR,
+    guided_dir: Optional[Path] = _GUIDED_DIR,
 ) -> dict:
     """Ana entry point — cache + guided receipt otomatik."""
     return ocr_with_cache(engine_obj, image_path, engine_name, cache_dir, guided_dir)
