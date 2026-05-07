@@ -17,8 +17,9 @@ from pathlib import Path
 from typing import Optional
 
 from parser import Detection, Receipt, ReceiptItem, load_detections, group_into_rows
+from config import OCR_CACHE_DIR, PARSE_LLM_CACHE_DIR
 
-CACHE_DIR = Path(".parse_llm_cache")
+CACHE_DIR = PARSE_LLM_CACHE_DIR
 MODEL = "claude-haiku-4-5-20251001"
 
 SYSTEM_PROMPT = """\
@@ -185,7 +186,7 @@ def _compare_all(api_key: str, force: bool = False):
     from parser import parse_receipt as regex_parse
 
     cache_files = sorted([
-        f for f in Path(".ocr_cache").glob("*.json")
+        f for f in OCR_CACHE_DIR.glob("*.json")
         if "_tesseract" not in f.name and "_windows" not in f.name
     ])
 
@@ -267,7 +268,7 @@ if __name__ == "__main__":
 
     if args.dry_run:
         files = args.files or sorted([
-            str(f) for f in Path(".ocr_cache").glob("*.json")
+            str(f) for f in OCR_CACHE_DIR.glob("*.json")
             if "_tesseract" not in f.name and "_windows" not in f.name
         ])
         for path in files:

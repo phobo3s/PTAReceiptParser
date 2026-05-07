@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 from parser import parse_receipt, Receipt
-from config import PARSE_SNAPSHOTS_DIR
+from config import PARSE_SNAPSHOTS_DIR, OCR_CACHE_DIR
 
 SNAPSHOTS_FILE = PARSE_SNAPSHOTS_DIR / "snapshots.json"
 AMOUNT_TOLERANCE = 0.02  # TL
@@ -138,7 +138,7 @@ def check_snapshot(ocr_path: Path, receipt: Receipt) -> list[str]:
 
 # ── Regresyon testi ────────────────────────────────────────────────────────────
 
-def run_regression(cache_dir: Path = Path(".ocr_cache")) -> int:
+def run_regression(cache_dir: Path = OCR_CACHE_DIR) -> int:
     """
     Tüm snapshot'ları yeniden parse ederek regresyon testi yapar.
     Döndürür: bulunan regresyon sayısı.
@@ -191,7 +191,7 @@ def run_regression(cache_dir: Path = Path(".ocr_cache")) -> int:
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main():
-    cache_dir = Path(".ocr_cache")
+    cache_dir = OCR_CACHE_DIR
 
     if "--cache-dir" in sys.argv:
         idx = sys.argv.index("--cache-dir")

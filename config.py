@@ -17,6 +17,7 @@ _DEFAULTS = {
         "processed_receipts": ".processedReceipts",
         "trocr_adapter":      ".trocr_adapter",
         "parse_snapshots":    ".parse_snapshots",
+        "parse_llm_cache":    ".parse_llm_cache",
         "rules":              "rules.toml",
         "rules_learned":      "rules_learned.toml",
         "default_account":    "Gider:Bilinmeyen",
@@ -50,6 +51,7 @@ GUIDED_RECEIPTS_DIR   = Path(_cfg["paths"]["guided_receipts"])
 PROCESSED_RECEIPTS_DIR= Path(_cfg["paths"]["processed_receipts"])
 TROCR_ADAPTER_DIR     = Path(_cfg["paths"]["trocr_adapter"])
 PARSE_SNAPSHOTS_DIR   = Path(_cfg["paths"]["parse_snapshots"])
+PARSE_LLM_CACHE_DIR   = Path(_cfg["paths"]["parse_llm_cache"])
 RULES_FILE            = Path(_cfg["paths"]["rules"])
 RULES_LEARNED         = Path(_cfg["paths"]["rules_learned"])
 DEFAULT_ACCOUNT       = _cfg["paths"]["default_account"]

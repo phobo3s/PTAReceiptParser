@@ -11,6 +11,7 @@
 # processed_receipts  = "C:/PTAReceiptParser-data/.processedReceipts"
 # trocr_adapter       = "C:/PTAReceiptParser-data/.trocr_adapter"
 # parse_snapshots     = "C:/PTAReceiptParser-data/.parse_snapshots"
+# parse_llm_cache     = "C:/PTAReceiptParser-data/.parse_llm_cache"
 ocr_cache           = ".ocr_cache"
 ocr_cache_trocr     = ".ocr_cache_trocr"
 ocr_cache_easyocr   = ".ocr_cache_easyocr"
@@ -18,6 +19,7 @@ guided_receipts     = ".guidedReceipts"
 processed_receipts  = ".processedReceipts"
 trocr_adapter       = ".trocr_adapter"
 parse_snapshots     = ".parse_snapshots"
+parse_llm_cache     = ".parse_llm_cache"
 
 # Kural dosyaları
 # rules         = "C:/PTAReceiptParser-data/rules.toml"

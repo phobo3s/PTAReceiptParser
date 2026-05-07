@@ -27,7 +27,7 @@ Kurulum:
 Kullanım:
     from ocr_engine import run_ocr, load_engine
     engine = load_engine("tesseract")
-    result = run_ocr(engine, Path("fis.jpg"), cache_dir=Path(".ocr_cache"),
+    result = run_ocr(engine, Path("fis.jpg"), cache_dir=_OCR_CACHE_DIR,
                      guided_dir=_GUIDED_DIR)
 """
 
@@ -36,7 +36,7 @@ import platform
 from pathlib import Path
 from typing import Optional
 
-from config import GUIDED_RECEIPTS_DIR as _GUIDED_DIR
+from config import GUIDED_RECEIPTS_DIR as _GUIDED_DIR, OCR_CACHE_DIR as _OCR_CACHE_DIR
 
 # ── Renk kodları (guided receipt overlay) ─────────────────────────────────────
 # Her motor farklı renk → aynı fiş üzerinde karşılaştırma yapılabilir
@@ -362,7 +362,7 @@ def run_ocr(
     engine_obj,
     engine_name: str,
     image_path: Path,
-    cache_dir: Path = Path(".ocr_cache"),
+    cache_dir: Path = _OCR_CACHE_DIR,
     guided_dir: Optional[Path] = _GUIDED_DIR,
 ) -> dict:
     """Ana entry point — cache + guided receipt otomatik."""
