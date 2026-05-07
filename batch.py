@@ -40,11 +40,10 @@ from preProcess import process_image as preprocess_image
 
 logging.basicConfig(level=logging.WARNING)  # PaddleOCR loglarını sustur
 
-from config import RULES_FILE, RULES_LEARNED as LEARNED_RULES_FILE, OCR_CACHE_DIR
+from config import RULES_FILE, RULES_LEARNED as LEARNED_RULES_FILE, OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR
 
 SUPPORTED_EXTS      = {".jpg", ".jpeg", ".png"}
 OCR_CACHE_DIR_EASY  = Path(".ocr_cache_easyocr")   # EasyOCR cache (Türkçe karakter desteği)
-OCR_CACHE_DIR_TROCR = Path(".ocr_cache_trocr")     # TrOCR cache
 
 
 # ── OCR ───────────────────────────────────────────────────────────────────────

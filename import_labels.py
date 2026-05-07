@@ -24,7 +24,7 @@ import json
 import sys
 from pathlib import Path
 
-from config import PPOCR_DATA_DIR
+from config import PPOCR_DATA_DIR, OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR
 
 
 def convert(label_txt_path: Path, output_dir: Path, base_dir: Path | None = None):
@@ -84,10 +84,10 @@ if __name__ == "__main__":
     label_txt = Path(args.label_txt) if args.label_txt else PPOCR_DATA_DIR / "Label.txt"
 
     if args.all_caches:
-        print("=== paddleocr cache (.ocr_cache/) ===")
-        convert(label_txt, Path(".ocr_cache"))
-        print("\n=== trocr cache (.ocr_cache_trocr/) ===")
-        convert(label_txt, Path(".ocr_cache_trocr"))
+        print(f"=== paddleocr cache ({OCR_CACHE_DIR}/) ===")
+        convert(label_txt, OCR_CACHE_DIR)
+        print(f"\n=== trocr cache ({OCR_CACHE_DIR_TROCR}/) ===")
+        convert(label_txt, OCR_CACHE_DIR_TROCR)
     else:
-        output = Path(args.output) if args.output else Path(".ocr_cache")
+        output = Path(args.output) if args.output else OCR_CACHE_DIR
         convert(label_txt, output)

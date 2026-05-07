@@ -3,9 +3,11 @@
 # config.toml .gitignore'dadır, repoya girmez.
 
 [paths]
-# OCR cache klasörü — ayrı data repo kullanıyorsanız tam path verin
-# ocr_cache = "C:/PTAReceiptParser-data/.ocr_cache"
+# OCR cache klasörleri — ayrı data repo kullanıyorsanız tam path verin
+# ocr_cache       = "C:/PTAReceiptParser-data/.ocr_cache"
+# ocr_cache_trocr = "C:/PTAReceiptParser-data/.ocr_cache_trocr"
 ocr_cache       = ".ocr_cache"
+ocr_cache_trocr = ".ocr_cache_trocr"
 
 # Kural dosyaları
 # rules         = "C:/PTAReceiptParser-data/rules.toml"
