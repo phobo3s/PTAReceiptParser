@@ -10,8 +10,9 @@ _CONFIG_FILE = Path(__file__).parent / "config.toml"
 
 _DEFAULTS = {
     "paths": {
-        "ocr_cache":       ".ocr_cache",
-        "ocr_cache_trocr": ".ocr_cache_trocr",
+        "ocr_cache":        ".ocr_cache",
+        "ocr_cache_trocr":  ".ocr_cache_trocr",
+        "guided_receipts":  ".guidedReceipts",
         "rules":           "rules.toml",
         "rules_learned":   "rules_learned.toml",
         "default_account": "Gider:Bilinmeyen",
@@ -40,6 +41,7 @@ _cfg = _load()
 
 OCR_CACHE_DIR       = Path(_cfg["paths"]["ocr_cache"])
 OCR_CACHE_DIR_TROCR = Path(_cfg["paths"]["ocr_cache_trocr"])
+GUIDED_RECEIPTS_DIR = Path(_cfg["paths"]["guided_receipts"])
 RULES_FILE          = Path(_cfg["paths"]["rules"])
 RULES_LEARNED       = Path(_cfg["paths"]["rules_learned"])
 DEFAULT_ACCOUNT     = _cfg["paths"]["default_account"]

@@ -40,7 +40,7 @@ from preProcess import process_image as preprocess_image
 
 logging.basicConfig(level=logging.WARNING)  # PaddleOCR loglarını sustur
 
-from config import RULES_FILE, RULES_LEARNED as LEARNED_RULES_FILE, OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR
+from config import RULES_FILE, RULES_LEARNED as LEARNED_RULES_FILE, OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR, GUIDED_RECEIPTS_DIR
 
 SUPPORTED_EXTS      = {".jpg", ".jpeg", ".png"}
 OCR_CACHE_DIR_EASY  = Path(".ocr_cache_easyocr")   # EasyOCR cache (Türkçe karakter desteği)
@@ -201,7 +201,7 @@ def _run_trocr(engine_tuple, image_path: Path, img, w: int, h: int) -> dict:
                 detections.append([bbox, [text, 0.95]])
 
     # Görselleştirme (.guidedReceipts/ klasörüne)
-    guided_receipts_dir = Path(".guidedReceipts")
+    guided_receipts_dir = GUIDED_RECEIPTS_DIR
     guided_receipts_dir.mkdir(exist_ok=True)
     vis = img.copy()
     draw = ImageDraw.Draw(vis)
@@ -234,7 +234,7 @@ def run_ocr(ocr_engine, image_path: Path, engine_name: str = "paddleocr") -> dic
 def _run_paddleocr(ocr_engine, image_path: Path, img_array, w: int, h: int) -> dict:
     result = list(ocr_engine.predict(str(image_path)))
 
-    guided_receipts_dir = Path(".guidedReceipts")
+    guided_receipts_dir = GUIDED_RECEIPTS_DIR
     guided_receipts_dir.mkdir(exist_ok=True)
     output_path = guided_receipts_dir / image_path.name
     result[0].img['ocr_res_img'].save(str(output_path))
@@ -261,7 +261,7 @@ def _run_easyocr(reader, image_path: Path, img, w: int, h: int) -> dict:
     results = reader.readtext(str(image_path))
 
     # Görselleştirme (.guidedReceipts/ klasörüne)
-    guided_receipts_dir = Path(".guidedReceipts")
+    guided_receipts_dir = GUIDED_RECEIPTS_DIR
     guided_receipts_dir.mkdir(exist_ok=True)
     vis = img.copy()
     draw = ImageDraw.Draw(vis)
