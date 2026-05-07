@@ -26,10 +26,10 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from config import PPOCR_DATA_DIR
+from config import PPOCR_DATA_DIR, TROCR_ADAPTER_DIR
 
 BASE_MODEL_ID     = "microsoft/trocr-base-printed"
-ADAPTER_DIR       = Path("trocr_adapter")
+ADAPTER_DIR       = TROCR_ADAPTER_DIR
 DEFAULT_LABELS    = PPOCR_DATA_DIR / "rec_gt.txt"
 DEFAULT_EPOCHS    = 3
 DEFAULT_BATCH     = 4

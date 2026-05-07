@@ -3,13 +3,21 @@
 # config.toml .gitignore'dadır, repoya girmez.
 
 [paths]
-# OCR cache ve görsel klasörleri — ayrı data repo kullanıyorsanız tam path verin
-# ocr_cache        = "C:/PTAReceiptParser-data/.ocr_cache"
-# ocr_cache_trocr  = "C:/PTAReceiptParser-data/.ocr_cache_trocr"
-# guided_receipts  = "C:/PTAReceiptParser-data/.guidedReceipts"
-ocr_cache        = ".ocr_cache"
-ocr_cache_trocr  = ".ocr_cache_trocr"
-guided_receipts  = ".guidedReceipts"
+# Veri klasörleri — ayrı data repo kullanıyorsanız tam path verin
+# ocr_cache           = "C:/PTAReceiptParser-data/.ocr_cache"
+# ocr_cache_trocr     = "C:/PTAReceiptParser-data/.ocr_cache_trocr"
+# ocr_cache_easyocr   = "C:/PTAReceiptParser-data/.ocr_cache_easyocr"
+# guided_receipts     = "C:/PTAReceiptParser-data/.guidedReceipts"
+# processed_receipts  = "C:/PTAReceiptParser-data/.processedReceipts"
+# trocr_adapter       = "C:/PTAReceiptParser-data/.trocr_adapter"
+# parse_snapshots     = "C:/PTAReceiptParser-data/.parse_snapshots"
+ocr_cache           = ".ocr_cache"
+ocr_cache_trocr     = ".ocr_cache_trocr"
+ocr_cache_easyocr   = ".ocr_cache_easyocr"
+guided_receipts     = ".guidedReceipts"
+processed_receipts  = ".processedReceipts"
+trocr_adapter       = ".trocr_adapter"
+parse_snapshots     = ".parse_snapshots"
 
 # Kural dosyaları
 # rules         = "C:/PTAReceiptParser-data/rules.toml"

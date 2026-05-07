@@ -40,10 +40,11 @@ from preProcess import process_image as preprocess_image
 
 logging.basicConfig(level=logging.WARNING)  # PaddleOCR loglarını sustur
 
-from config import RULES_FILE, RULES_LEARNED as LEARNED_RULES_FILE, OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR, GUIDED_RECEIPTS_DIR
+from config import (RULES_FILE, RULES_LEARNED as LEARNED_RULES_FILE,
+                    OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR, OCR_CACHE_DIR_EASY,
+                    GUIDED_RECEIPTS_DIR, PROCESSED_RECEIPTS_DIR, TROCR_ADAPTER_DIR)
 
-SUPPORTED_EXTS      = {".jpg", ".jpeg", ".png"}
-OCR_CACHE_DIR_EASY  = Path(".ocr_cache_easyocr")   # EasyOCR cache (Türkçe karakter desteği)
+SUPPORTED_EXTS = {".jpg", ".jpeg", ".png"}
 
 
 # ── OCR ───────────────────────────────────────────────────────────────────────
@@ -126,7 +127,7 @@ def get_trocr_engine():
 
     # Recognition: TrOCR large-printed (+ opsiyonel LoRA adapter)
     MODEL_ID    = "microsoft/trocr-base-printed"
-    ADAPTER_DIR = Path("trocr_adapter")
+    ADAPTER_DIR = TROCR_ADAPTER_DIR
 
     print(f"⏳ TrOCR yükleniyor ({MODEL_ID})...")
     processor = TrOCRProcessor.from_pretrained(MODEL_ID)
@@ -620,7 +621,7 @@ def main():
             preprocess_image(image_path, engine="paddle", debug=False)
         print(f"✓ Ön işleme tamamlandı\n")
         images = sorted([
-            p for p in Path(".processedReceipts").iterdir()
+            p for p in PROCESSED_RECEIPTS_DIR.iterdir()
             if p.suffix.lower() in SUPPORTED_EXTS
         ])
 
