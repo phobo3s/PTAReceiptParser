@@ -14,6 +14,7 @@ _DEFAULTS = {
         "rules":           "rules.toml",
         "rules_learned":   "rules_learned.toml",
         "default_account": "Gider:Bilinmeyen",
+        "ppocr_data":      "PPOCRLabel_Data/Receipts",
     }
 }
 
@@ -40,4 +41,5 @@ OCR_CACHE_DIR    = Path(_cfg["paths"]["ocr_cache"])
 RULES_FILE       = Path(_cfg["paths"]["rules"])
 RULES_LEARNED    = Path(_cfg["paths"]["rules_learned"])
 DEFAULT_ACCOUNT  = _cfg["paths"]["default_account"]
+PPOCR_DATA_DIR   = Path(_cfg["paths"]["ppocr_data"])
 PROCESSED_FILE   = OCR_CACHE_DIR / "processed.json"

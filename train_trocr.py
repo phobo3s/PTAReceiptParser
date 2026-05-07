@@ -26,9 +26,11 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from config import PPOCR_DATA_DIR
+
 BASE_MODEL_ID     = "microsoft/trocr-base-printed"
 ADAPTER_DIR       = Path("trocr_adapter")
-DEFAULT_LABELS    = Path("PPOCRLabel_Data/Receipts/rec_gt.txt")
+DEFAULT_LABELS    = PPOCR_DATA_DIR / "rec_gt.txt"
 DEFAULT_EPOCHS    = 3
 DEFAULT_BATCH     = 4
 DEFAULT_LR        = 5e-4

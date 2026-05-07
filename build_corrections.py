@@ -23,9 +23,10 @@ import sys
 import tomllib
 from pathlib import Path
 
+from config import PPOCR_DATA_DIR
 
-DEFAULT_CACHE   = Path("PPOCRLabel_Data/Receipts/Cache.cach")
-DEFAULT_LABELS  = Path("PPOCRLabel_Data/Receipts/Label.txt")
+DEFAULT_CACHE       = PPOCR_DATA_DIR / "Cache.cach"
+DEFAULT_LABELS      = PPOCR_DATA_DIR / "Label.txt"
 DEFAULT_CORRECTIONS = Path("corrections.toml")
 
 

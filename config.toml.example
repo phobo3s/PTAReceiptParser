@@ -14,3 +14,7 @@ rules_learned   = "rules_learned.toml"
 
 # Varsayılan hesap adı (kural eşleşmezse)
 default_account = "Gider:Bilinmeyen"
+
+# PPOCRLabel data klasörü (Label.txt, rec_gt.txt, Cache.cach, crop_img/)
+# ppocr_data = "C:/PTAReceiptParser-data/Receipts"
+ppocr_data      = "PPOCRLabel_Data/Receipts"
