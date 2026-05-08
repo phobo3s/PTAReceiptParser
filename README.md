@@ -18,6 +18,7 @@ Receipt Image (jpg/png)
   [batch.py]               ← main entry point
        │
        ├─► [ocr_engine.py] ← PaddleOCR / Tesseract / Windows OCR
+       │   [batch.py]      ← also supports EasyOCR and TrOCR (hybrid)
        │         │
        │         ▼
        │    .ocr_cache/         ← raw OCR results (JSON, reused on re-runs)
@@ -46,38 +47,48 @@ Receipt Image (jpg/png)
 
 | File | Description |
 |---|---|
-| `batch.py` | **Main entry point.** Scans a folder of receipt images: OCR → parse → categorize → update journal. |
-| `ocr_engine.py` | OCR engine adapter. Unified interface for PaddleOCR, Tesseract, and Windows OCR. Caches results under `.ocr_cache/`. |
-| `parser.py` | Coordinate-based receipt parser. Extracts store name, date, item list, and total from OCR JSON output. |
-| `rules.py` | Maps item names to hledger accounts using `rules.toml` and `rules_learned.toml`. |
-| `update_journal.py` | Converts parse output to hledger journal format and appends to an existing `.hledger` file. |
-| `update_excel.py` | Writes parse output line-by-line into a double-entry Excel ledger. |
-| `preProcess.py` | Image pre-processing: deskew, perspective correction, contrast normalization, sharpening, crop. Improves OCR quality before scanning. |
+| `batch.py` | **Main entry point.** Scans a folder of receipt images: OCR → parse → categorize → update journal/Excel. Supports PaddleOCR, EasyOCR, and TrOCR engines. |
+| `ocr_engine.py` | OCR engine adapter. Unified interface for PaddleOCR, Tesseract, and Windows OCR. Handles caching, guided receipt overlays, and confidence coloring. |
+| `parser.py` | Coordinate-based receipt parser. Extracts store name, date, item list, and total from OCR JSON. Handles weight-based items, two-line formats, and orphan rows. |
+| `rules.py` | Maps item names to hledger accounts using `rules.toml` and `rules_learned.toml`. Rule matching uses AND logic across item regex, store, and amount range. |
+| `update_journal.py` | Converts parse output to hledger journal format. Matches existing transactions by date + amount, replaces postings with categorized items. |
+| `update_excel.py` | Writes categorized items into a double-entry Excel ledger. Matches by date + amount, replaces to-account rows in-place. |
+| `preProcess.py` | Image pre-processing pipeline (9 steps): upscale → deskew → perspective → bg normalization → gamma → CLAHE → denoise → sharpen → crop. Significantly improves OCR accuracy on dark or skewed photos. |
+| `llm_parser.py` | LLM-based alternative parser using Claude API instead of regex. Useful for receipts that defeat the rule-based parser. Includes regex vs. LLM comparison mode. |
 
 ### Configuration Files
 
 | File | Description |
 |---|---|
-| `stores.toml` | Store profiles (BIM, Migros, Metro, ...) and universal rules (skip patterns, date formats, name cleanup). |
-| `rules.toml` | Hand-written categorization rules. Assigns hledger accounts by item name, store, or amount range. |
-| `rules_learned.toml` | Categories learned interactively through Claude. Auto-updated by `rules.py`. |
-| `corrections.toml` | OCR correction dictionary. Wrong OCR text → correct text. Updated via `build_corrections.py`. |
+| `config.toml` | Central configuration: paths for OCR cache, guided receipts, rules, snapshots, TrOCR adapter, etc. All paths are relative to the project root. |
+| `stores.toml` | Store profiles (BIM, Migros, Metro, ...) and universal rules (skip patterns, date formats, name cleanup regexes). |
+| `rules.toml` | Hand-written categorization rules. Assigns hledger accounts by item name regex, store regex, or amount range. |
+| `rules_learned.toml` | Categories learned interactively through Claude or manual input. Auto-appended by `rules.py`. |
+| `corrections.toml` | OCR correction dictionary (wrong → right, exact match). Applied during `load_detections()` before parsing. Updated via `build_corrections.py`. |
+
+### TrOCR Fine-tuning
+
+| File | Description |
+|---|---|
+| `train_trocr.py` | Fine-tunes `microsoft/trocr-base-printed` on Turkish receipt data using LoRA (PEFT). Reads `PPOCRLabel_Data/Receipts/rec_gt.txt`. Saves adapter to `.trocr_adapter/` and incrementally improves with each run. |
 
 ### PPOCRLabel / Calibration
 
 | File | Description |
 |---|---|
-| `import_labels.py` | Converts a PPOCRLabel `Label.txt` export into `.ocr_cache` format, so manually corrected OCR data is used as ground truth. |
+| `import_labels.py` | Converts a PPOCRLabel `Label.txt` export into `.ocr_cache` format so manually corrected OCR data is used as ground truth. |
 | `build_corrections.py` | Diffs PPOCRLabel `Cache.cach` (raw auto-OCR) against `Label.txt` (user-corrected) and appends new correction pairs to `corrections.toml`. |
-| `correct_labels.py` | Uses Claude Haiku Vision to automatically correct `Label.txt` transcriptions from crop images. |
+| `correct_labels.py` | Uses Claude Haiku Vision to automatically correct `Label.txt` transcriptions by re-reading each crop image. |
 
 ### Support Tools
 
 | File | Description |
 |---|---|
-| `snapshots.py` | Saves successful parse results. Regression test: after a code or regex change, verify old receipts still parse correctly. |
-| `llm_parser.py` | LLM-based alternative parser using Claude API instead of regex. Useful for receipts that defeat the rule-based parser. |
-| `generate_tesseract_cache.py` | Generates Tesseract cache files for all receipts (for engine comparison). |
+| `menu.py` | **Interactive TUI menu.** Launches all tools from a single numbered menu. No arguments needed — guided parameter input with validation. Run with `py menu.py`. |
+| `snapshots.py` | Saves successful parse results to `.parse_snapshots/`. Regression test: after a code or regex change, verify old receipts still parse correctly with `--regression`. |
+| `processed.py` | Tracks which receipts have already been written to hledger or Excel (stored in `.ocr_cache/processed.json`). Prevents duplicate updates. |
+| `config.py` | Loads `config.toml` and exposes all paths as typed `Path` objects with sane defaults. |
+| `generate_tesseract_cache.py` | Generates Tesseract cache files for all receipts that already have a PaddleOCR cache — useful for engine comparison. |
 
 ### Tests
 
@@ -85,41 +96,69 @@ Receipt Image (jpg/png)
 |---|---|
 | `test_parser.py` | Unit tests for `parser.py`. |
 | `test_new_files.py` | Test-parses newly added receipt images and prints results. |
-| `test_compare_engines.py` | Compares OCR engine outputs on the same receipt. |
+| `test_compare_engines.py` | Compares OCR engine outputs side-by-side on the same receipt. |
 | `test_preprocess_compare.py` | Measures the effect of pre-processing steps on OCR quality. |
 
 ---
 
 ## Quick Start
 
+### 0. Interactive Menu (Recommended)
+
+```bash
+pip install rich   # tek ek bağımlılık
+py menu.py
+```
+
+Tüm araçları menü üzerinden çalıştırabilirsiniz — parametre ezberlemeye gerek yok.
+
 ### 1. Install Dependencies
 
 ```bash
-pip install paddleocr anthropic openpyxl pillow opencv-python numpy shapely
+pip install paddleocr anthropic openpyxl pillow opencv-python numpy shapely rich
+```
+
+Optional engines:
+```bash
+pip install easyocr                          # EasyOCR (Turkish character support)
+pip install pytesseract                      # Tesseract (+ winget install UB-Mannheim.TesseractOCR)
+pip install winocr                           # Windows built-in OCR
+pip install transformers torch peft          # TrOCR hybrid engine
 ```
 
 ### 2. Process Receipts
 
 ```bash
 # Process all receipts in a folder and update the journal
-py batch.py Receipts/ ledger.hledger
+py batch.py Receipts/ --hledger ledger.hledger
 
-# With Claude API key (for interactive categorization questions)
-py batch.py Receipts/ ledger.hledger --api-key sk-ant-...
+# With Claude API key (automatic categorization of unknown items)
+py batch.py Receipts/ --hledger ledger.hledger --api-key sk-ant-...
+
+# Update an Excel ledger instead (or both)
+py batch.py Receipts/ --excel budget.xlsx --sheet Expenses
+py batch.py Receipts/ --hledger ledger.hledger --excel budget.xlsx
 
 # Pre-process images first for better OCR accuracy
 py preProcess.py Receipts/
-py batch.py .processedReceipts/ ledger.hledger
+py batch.py .processedReceipts/ --hledger ledger.hledger
 ```
 
 ### 3. Parse a Single Receipt
 
 ```bash
-# Parse from cached OCR output
+# Parse from cached OCR output and print summary
 py parser.py .ocr_cache/receipt.json
 
-# Output in hledger format
-py parser.py .ocr_cache/receipt.json --hledger
+# Show full debug trace (row grouping, skip reasons, price matches)
+py parser.py .ocr_cache/receipt.json --debug
+
+# Batch parse all cached receipts, show only mismatched totals
+py parser.py .ocr_cache/ --mismatch-only
+
+# Parse and write to hledger or Excel in one step
+py parser.py .ocr_cache/receipt.json --hledger ledger.hledger
+py parser.py .ocr_cache/receipt.json --excel budget.xlsx --sheet Expenses
 ```
 
 ### 4. OCR Correction Workflow
@@ -138,6 +177,18 @@ Open receipts in PPOCRLabel
 py snapshots.py --regression
 ```
 
+### 6. Fine-tune TrOCR (optional)
+
+```bash
+# After labeling receipts in PPOCRLabel and exporting rec_gt.txt:
+py train_trocr.py                        # 3 epochs, full dataset
+py train_trocr.py --epochs 1             # quick daily incremental run
+py train_trocr.py --val-split 0.1        # with 10% validation split
+
+# Then use the fine-tuned model:
+py batch.py Receipts/ --engine trocr --hledger ledger.hledger
+```
+
 ---
 
 ## Decision Tree: Where to Fix an Error
@@ -151,8 +202,11 @@ Receipt produced wrong output
         ├─ Characters correct but parser split rows/prices wrong
         │         └─► Edit stores.toml  (price_pattern, skip_patterns, y_tolerance, ...)
         │
-        └─ Parsed correctly but wrong spending category
-                  └─► Edit rules.toml  or let Claude learn it  (rules_learned.toml)
+        ├─ Parsed correctly but wrong spending category
+        │         └─► Edit rules.toml  or let Claude learn it  (rules_learned.toml)
+        │
+        └─ Rule-based parser fails entirely for an unusual receipt format
+                  └─► py llm_parser.py --compare  (LLM fallback)
 ```
 
 ---
@@ -177,15 +231,27 @@ To add a new store, add a `[store.xxx]` block to `stores.toml`. Each profile def
 
 ## OCR Engines
 
-`ocr_engine.py` supports three engines behind a unified interface:
+### `ocr_engine.py` engines (used via `run_ocr` / `load_engine`)
 
 | Engine | Install | Notes |
 |---|---|---|
-| **PaddleOCR** (default-recommended) | `pip install paddleocr` | Best `*` detection and character accuracy |
-| **Tesseract** | `winget install UB-Mannheim.TesseractOCR` + `pip install pytesseract` | Requires language pack for your locale |
-| **Windows OCR** | `pip install winocr` | Built-in on Windows 10/11, no extra install |
+| **PaddleOCR** (recommended) | `pip install paddleocr` | Best `*` detection and character accuracy. Uses `PP-OCRv5_mobile_det` + `PP-OCRv5_mobile_rec`. |
+| **Tesseract** | `winget install UB-Mannheim.TesseractOCR` + `pip install pytesseract` | Requires `tur` language pack. Slower but good for comparison. |
+| **Windows OCR** | `pip install winocr` | Built-in on Windows 10/11, no extra install. Confidence always 1.0. |
 
-**Recommended model:** `PP-OCRv5_mobile_rec` — better `*` character recognition than the server model and fewer character mutations on Turkish text.
+### `batch.py` additional engines (`--engine` flag)
+
+| Engine | Install | Notes |
+|---|---|---|
+| **EasyOCR** | `pip install easyocr` | Native Turkish character support (İ, Ğ, Ş, Ö, Ü, Ç). |
+| **TrOCR** (hybrid) | `pip install transformers torch peft` | PaddleOCR detection + TrOCR recognition. Fine-tunable with `train_trocr.py`. |
+
+**Critical PaddleOCR settings** — always keep these `False`:
+
+```python
+use_doc_unwarping=False        # True dramatically degrades thermal receipt OCR
+use_textline_orientation=False # True adds noise on straight thermal receipts
+```
 
 ---
 
@@ -220,7 +286,7 @@ py batch.py <receipt_folder> [options]
 | `--excel <file.xlsx>` | Update this Excel ledger file |
 | `--sheet <SheetName>` | Excel sheet name (default: first sheet) |
 | `--api-key sk-ant-...` | Anthropic API key for automatic item categorization. Also reads `ANTHROPIC_API_KEY` env var. |
-| `--engine paddleocr\|easyocr` | OCR engine (default: `paddleocr`) |
+| `--engine paddleocr\|easyocr\|trocr` | OCR engine (default: `paddleocr`) |
 | `--preprocess` | Run `preProcess.py` on images before OCR |
 
 **Examples:**
@@ -229,6 +295,7 @@ py batch.py Receipts/ --hledger budget.hledger
 py batch.py Receipts/ --excel budget.xlsx --sheet Expenses
 py batch.py Receipts/ --hledger budget.hledger --excel budget.xlsx --api-key sk-ant-...
 py batch.py Receipts/ --engine easyocr --hledger budget.hledger
+py batch.py Receipts/ --engine trocr --hledger budget.hledger
 ```
 
 **Categorization priority:** `rules_learned.toml` → `rules.toml` → Claude API (if `--api-key` given) → manual prompt.
@@ -244,8 +311,12 @@ py parser.py <ocr_cache.json|folder> [options]
 | Argument | Description |
 |---|---|
 | `<path>` | A single `.ocr_cache/*.json` file, or a folder to parse all JSON files in it |
+| `--hledger <file>` | Update this hledger journal file after parsing |
+| `--excel <file>` | Update this Excel ledger file after parsing |
+| `--sheet <name>` | Excel sheet name (used with `--excel`) |
 | `--debug` | Print detailed row-by-row parse trace: layout bounds, detection grouping, skip reasons, price matches |
 | `--mismatch-only` | Suppress output for receipts where calculated total matches receipt total — only show failures |
+| `--force` | Re-process receipts that have already been marked as done |
 
 **Examples:**
 ```bash
@@ -270,17 +341,58 @@ py preProcess.py <folder|image> [options]
 | Argument | Description |
 |---|---|
 | `<target>` | Folder of images or a single image file |
-| `--engine paddle\|tesseract` | Target OCR engine — affects binarization step (default: `paddle`) |
+| `--engine paddle\|tesseract` | Target OCR engine — enables binarization step for Tesseract (default: `paddle`) |
 | `--gamma <float>` | Gamma correction, e.g. `0.7` to brighten dark receipts (default: off) |
 | `--sharpen` | Apply unsharp masking for sharper text edges |
 | `--output <dir>` | Output directory (default: `.processedReceipts/`) |
 | `--no-debug` | Skip saving per-step debug images |
+
+**Pipeline steps:**
+```
+[0] Upscale          — enforce minimum width (800px)
+[1] Deskew           — Hough line rotation correction
+[2] Perspective      — 4-corner warpPerspective
+[3] BG normalize     — large Gaussian divide (removes shadows/uneven lighting)
+[4] Gamma            — midtone brightness (--gamma, optional)
+[5] CLAHE            — adaptive local contrast
+[6] Denoise          — bilateral filter
+[7] Sharpen          — unsharp masking (--sharpen, optional)
+[8] Binary           — adaptive threshold (Tesseract only)
+[9] Crop             — trim empty borders
+```
 
 **Examples:**
 ```bash
 py preProcess.py Receipts/
 py preProcess.py Receipts/ --gamma 0.7 --sharpen
 py preProcess.py Receipts/ --engine tesseract --output .processed_tess
+```
+
+---
+
+### `train_trocr.py` — Fine-tune TrOCR on receipt data
+
+```
+py train_trocr.py [options]
+```
+
+| Argument | Default | Description |
+|---|---|---|
+| `--labels <path>` | `PPOCRLabel_Data/Receipts/rec_gt.txt` | Training data: crop path + label pairs |
+| `--epochs <n>` | `3` | Number of training epochs |
+| `--batch-size <n>` | `4` | Batch size |
+| `--lr <float>` | `5e-4` | Learning rate |
+| `--val-split <float>` | `0.0` | Fraction for validation (e.g. `0.1` = 10%) |
+| `--adapter-dir <path>` | `.trocr_adapter/` | Where to save/load the LoRA adapter |
+| `--no-continue` | — | Ignore existing adapter, start from scratch |
+| `--max-label-len <n>` | `128` | Maximum token length per label |
+
+The adapter is saved after every epoch. If `.trocr_adapter/adapter_config.json` exists, training resumes from the existing adapter (incremental fine-tuning). Use `batch.py --engine trocr` to use the fine-tuned model.
+
+```bash
+py train_trocr.py --epochs 1 --batch-size 4   # fast daily run
+py train_trocr.py --val-split 0.1              # with validation
+py train_trocr.py --no-continue                # start fresh
 ```
 
 ---
@@ -305,6 +417,27 @@ py snapshots.py --regression --cache-dir .ocr_cache
 
 ---
 
+### `llm_parser.py` — LLM-based parser
+
+```
+py llm_parser.py [files...] [options]
+```
+
+| Argument | Description |
+|---|---|
+| `--api-key` | Anthropic API key (or set `ANTHROPIC_API_KEY` env var) |
+| `--compare` | Compare regex parser vs. LLM parser on all cached receipts |
+| `--force` | Bypass LLM response cache, re-call the API |
+| `--dry-run` | Print the text sent to the LLM without calling the API |
+
+```bash
+py llm_parser.py --dry-run                         # preview text sent to Claude
+py llm_parser.py --compare --api-key sk-ant-...    # regex vs LLM side-by-side
+py llm_parser.py .ocr_cache/receipt.json --api-key sk-ant-...
+```
+
+---
+
 ### `build_corrections.py` — Build OCR correction dictionary
 
 ```
@@ -319,7 +452,6 @@ py build_corrections.py [Cache.cach] [Label.txt] [corrections.toml]
 
 ```bash
 py build_corrections.py
-py build_corrections.py PPOCRLabel_Data/Receipts/Cache.cach PPOCRLabel_Data/Receipts/Label.txt corrections.toml
 ```
 
 ---
@@ -328,12 +460,14 @@ py build_corrections.py PPOCRLabel_Data/Receipts/Cache.cach PPOCRLabel_Data/Rece
 
 ```
 py import_labels.py [Label.txt] [output_dir]
+py import_labels.py --all-caches
 ```
 
 | Argument | Default | Description |
 |---|---|---|
 | `Label.txt` | `PPOCRLabel_Data/Receipts/Label.txt` | Corrected label file |
 | `output_dir` | `.ocr_cache/` | Where to write `{stem}.json` cache files |
+| `--all-caches` | — | Write to both `.ocr_cache/` and `.ocr_cache_trocr/` |
 
 Existing cache files are **not overwritten** — delete the relevant `.json` first if you want to re-import.
 
@@ -346,7 +480,7 @@ PPOCRLabel is a GUI annotation tool that lets you visually inspect and correct O
 ### Setup
 
 1. Install: `pip install PPOCRLabel`
-2. Launch: `PPOCRLabel --lang en` (or `--lang ch` for the full UI)
+2. Launch: `PPOCRLabel --lang en`
 3. Open folder: **File → Open Dir** → select `PPOCRLabel_Data/Receipts/`
 
 ### Typical workflow for a new batch of receipts
@@ -359,47 +493,38 @@ PPOCRLabel is a GUI annotation tool that lets you visually inspect and correct O
 
 3. Auto-detect all images
    View → Auto Recognition
-
-   PPOCRLabel runs its built-in OCR on every image and fills
-   transcriptions automatically. Raw results saved to Cache.cach.
+   (Raw results saved to Cache.cach)
 
 4. Correct transcription errors
-   Click each detection box on screen.
-   Edit the transcription text in the right panel.
-   Save: Ctrl+S  (updates Label.txt, not Cache.cach)
-
+   Click each detection box → edit text in right panel → Ctrl+S
    Focus on items and totals — header/footer errors don't affect parsing.
-   Rule of thumb:
-     - OCR character error (TARIH, UISA) → fix here → build_corrections.py
-     - Layout/price issue                 → fix in stores.toml instead
 
-5. Export corrected data
-   File → Export Recognition Results  (writes rec_gt.txt, optional)
-
-6. Build correction dictionary
+5. Build correction dictionary
    py build_corrections.py
    → Diffs Cache.cach (auto) vs Label.txt (corrected)
    → Appends new pairs to corrections.toml
 
-7. Import corrected cache (optional — use corrected data as OCR cache)
-   Delete existing cache files for affected images:
-     del .ocr_cache\Belge4_1.json
-   Then:
-     py import_labels.py
+6. Import corrected cache (optional)
+   del .ocr_cache\Belge4_1.json  ← delete old cache first
+   py import_labels.py
    → Writes Label.txt data into .ocr_cache/ with confidence=1.0
 
-8. Run regression test to verify nothing broke
+7. Run regression test to verify nothing broke
    py snapshots.py --regression
+
+8. Export for TrOCR fine-tuning (optional)
+   File → Export Recognition Results  → rec_gt.txt
+   py train_trocr.py --epochs 1
 ```
 
 ### Key files in PPOCRLabel_Data/Receipts/
 
 | File | Written by | Content |
 |---|---|---|
-| `Cache.cach` | PPOCRLabel auto-OCR | Raw (uncorrected) detections — same format as Label.txt |
+| `Cache.cach` | PPOCRLabel auto-OCR | Raw (uncorrected) detections |
 | `Label.txt` | User corrections | Corrected transcriptions — one line per image |
-| `rec_gt.txt` | PPOCRLabel export | Crop + text pairs for model training (optional) |
-| `crop_img/` | PPOCRLabel | Individual word/phrase crops |
+| `rec_gt.txt` | PPOCRLabel export | Crop + text pairs for TrOCR fine-tuning |
+| `crop_img/` | PPOCRLabel | Individual word/phrase crop images |
 
 ### What to correct vs what to leave
 
@@ -410,3 +535,4 @@ PPOCRLabel is a GUI annotation tool that lets you visually inspect and correct O
 | Wrong row grouping | Leave — adjust `y_tolerance` in `stores.toml` |
 | Footer/header noise | Leave — handled by `skip_patterns` in `stores.toml` |
 | Product name has garbage suffix | Leave — handled by `name_cleanup` in `stores.toml` |
+| Recurring OCR error on many receipts | Fix via PPOCRLabel → TrOCR fine-tuning |

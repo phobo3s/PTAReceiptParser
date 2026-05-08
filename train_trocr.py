@@ -81,6 +81,7 @@ class ReceiptDataset:
     def __init__(self, samples: list, processor, max_label_len: int = 128):
         self.samples = samples
         self.processor = processor
+        self.tokenizer = getattr(processor, "tokenizer")  # ProcessorMixin dinamik attr
         self.max_label_len = max_label_len
 
     def __len__(self) -> int:
@@ -94,7 +95,7 @@ class ReceiptDataset:
 
         pixel_values = self.processor(images=image, return_tensors="pt").pixel_values.squeeze(0)
 
-        labels = self.processor.tokenizer(
+        labels = self.tokenizer(
             label,
             max_length=self.max_label_len,
             padding="max_length",
@@ -103,7 +104,7 @@ class ReceiptDataset:
         ).input_ids.squeeze(0)
 
         # Padding token'ları loss hesabından çıkar
-        pad_id = self.processor.tokenizer.pad_token_id
+        pad_id = self.tokenizer.pad_token_id
         labels[labels == pad_id] = -100
 
         return {"pixel_values": pixel_values, "labels": labels}
@@ -131,10 +132,14 @@ def build_lora_model(base_model_id: str, adapter_dir: Optional[Path] = None):
     processor = TrOCRProcessor.from_pretrained(base_model_id)
     base_model = VisionEncoderDecoderModel.from_pretrained(base_model_id)
 
-    # Teacher-forcing için gerekli token ID'leri
-    base_model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
-    base_model.config.pad_token_id = processor.tokenizer.pad_token_id
-    base_model.config.eos_token_id = processor.tokenizer.sep_token_id
+    # Teacher-forcing için gerekli token ID'leri.
+    # TrOCRProcessor, ProcessorMixin'den miras alır ve tokenizer'ı dinamik __getattr__
+    # ile açar — Pylance statik olarak göremez, getattr() ile erişiyoruz.
+    from transformers import PreTrainedTokenizerBase
+    tokenizer: PreTrainedTokenizerBase = getattr(processor, "tokenizer")
+    base_model.config.decoder_start_token_id = tokenizer.cls_token_id
+    base_model.config.pad_token_id           = tokenizer.pad_token_id
+    base_model.config.eos_token_id           = tokenizer.sep_token_id
 
     if adapter_dir is not None and (adapter_dir / "adapter_config.json").exists():
         print(f"  Mevcut adapter yükleniyor: {adapter_dir}/")

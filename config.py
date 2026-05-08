@@ -10,6 +10,7 @@ _CONFIG_FILE = Path(__file__).parent / "config.toml"
 
 _DEFAULTS = {
     "paths": {
+        "receipts":           "Receipts",
         "ocr_cache":          ".ocr_cache",
         "ocr_cache_trocr":    ".ocr_cache_trocr",
         "ocr_cache_easyocr":  ".ocr_cache_easyocr",
@@ -44,6 +45,7 @@ def _load() -> dict:
 
 _cfg = _load()
 
+RECEIPTS_DIR          = Path(_cfg["paths"]["receipts"])
 OCR_CACHE_DIR         = Path(_cfg["paths"]["ocr_cache"])
 OCR_CACHE_DIR_TROCR   = Path(_cfg["paths"]["ocr_cache_trocr"])
 OCR_CACHE_DIR_EASY    = Path(_cfg["paths"]["ocr_cache_easyocr"])

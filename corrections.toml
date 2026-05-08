@@ -140,3 +140,27 @@ right = "*70,00"
 [[correction]]
 wrong = "TOPKV"
 right = "TOPKDV"
+
+[[correction]]
+wrong = "KREDI KARTI"
+right = "KREDİ KARTI"
+
+[[correction]]
+wrong = "22101/2025"
+right = "22/01/2025"
+
+[[correction]]
+wrong = "TOPKUV"
+right = "TOPKDV"
+
+[[correction]]
+wrong = "KOVAN BAR TURIZH ISLETHELERI"
+right = "KOVAN BAR TURİZM İŞLETMELERİ"
+
+[[correction]]
+wrong = "KAZINDIRIK MAH."
+right = "KAZIMDIRIK MAH."
+
+[[correction]]
+wrong = "SANAYI CD. NO:31/Z2"
+right = "SANAYİ CD. NO:31/Z2"

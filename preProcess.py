@@ -214,7 +214,7 @@ def normalize_background(img: np.ndarray) -> np.ndarray:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ADIM 4 — KONTRAST NORMALİZASYON (CLAHE)
+# ADIM 5 — KONTRAST NORMALİZASYON (CLAHE)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def enhance_contrast(img: np.ndarray) -> np.ndarray:
@@ -244,7 +244,7 @@ def enhance_contrast(img: np.ndarray) -> np.ndarray:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ADIM 4 — GAMMA DÜZELTMESİ (OPSİYONEL, YENİ)
+# ADIM 4 — GAMMA DÜZELTMESİ (OPSİYONEL)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def gamma_correct(img: np.ndarray, gamma: float = 0.7) -> np.ndarray:
@@ -328,7 +328,7 @@ def to_binary(img: np.ndarray) -> np.ndarray:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ADIM 7 — CROP
+# ADIM 9 — CROP
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def crop_receipt(img: np.ndarray, padding: int = 10) -> np.ndarray:
@@ -426,7 +426,6 @@ def process_image(
 
     # ── Adım 2: Perspektif düzeltme ───────────────────────────────────────────
     try:
-        w_before = cur.shape[1]
         warped = correct_perspective(cur)
         if warped.shape != cur.shape:
             print(f"    [2] Perspektif: {cur.shape[1]}x{cur.shape[0]} -> {warped.shape[1]}x{warped.shape[0]}")

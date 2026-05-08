@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "generated_at": "2026-05-08T10:57:53.264941+00:00",
+  "analyzed_files": [
+    "batch.py",
+    "build_corrections.py",
+    "config.py",
+    "correct_labels.py",
+    "generate_tesseract_cache.py",
+    "import_labels.py",
+    "llm_parser.py",
+    "ocr_engine.py",
+    "parser.py",
+    "preProcess.py",
+    "processed.py",
+    "rules.py",
+    "snapshots.py",
+    "train_trocr.py",
+    "update_excel.py",
+    "update_journal.py"
+  ],
+  "not_analyzed_files": [
+    {
+      "path": "corrections.toml",
+      "reason": "other"
+    },
+    {
+      "path": "notes\\fis_bazli_analiz.md",
+      "reason": "other"
+    },
+    {
+      "path": "notes\\genel_durum.md",
+      "reason": "other"
+    },
+    {
+      "path": "notes\\parser_teknik_detaylar.md",
+      "reason": "other"
+    },
+    {
+      "path": "notes\\test_durumu.md",
+      "reason": "other"
+    },
+    {
+      "path": "PPOCRLabel_Data\\Receipts\\fileState.txt",
+      "reason": "other"
+    },
+    {
+      "path": "PPOCRLabel_Data\\Receipts\\Label.txt",
+      "reason": "other"
+    },
+    {
+      "path": "PPOCRLabel_Data\\Receipts\\rec_gt.txt",
+      "reason": "other"
+    },
+    {
+      "path": "README.md",
+      "reason": "other"
+    },
+    {
+      "path": "stores.toml",
+      "reason": "other"
+    },
+    {
+      "path": "test_compare_engines.py",
+      "reason": "codeboardingignore"
+    },
+    {
+      "path": "test_new_files.py",
+      "reason": "codeboardingignore"
+    },
+    {
+      "path": "test_parser.py",
+      "reason": "codeboardingignore"
+    },
+    {
+      "path": "test_preprocess_compare.py",
+      "reason": "codeboardingignore"
+    }
+  ],
+  "summary": {
+    "total_files": 30,
+    "analyzed": 16,
+    "not_analyzed": 14,
+    "not_analyzed_by_reason": {
+      "other": 10,
+      "codeboardingignore": 4
+    }
+  }
+}

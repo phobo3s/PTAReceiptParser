@@ -214,7 +214,7 @@ def _compare_all(api_key: str, force: bool = False):
 
         ck = stem if not force else None
         try:
-            lr = parse_with_llm(ocr_json, api_key=api_key, cache_key=stem)
+            lr = parse_with_llm(ocr_json, api_key=api_key, cache_key=ck)
         except Exception as e:
             lr = None
             print(f"  [LLM HATA] {stem}: {e}", file=sys.stderr)

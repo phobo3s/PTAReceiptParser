@@ -1,0 +1,1640 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-08T10:57:53.262973+00:00",
+    "commit_hash": "",
+    "repo_name": "snapshot-worktree",
+    "depth_level": 1,
+    "file_coverage_summary": {
+      "total_files": 30,
+      "analyzed": 16,
+      "not_analyzed": 14,
+      "not_analyzed_by_reason": {
+        "other": 10,
+        "codeboardingignore": 4
+      }
+    }
+  },
+  "description": "This final component architecture for `snapshot-worktree` represents a robust ETL pipeline designed for high-accuracy receipt processing. The system flows from raw image ingestion through a multi-stage transformation process\u00e2\u20ac\u201dleveraging both deterministic spatial geometry and probabilistic LLM refinement\u00e2\u20ac\u201dbefore finalizing data into accounting formats. A dedicated feedback and state management layer ensures idempotency and continuous model improvement, characteristic of a production-grade CLI data tool.",
+  "files": {
+    "batch.py": {
+      "method_keys": [
+        "batch.py|batch.get_ocr_engine",
+        "batch.py|batch.get_easyocr_engine",
+        "batch.py|batch.get_trocr_engine",
+        "batch.py|batch._run_trocr",
+        "batch.py|batch.run_ocr",
+        "batch.py|batch._run_paddleocr",
+        "batch.py|batch._run_easyocr",
+        "batch.py|batch.ocr_with_cache",
+        "batch.py|batch.ask_claude",
+        "batch.py|batch.categorize_items",
+        "batch.py|batch.process_receipt",
+        "batch.py|batch.main"
+      ]
+    },
+    "config.py": {
+      "method_keys": [
+        "config.py|config._load"
+      ]
+    },
+    "import_labels.py": {
+      "method_keys": [
+        "import_labels.py|import_labels.convert"
+      ]
+    },
+    "ocr_engine.py": {
+      "method_keys": [
+        "ocr_engine.py|ocr_engine._conf_color",
+        "ocr_engine.py|ocr_engine._bbox_to_quad",
+        "ocr_engine.py|ocr_engine.save_guided_receipt",
+        "ocr_engine.py|ocr_engine.ocr_with_cache",
+        "ocr_engine.py|ocr_engine._run_engine",
+        "ocr_engine.py|ocr_engine.load_paddle",
+        "ocr_engine.py|ocr_engine._run_paddle",
+        "ocr_engine.py|ocr_engine.load_tesseract",
+        "ocr_engine.py|ocr_engine._run_tesseract",
+        "ocr_engine.py|ocr_engine.load_windows",
+        "ocr_engine.py|ocr_engine._run_ocr_async_helper",
+        "ocr_engine.py|ocr_engine._run_windows",
+        "ocr_engine.py|ocr_engine.load_engine",
+        "ocr_engine.py|ocr_engine.run_ocr"
+      ]
+    },
+    "preProcess.py": {
+      "method_keys": [
+        "preProcess.py|preProcess.enforce_min_width",
+        "preProcess.py|preProcess.correct_rotation",
+        "preProcess.py|preProcess.correct_perspective",
+        "preProcess.py|preProcess.order_points",
+        "preProcess.py|preProcess.normalize_background",
+        "preProcess.py|preProcess.enhance_contrast",
+        "preProcess.py|preProcess.gamma_correct",
+        "preProcess.py|preProcess.denoise",
+        "preProcess.py|preProcess.sharpen",
+        "preProcess.py|preProcess.to_binary",
+        "preProcess.py|preProcess.crop_receipt",
+        "preProcess.py|preProcess.save_debug",
+        "preProcess.py|preProcess.process_image",
+        "preProcess.py|preProcess.process_image._dbg",
+        "preProcess.py|preProcess.process_folder",
+        "preProcess.py|preProcess.main"
+      ]
+    },
+    "llm_parser.py": {
+      "method_keys": [
+        "llm_parser.py|llm_parser._parse_turkish_number",
+        "llm_parser.py|llm_parser._ocr_to_text",
+        "llm_parser.py|llm_parser._call_claude",
+        "llm_parser.py|llm_parser.show_formatted_text",
+        "llm_parser.py|llm_parser._build_receipt",
+        "llm_parser.py|llm_parser.parse_with_llm",
+        "llm_parser.py|llm_parser._compare_all"
+      ]
+    },
+    "parser.py": {
+      "method_keys": [
+        "parser.py|parser.Detection",
+        "parser.py|parser.ReceiptItem",
+        "parser.py|parser.Receipt",
+        "parser.py|parser._load_config",
+        "parser.py|parser._load_corrections",
+        "parser.py|parser.load_detections",
+        "parser.py|parser.detect_store",
+        "parser.py|parser.extract_date",
+        "parser.py|parser._middle_third_bbox",
+        "parser.py|parser.group_into_rows",
+        "parser.py|parser.get_line_equation_from_two_points",
+        "parser.py|parser.check_detection",
+        "parser.py|parser.should_skip",
+        "parser.py|parser.clean_name",
+        "parser.py|parser.parse_price",
+        "parser.py|parser.parse_weight_line",
+        "parser.py|parser.row_has_price",
+        "parser.py|parser._try_inline_split",
+        "parser.py|parser.split_row_into_name_price",
+        "parser.py|parser.merge_weight_rows",
+        "parser.py|parser.merge_orphan_rows",
+        "parser.py|parser.merge_two_line_rows",
+        "parser.py|parser.parse_receipt",
+        "parser.py|parser.print_summary",
+        "parser.py|parser.main",
+        "parser.py|parser.main._process"
+      ]
+    },
+    "rules.py": {
+      "method_keys": [
+        "rules.py|rules.Rule",
+        "rules.py|rules.Rule.matches",
+        "rules.py|rules._parse_rule",
+        "rules.py|rules.load_rules",
+        "rules.py|rules.find_account",
+        "rules.py|rules.append_learned_rule"
+      ]
+    },
+    "update_excel.py": {
+      "method_keys": [
+        "update_excel.py|update_excel.parse_excel_amount",
+        "update_excel.py|update_excel.format_excel_amount",
+        "update_excel.py|update_excel.parse_excel_date",
+        "update_excel.py|update_excel.receipt_date_to_excel",
+        "update_excel.py|update_excel._unmerge_rows",
+        "update_excel.py|update_excel.find_excel_transaction",
+        "update_excel.py|update_excel.get_to_account_rows",
+        "update_excel.py|update_excel.find_excel_match",
+        "update_excel.py|update_excel.read_excel_to_accounts",
+        "update_excel.py|update_excel.preview_excel",
+        "update_excel.py|update_excel._apply_to_ws",
+        "update_excel.py|update_excel.update_excel",
+        "update_excel.py|update_excel.update_excel_batch"
+      ]
+    },
+    "update_journal.py": {
+      "method_keys": [
+        "update_journal.py|update_journal.Transaction",
+        "update_journal.py|update_journal.parse_journal",
+        "update_journal.py|update_journal.find_matching_transaction",
+        "update_journal.py|update_journal.categorize_items",
+        "update_journal.py|update_journal.build_new_transaction",
+        "update_journal.py|update_journal.update_journal",
+        "update_journal.py|update_journal.preview",
+        "update_journal.py|update_journal.main"
+      ]
+    },
+    "build_corrections.py": {
+      "method_keys": [
+        "build_corrections.py|build_corrections._load_ppocr_file",
+        "build_corrections.py|build_corrections._load_existing_corrections",
+        "build_corrections.py|build_corrections._toml_escape",
+        "build_corrections.py|build_corrections.build"
+      ]
+    },
+    "correct_labels.py": {
+      "method_keys": [
+        "correct_labels.py|correct_labels.encode_image",
+        "correct_labels.py|correct_labels.ask_haiku",
+        "correct_labels.py|correct_labels.correct_label_txt"
+      ]
+    },
+    "processed.py": {
+      "method_keys": [
+        "processed.py|processed._load",
+        "processed.py|processed._save",
+        "processed.py|processed.is_processed",
+        "processed.py|processed.mark_processed",
+        "processed.py|processed.unmark_processed"
+      ]
+    },
+    "snapshots.py": {
+      "method_keys": [
+        "snapshots.py|snapshots._load_snapshots",
+        "snapshots.py|snapshots._save_snapshots",
+        "snapshots.py|snapshots._receipt_to_snapshot",
+        "snapshots.py|snapshots.totals_match",
+        "snapshots.py|snapshots.save_snapshot",
+        "snapshots.py|snapshots.check_snapshot",
+        "snapshots.py|snapshots.run_regression",
+        "snapshots.py|snapshots.main"
+      ]
+    },
+    "train_trocr.py": {
+      "method_keys": [
+        "train_trocr.py|train_trocr.parse_rec_gt",
+        "train_trocr.py|train_trocr.ReceiptDataset",
+        "train_trocr.py|train_trocr.ReceiptDataset.__init__",
+        "train_trocr.py|train_trocr.ReceiptDataset.__len__",
+        "train_trocr.py|train_trocr.ReceiptDataset.__getitem__",
+        "train_trocr.py|train_trocr.build_lora_model",
+        "train_trocr.py|train_trocr.train",
+        "train_trocr.py|train_trocr._evaluate",
+        "train_trocr.py|train_trocr.parse_args",
+        "train_trocr.py|train_trocr.main"
+      ]
+    }
+  },
+  "methods_index": {
+    "batch.py|batch.get_ocr_engine": {
+      "file_path": "batch.py",
+      "qualified_name": "batch.get_ocr_engine",
+      "start_line": 52,
+      "end_line": 81,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch.get_easyocr_engine": {
+      "file_path": "batch.py",
+      "qualified_name": "batch.get_easyocr_engine",
+      "start_line": 84,
+      "end_line": 94,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch.get_trocr_engine": {
+      "file_path": "batch.py",
+      "qualified_name": "batch.get_trocr_engine",
+      "start_line": 97,
+      "end_line": 155,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch._run_trocr": {
+      "file_path": "batch.py",
+      "qualified_name": "batch._run_trocr",
+      "start_line": 158,
+      "end_line": 215,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch.run_ocr": {
+      "file_path": "batch.py",
+      "qualified_name": "batch.run_ocr",
+      "start_line": 218,
+      "end_line": 232,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch._run_paddleocr": {
+      "file_path": "batch.py",
+      "qualified_name": "batch._run_paddleocr",
+      "start_line": 235,
+      "end_line": 255,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch._run_easyocr": {
+      "file_path": "batch.py",
+      "qualified_name": "batch._run_easyocr",
+      "start_line": 258,
+      "end_line": 286,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch.ocr_with_cache": {
+      "file_path": "batch.py",
+      "qualified_name": "batch.ocr_with_cache",
+      "start_line": 288,
+      "end_line": 306,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch.ask_claude": {
+      "file_path": "batch.py",
+      "qualified_name": "batch.ask_claude",
+      "start_line": 311,
+      "end_line": 360,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch.categorize_items": {
+      "file_path": "batch.py",
+      "qualified_name": "batch.categorize_items",
+      "start_line": 365,
+      "end_line": 408,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch.process_receipt": {
+      "file_path": "batch.py",
+      "qualified_name": "batch.process_receipt",
+      "start_line": 413,
+      "end_line": 527,
+      "type": "FUNCTION"
+    },
+    "batch.py|batch.main": {
+      "file_path": "batch.py",
+      "qualified_name": "batch.main",
+      "start_line": 532,
+      "end_line": 672,
+      "type": "FUNCTION"
+    },
+    "config.py|config._load": {
+      "file_path": "config.py",
+      "qualified_name": "config._load",
+      "start_line": 29,
+      "end_line": 42,
+      "type": "FUNCTION"
+    },
+    "import_labels.py|import_labels.convert": {
+      "file_path": "import_labels.py",
+      "qualified_name": "import_labels.convert",
+      "start_line": 30,
+      "end_line": 73,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine._conf_color": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine._conf_color",
+      "start_line": 50,
+      "end_line": 57,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine._bbox_to_quad": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine._bbox_to_quad",
+      "start_line": 60,
+      "end_line": 67,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine.save_guided_receipt": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine.save_guided_receipt",
+      "start_line": 72,
+      "end_line": 119,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine.ocr_with_cache": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine.ocr_with_cache",
+      "start_line": 124,
+      "end_line": 150,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine._run_engine": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine._run_engine",
+      "start_line": 153,
+      "end_line": 161,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine.load_paddle": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine.load_paddle",
+      "start_line": 166,
+      "end_line": 186,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine._run_paddle": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine._run_paddle",
+      "start_line": 189,
+      "end_line": 212,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine.load_tesseract": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine.load_tesseract",
+      "start_line": 217,
+      "end_line": 241,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine._run_tesseract": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine._run_tesseract",
+      "start_line": 244,
+      "end_line": 282,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine.load_windows": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine.load_windows",
+      "start_line": 287,
+      "end_line": 304,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine._run_ocr_async_helper": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine._run_ocr_async_helper",
+      "start_line": 307,
+      "end_line": 310,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine._run_windows": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine._run_windows",
+      "start_line": 312,
+      "end_line": 343,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine.load_engine": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine.load_engine",
+      "start_line": 348,
+      "end_line": 358,
+      "type": "FUNCTION"
+    },
+    "ocr_engine.py|ocr_engine.run_ocr": {
+      "file_path": "ocr_engine.py",
+      "qualified_name": "ocr_engine.run_ocr",
+      "start_line": 361,
+      "end_line": 369,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.enforce_min_width": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.enforce_min_width",
+      "start_line": 48,
+      "end_line": 59,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.correct_rotation": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.correct_rotation",
+      "start_line": 66,
+      "end_line": 118,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.correct_perspective": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.correct_perspective",
+      "start_line": 125,
+      "end_line": 171,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.order_points": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.order_points",
+      "start_line": 174,
+      "end_line": 182,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.normalize_background": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.normalize_background",
+      "start_line": 189,
+      "end_line": 213,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.enhance_contrast": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.enhance_contrast",
+      "start_line": 220,
+      "end_line": 243,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.gamma_correct": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.gamma_correct",
+      "start_line": 250,
+      "end_line": 263,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.denoise": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.denoise",
+      "start_line": 270,
+      "end_line": 276,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.sharpen": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.sharpen",
+      "start_line": 283,
+      "end_line": 296,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.to_binary": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.to_binary",
+      "start_line": 303,
+      "end_line": 327,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.crop_receipt": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.crop_receipt",
+      "start_line": 334,
+      "end_line": 358,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.save_debug": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.save_debug",
+      "start_line": 365,
+      "end_line": 369,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.process_image": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.process_image",
+      "start_line": 372,
+      "end_line": 516,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.process_image._dbg": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.process_image._dbg",
+      "start_line": 403,
+      "end_line": 409,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.process_folder": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.process_folder",
+      "start_line": 519,
+      "end_line": 567,
+      "type": "FUNCTION"
+    },
+    "preProcess.py|preProcess.main": {
+      "file_path": "preProcess.py",
+      "qualified_name": "preProcess.main",
+      "start_line": 574,
+      "end_line": 626,
+      "type": "FUNCTION"
+    },
+    "llm_parser.py|llm_parser._parse_turkish_number": {
+      "file_path": "llm_parser.py",
+      "qualified_name": "llm_parser._parse_turkish_number",
+      "start_line": 53,
+      "end_line": 65,
+      "type": "FUNCTION"
+    },
+    "llm_parser.py|llm_parser._ocr_to_text": {
+      "file_path": "llm_parser.py",
+      "qualified_name": "llm_parser._ocr_to_text",
+      "start_line": 68,
+      "end_line": 83,
+      "type": "FUNCTION"
+    },
+    "llm_parser.py|llm_parser._call_claude": {
+      "file_path": "llm_parser.py",
+      "qualified_name": "llm_parser._call_claude",
+      "start_line": 86,
+      "end_line": 102,
+      "type": "FUNCTION"
+    },
+    "llm_parser.py|llm_parser.show_formatted_text": {
+      "file_path": "llm_parser.py",
+      "qualified_name": "llm_parser.show_formatted_text",
+      "start_line": 105,
+      "end_line": 112,
+      "type": "FUNCTION"
+    },
+    "llm_parser.py|llm_parser._build_receipt": {
+      "file_path": "llm_parser.py",
+      "qualified_name": "llm_parser._build_receipt",
+      "start_line": 115,
+      "end_line": 144,
+      "type": "FUNCTION"
+    },
+    "llm_parser.py|llm_parser.parse_with_llm": {
+      "file_path": "llm_parser.py",
+      "qualified_name": "llm_parser.parse_with_llm",
+      "start_line": 147,
+      "end_line": 180,
+      "type": "FUNCTION"
+    },
+    "llm_parser.py|llm_parser._compare_all": {
+      "file_path": "llm_parser.py",
+      "qualified_name": "llm_parser._compare_all",
+      "start_line": 185,
+      "end_line": 256,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.Detection": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.Detection",
+      "start_line": 23,
+      "end_line": 31,
+      "type": "CLASS"
+    },
+    "parser.py|parser.ReceiptItem": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.ReceiptItem",
+      "start_line": 35,
+      "end_line": 38,
+      "type": "CLASS"
+    },
+    "parser.py|parser.Receipt": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.Receipt",
+      "start_line": 42,
+      "end_line": 47,
+      "type": "CLASS"
+    },
+    "parser.py|parser._load_config": {
+      "file_path": "parser.py",
+      "qualified_name": "parser._load_config",
+      "start_line": 52,
+      "end_line": 85,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser._load_corrections": {
+      "file_path": "parser.py",
+      "qualified_name": "parser._load_corrections",
+      "start_line": 93,
+      "end_line": 100,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.load_detections": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.load_detections",
+      "start_line": 117,
+      "end_line": 141,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.detect_store": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.detect_store",
+      "start_line": 146,
+      "end_line": 159,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.extract_date": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.extract_date",
+      "start_line": 164,
+      "end_line": 204,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser._middle_third_bbox": {
+      "file_path": "parser.py",
+      "qualified_name": "parser._middle_third_bbox",
+      "start_line": 209,
+      "end_line": 219,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.group_into_rows": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.group_into_rows",
+      "start_line": 222,
+      "end_line": 271,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.get_line_equation_from_two_points": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.get_line_equation_from_two_points",
+      "start_line": 274,
+      "end_line": 282,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.check_detection": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.check_detection",
+      "start_line": 284,
+      "end_line": 305,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.should_skip": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.should_skip",
+      "start_line": 309,
+      "end_line": 313,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.clean_name": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.clean_name",
+      "start_line": 316,
+      "end_line": 319,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.parse_price": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.parse_price",
+      "start_line": 322,
+      "end_line": 350,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.parse_weight_line": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.parse_weight_line",
+      "start_line": 353,
+      "end_line": 366,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.row_has_price": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.row_has_price",
+      "start_line": 369,
+      "end_line": 370,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser._try_inline_split": {
+      "file_path": "parser.py",
+      "qualified_name": "parser._try_inline_split",
+      "start_line": 373,
+      "end_line": 411,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.split_row_into_name_price": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.split_row_into_name_price",
+      "start_line": 414,
+      "end_line": 467,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.merge_weight_rows": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.merge_weight_rows",
+      "start_line": 470,
+      "end_line": 597,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.merge_orphan_rows": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.merge_orphan_rows",
+      "start_line": 600,
+      "end_line": 638,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.merge_two_line_rows": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.merge_two_line_rows",
+      "start_line": 641,
+      "end_line": 687,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.parse_receipt": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.parse_receipt",
+      "start_line": 690,
+      "end_line": 935,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.print_summary": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.print_summary",
+      "start_line": 940,
+      "end_line": 956,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.main": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.main",
+      "start_line": 960,
+      "end_line": 1175,
+      "type": "FUNCTION"
+    },
+    "parser.py|parser.main._process": {
+      "file_path": "parser.py",
+      "qualified_name": "parser.main._process",
+      "start_line": 999,
+      "end_line": 1112,
+      "type": "FUNCTION"
+    },
+    "rules.py|rules.Rule": {
+      "file_path": "rules.py",
+      "qualified_name": "rules.Rule",
+      "start_line": 14,
+      "end_line": 31,
+      "type": "CLASS"
+    },
+    "rules.py|rules.Rule.matches": {
+      "file_path": "rules.py",
+      "qualified_name": "rules.Rule.matches",
+      "start_line": 22,
+      "end_line": 31,
+      "type": "METHOD"
+    },
+    "rules.py|rules._parse_rule": {
+      "file_path": "rules.py",
+      "qualified_name": "rules._parse_rule",
+      "start_line": 33,
+      "end_line": 41,
+      "type": "FUNCTION"
+    },
+    "rules.py|rules.load_rules": {
+      "file_path": "rules.py",
+      "qualified_name": "rules.load_rules",
+      "start_line": 43,
+      "end_line": 48,
+      "type": "FUNCTION"
+    },
+    "rules.py|rules.find_account": {
+      "file_path": "rules.py",
+      "qualified_name": "rules.find_account",
+      "start_line": 50,
+      "end_line": 54,
+      "type": "FUNCTION"
+    },
+    "rules.py|rules.append_learned_rule": {
+      "file_path": "rules.py",
+      "qualified_name": "rules.append_learned_rule",
+      "start_line": 56,
+      "end_line": 71,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.parse_excel_amount": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.parse_excel_amount",
+      "start_line": 42,
+      "end_line": 61,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.format_excel_amount": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.format_excel_amount",
+      "start_line": 64,
+      "end_line": 76,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.parse_excel_date": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.parse_excel_date",
+      "start_line": 81,
+      "end_line": 100,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.receipt_date_to_excel": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.receipt_date_to_excel",
+      "start_line": 103,
+      "end_line": 109,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel._unmerge_rows": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel._unmerge_rows",
+      "start_line": 114,
+      "end_line": 123,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.find_excel_transaction": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.find_excel_transaction",
+      "start_line": 128,
+      "end_line": 157,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.get_to_account_rows": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.get_to_account_rows",
+      "start_line": 160,
+      "end_line": 179,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.find_excel_match": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.find_excel_match",
+      "start_line": 184,
+      "end_line": 221,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.read_excel_to_accounts": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.read_excel_to_accounts",
+      "start_line": 226,
+      "end_line": 268,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.preview_excel": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.preview_excel",
+      "start_line": 273,
+      "end_line": 283,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel._apply_to_ws": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel._apply_to_ws",
+      "start_line": 288,
+      "end_line": 332,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.update_excel": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.update_excel",
+      "start_line": 335,
+      "end_line": 342,
+      "type": "FUNCTION"
+    },
+    "update_excel.py|update_excel.update_excel_batch": {
+      "file_path": "update_excel.py",
+      "qualified_name": "update_excel.update_excel_batch",
+      "start_line": 345,
+      "end_line": 381,
+      "type": "FUNCTION"
+    },
+    "update_journal.py|update_journal.Transaction": {
+      "file_path": "update_journal.py",
+      "qualified_name": "update_journal.Transaction",
+      "start_line": 23,
+      "end_line": 29,
+      "type": "CLASS"
+    },
+    "update_journal.py|update_journal.parse_journal": {
+      "file_path": "update_journal.py",
+      "qualified_name": "update_journal.parse_journal",
+      "start_line": 32,
+      "end_line": 75,
+      "type": "FUNCTION"
+    },
+    "update_journal.py|update_journal.find_matching_transaction": {
+      "file_path": "update_journal.py",
+      "qualified_name": "update_journal.find_matching_transaction",
+      "start_line": 80,
+      "end_line": 107,
+      "type": "FUNCTION"
+    },
+    "update_journal.py|update_journal.categorize_items": {
+      "file_path": "update_journal.py",
+      "qualified_name": "update_journal.categorize_items",
+      "start_line": 112,
+      "end_line": 147,
+      "type": "FUNCTION"
+    },
+    "update_journal.py|update_journal.build_new_transaction": {
+      "file_path": "update_journal.py",
+      "qualified_name": "update_journal.build_new_transaction",
+      "start_line": 152,
+      "end_line": 179,
+      "type": "FUNCTION"
+    },
+    "update_journal.py|update_journal.update_journal": {
+      "file_path": "update_journal.py",
+      "qualified_name": "update_journal.update_journal",
+      "start_line": 182,
+      "end_line": 190,
+      "type": "FUNCTION"
+    },
+    "update_journal.py|update_journal.preview": {
+      "file_path": "update_journal.py",
+      "qualified_name": "update_journal.preview",
+      "start_line": 195,
+      "end_line": 201,
+      "type": "FUNCTION"
+    },
+    "update_journal.py|update_journal.main": {
+      "file_path": "update_journal.py",
+      "qualified_name": "update_journal.main",
+      "start_line": 206,
+      "end_line": 274,
+      "type": "FUNCTION"
+    },
+    "build_corrections.py|build_corrections._load_ppocr_file": {
+      "file_path": "build_corrections.py",
+      "qualified_name": "build_corrections._load_ppocr_file",
+      "start_line": 33,
+      "end_line": 45,
+      "type": "FUNCTION"
+    },
+    "build_corrections.py|build_corrections._load_existing_corrections": {
+      "file_path": "build_corrections.py",
+      "qualified_name": "build_corrections._load_existing_corrections",
+      "start_line": 48,
+      "end_line": 57,
+      "type": "FUNCTION"
+    },
+    "build_corrections.py|build_corrections._toml_escape": {
+      "file_path": "build_corrections.py",
+      "qualified_name": "build_corrections._toml_escape",
+      "start_line": 60,
+      "end_line": 62,
+      "type": "FUNCTION"
+    },
+    "build_corrections.py|build_corrections.build": {
+      "file_path": "build_corrections.py",
+      "qualified_name": "build_corrections.build",
+      "start_line": 65,
+      "end_line": 132,
+      "type": "FUNCTION"
+    },
+    "correct_labels.py|correct_labels.encode_image": {
+      "file_path": "correct_labels.py",
+      "qualified_name": "correct_labels.encode_image",
+      "start_line": 29,
+      "end_line": 31,
+      "type": "FUNCTION"
+    },
+    "correct_labels.py|correct_labels.ask_haiku": {
+      "file_path": "correct_labels.py",
+      "qualified_name": "correct_labels.ask_haiku",
+      "start_line": 34,
+      "end_line": 53,
+      "type": "FUNCTION"
+    },
+    "correct_labels.py|correct_labels.correct_label_txt": {
+      "file_path": "correct_labels.py",
+      "qualified_name": "correct_labels.correct_label_txt",
+      "start_line": 56,
+      "end_line": 102,
+      "type": "FUNCTION"
+    },
+    "processed.py|processed._load": {
+      "file_path": "processed.py",
+      "qualified_name": "processed._load",
+      "start_line": 33,
+      "end_line": 39,
+      "type": "FUNCTION"
+    },
+    "processed.py|processed._save": {
+      "file_path": "processed.py",
+      "qualified_name": "processed._save",
+      "start_line": 42,
+      "end_line": 46,
+      "type": "FUNCTION"
+    },
+    "processed.py|processed.is_processed": {
+      "file_path": "processed.py",
+      "qualified_name": "processed.is_processed",
+      "start_line": 49,
+      "end_line": 51,
+      "type": "FUNCTION"
+    },
+    "processed.py|processed.mark_processed": {
+      "file_path": "processed.py",
+      "qualified_name": "processed.mark_processed",
+      "start_line": 54,
+      "end_line": 61,
+      "type": "FUNCTION"
+    },
+    "processed.py|processed.unmark_processed": {
+      "file_path": "processed.py",
+      "qualified_name": "processed.unmark_processed",
+      "start_line": 64,
+      "end_line": 68,
+      "type": "FUNCTION"
+    },
+    "snapshots.py|snapshots._load_snapshots": {
+      "file_path": "snapshots.py",
+      "qualified_name": "snapshots._load_snapshots",
+      "start_line": 31,
+      "end_line": 37,
+      "type": "FUNCTION"
+    },
+    "snapshots.py|snapshots._save_snapshots": {
+      "file_path": "snapshots.py",
+      "qualified_name": "snapshots._save_snapshots",
+      "start_line": 40,
+      "end_line": 45,
+      "type": "FUNCTION"
+    },
+    "snapshots.py|snapshots._receipt_to_snapshot": {
+      "file_path": "snapshots.py",
+      "qualified_name": "snapshots._receipt_to_snapshot",
+      "start_line": 48,
+      "end_line": 59,
+      "type": "FUNCTION"
+    },
+    "snapshots.py|snapshots.totals_match": {
+      "file_path": "snapshots.py",
+      "qualified_name": "snapshots.totals_match",
+      "start_line": 63,
+      "end_line": 68,
+      "type": "FUNCTION"
+    },
+    "snapshots.py|snapshots.save_snapshot": {
+      "file_path": "snapshots.py",
+      "qualified_name": "snapshots.save_snapshot",
+      "start_line": 70,
+      "end_line": 83,
+      "type": "FUNCTION"
+    },
+    "snapshots.py|snapshots.check_snapshot": {
+      "file_path": "snapshots.py",
+      "qualified_name": "snapshots.check_snapshot",
+      "start_line": 86,
+      "end_line": 136,
+      "type": "FUNCTION"
+    },
+    "snapshots.py|snapshots.run_regression": {
+      "file_path": "snapshots.py",
+      "qualified_name": "snapshots.run_regression",
+      "start_line": 141,
+      "end_line": 188,
+      "type": "FUNCTION"
+    },
+    "snapshots.py|snapshots.main": {
+      "file_path": "snapshots.py",
+      "qualified_name": "snapshots.main",
+      "start_line": 193,
+      "end_line": 208,
+      "type": "FUNCTION"
+    },
+    "train_trocr.py|train_trocr.parse_rec_gt": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr.parse_rec_gt",
+      "start_line": 42,
+      "end_line": 70,
+      "type": "FUNCTION"
+    },
+    "train_trocr.py|train_trocr.ReceiptDataset": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr.ReceiptDataset",
+      "start_line": 73,
+      "end_line": 109,
+      "type": "CLASS"
+    },
+    "train_trocr.py|train_trocr.ReceiptDataset.__init__": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr.ReceiptDataset.__init__",
+      "start_line": 81,
+      "end_line": 84,
+      "type": "METHOD"
+    },
+    "train_trocr.py|train_trocr.ReceiptDataset.__len__": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr.ReceiptDataset.__len__",
+      "start_line": 86,
+      "end_line": 87,
+      "type": "METHOD"
+    },
+    "train_trocr.py|train_trocr.ReceiptDataset.__getitem__": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr.ReceiptDataset.__getitem__",
+      "start_line": 89,
+      "end_line": 109,
+      "type": "METHOD"
+    },
+    "train_trocr.py|train_trocr.build_lora_model": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr.build_lora_model",
+      "start_line": 114,
+      "end_line": 156,
+      "type": "FUNCTION"
+    },
+    "train_trocr.py|train_trocr.train": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr.train",
+      "start_line": 161,
+      "end_line": 199,
+      "type": "FUNCTION"
+    },
+    "train_trocr.py|train_trocr._evaluate": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr._evaluate",
+      "start_line": 202,
+      "end_line": 213,
+      "type": "FUNCTION"
+    },
+    "train_trocr.py|train_trocr.parse_args": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr.parse_args",
+      "start_line": 218,
+      "end_line": 231,
+      "type": "FUNCTION"
+    },
+    "train_trocr.py|train_trocr.main": {
+      "file_path": "train_trocr.py",
+      "qualified_name": "train_trocr.main",
+      "start_line": 234,
+      "end_line": 299,
+      "type": "FUNCTION"
+    }
+  },
+  "components": [
+    {
+      "name": "Ingestion & OCR Engine",
+      "description": "Responsible for preparing raw images and extracting raw text data. It handles computer vision enhancements (deskewing, normalization) and abstracts multiple OCR backends (Paddle, Tesseract, etc.) behind a unified interface with a filesystem-based cache to optimize performance.",
+      "key_entities": [
+        {
+          "qualified_name": "preProcess.process_image",
+          "reference_file": "preProcess.py",
+          "reference_start_line": 372,
+          "reference_end_line": 516
+        },
+        {
+          "qualified_name": "ocr_engine.ocr_with_cache",
+          "reference_file": "ocr_engine.py",
+          "reference_start_line": 124,
+          "reference_end_line": 150
+        },
+        {
+          "qualified_name": "batch.get_ocr_engine",
+          "reference_file": "batch.py",
+          "reference_start_line": 52,
+          "reference_end_line": 81
+        }
+      ],
+      "source_cluster_ids": [
+        3,
+        5,
+        9,
+        11
+      ],
+      "file_methods": [
+        {
+          "file_path": "batch.py",
+          "methods": [
+            "batch._run_trocr",
+            "batch.run_ocr",
+            "batch._run_paddleocr",
+            "batch._run_easyocr",
+            "batch.ocr_with_cache"
+          ]
+        },
+        {
+          "file_path": "config.py",
+          "methods": [
+            "config._load"
+          ]
+        },
+        {
+          "file_path": "import_labels.py",
+          "methods": [
+            "import_labels.convert"
+          ]
+        },
+        {
+          "file_path": "ocr_engine.py",
+          "methods": [
+            "ocr_engine._conf_color",
+            "ocr_engine._bbox_to_quad",
+            "ocr_engine.save_guided_receipt",
+            "ocr_engine.ocr_with_cache",
+            "ocr_engine._run_engine",
+            "ocr_engine.load_paddle",
+            "ocr_engine._run_paddle",
+            "ocr_engine.load_tesseract",
+            "ocr_engine._run_tesseract",
+            "ocr_engine.load_windows",
+            "ocr_engine._run_ocr_async_helper",
+            "ocr_engine._run_windows",
+            "ocr_engine.load_engine",
+            "ocr_engine.run_ocr"
+          ]
+        },
+        {
+          "file_path": "preProcess.py",
+          "methods": [
+            "preProcess.enforce_min_width",
+            "preProcess.correct_rotation",
+            "preProcess.correct_perspective",
+            "preProcess.order_points",
+            "preProcess.normalize_background",
+            "preProcess.enhance_contrast",
+            "preProcess.gamma_correct",
+            "preProcess.denoise",
+            "preProcess.sharpen",
+            "preProcess.to_binary",
+            "preProcess.crop_receipt",
+            "preProcess.save_debug",
+            "preProcess.process_image",
+            "preProcess.process_image._dbg",
+            "preProcess.process_folder",
+            "preProcess.main"
+          ]
+        }
+      ],
+      "component_id": "1",
+      "can_expand": true
+    },
+    {
+      "name": "Spatial & Semantic Parser",
+      "description": "The core transformation engine that converts unstructured OCR bounding boxes into structured receipt objects. It uses geometric algorithms to reconstruct rows and columns, and integrates LLM logic (Claude API) to handle complex layouts or ambiguous text extraction.",
+      "key_entities": [
+        {
+          "qualified_name": "parser.Receipt",
+          "reference_file": "parser.py",
+          "reference_start_line": 42,
+          "reference_end_line": 47
+        },
+        {
+          "qualified_name": "parser.group_into_rows",
+          "reference_file": "parser.py",
+          "reference_start_line": 222,
+          "reference_end_line": 271
+        },
+        {
+          "qualified_name": "llm_parser.parse_with_llm",
+          "reference_file": "llm_parser.py",
+          "reference_start_line": 147,
+          "reference_end_line": 180
+        }
+      ],
+      "source_cluster_ids": [
+        1
+      ],
+      "file_methods": [
+        {
+          "file_path": "llm_parser.py",
+          "methods": [
+            "llm_parser._parse_turkish_number",
+            "llm_parser._ocr_to_text",
+            "llm_parser._call_claude",
+            "llm_parser.show_formatted_text",
+            "llm_parser._build_receipt",
+            "llm_parser.parse_with_llm",
+            "llm_parser._compare_all"
+          ]
+        },
+        {
+          "file_path": "parser.py",
+          "methods": [
+            "parser.Detection",
+            "parser.ReceiptItem",
+            "parser.Receipt",
+            "parser._load_config",
+            "parser._load_corrections",
+            "parser.load_detections",
+            "parser.detect_store",
+            "parser.extract_date",
+            "parser._middle_third_bbox",
+            "parser.group_into_rows",
+            "parser.get_line_equation_from_two_points",
+            "parser.check_detection",
+            "parser.should_skip",
+            "parser.clean_name",
+            "parser.parse_price",
+            "parser.parse_weight_line",
+            "parser.row_has_price",
+            "parser._try_inline_split",
+            "parser.split_row_into_name_price",
+            "parser.merge_weight_rows",
+            "parser.merge_orphan_rows",
+            "parser.merge_two_line_rows",
+            "parser.parse_receipt"
+          ]
+        }
+      ],
+      "component_id": "2",
+      "can_expand": true
+    },
+    {
+      "name": "Pipeline Controller",
+      "description": "Orchestrates the end-to-end execution flow. It manages the lifecycle of a processing job, including loading business rules (TOML), triggering the parser, and applying categorization logic to map receipt items to specific accounts.",
+      "key_entities": [
+        {
+          "qualified_name": "batch.process_receipt",
+          "reference_file": "batch.py",
+          "reference_start_line": 413,
+          "reference_end_line": 527
+        },
+        {
+          "qualified_name": "rules.load_rules",
+          "reference_file": "rules.py",
+          "reference_start_line": 43,
+          "reference_end_line": 48
+        },
+        {
+          "qualified_name": "batch.categorize_items",
+          "reference_file": "batch.py",
+          "reference_start_line": 365,
+          "reference_end_line": 408
+        }
+      ],
+      "source_cluster_ids": [
+        2,
+        7
+      ],
+      "file_methods": [
+        {
+          "file_path": "batch.py",
+          "methods": [
+            "batch.get_ocr_engine",
+            "batch.get_easyocr_engine",
+            "batch.get_trocr_engine",
+            "batch.ask_claude",
+            "batch.categorize_items",
+            "batch.process_receipt",
+            "batch.main"
+          ]
+        },
+        {
+          "file_path": "parser.py",
+          "methods": [
+            "parser.print_summary",
+            "parser.main._process"
+          ]
+        },
+        {
+          "file_path": "rules.py",
+          "methods": [
+            "rules.Rule",
+            "rules.Rule.matches",
+            "rules._parse_rule",
+            "rules.load_rules",
+            "rules.find_account",
+            "rules.append_learned_rule"
+          ]
+        },
+        {
+          "file_path": "update_excel.py",
+          "methods": [
+            "update_excel.format_excel_amount",
+            "update_excel.receipt_date_to_excel",
+            "update_excel.preview_excel"
+          ]
+        },
+        {
+          "file_path": "update_journal.py",
+          "methods": [
+            "update_journal.Transaction",
+            "update_journal.parse_journal",
+            "update_journal.find_matching_transaction",
+            "update_journal.categorize_items",
+            "update_journal.build_new_transaction",
+            "update_journal.update_journal",
+            "update_journal.preview",
+            "update_journal.main"
+          ]
+        }
+      ],
+      "component_id": "3",
+      "can_expand": true
+    },
+    {
+      "name": "Accounting Exporter",
+      "description": "The \"Load\" phase of the ETL. It translates structured data into final financial artifacts, specifically Excel spreadsheets and hledger journals. It includes reconciliation logic to match new receipts against existing bank or ledger entries.",
+      "key_entities": [
+        {
+          "qualified_name": "update_excel.update_excel",
+          "reference_file": "update_excel.py",
+          "reference_start_line": 335,
+          "reference_end_line": 342
+        },
+        {
+          "qualified_name": "update_excel.find_excel_match",
+          "reference_file": "update_excel.py",
+          "reference_start_line": 184,
+          "reference_end_line": 221
+        },
+        {
+          "qualified_name": "update_journal.main",
+          "reference_file": "update_journal.py",
+          "reference_start_line": 206,
+          "reference_end_line": 274
+        }
+      ],
+      "source_cluster_ids": [
+        6
+      ],
+      "file_methods": [
+        {
+          "file_path": "update_excel.py",
+          "methods": [
+            "update_excel.parse_excel_amount",
+            "update_excel.parse_excel_date",
+            "update_excel._unmerge_rows",
+            "update_excel.find_excel_transaction",
+            "update_excel.get_to_account_rows",
+            "update_excel.find_excel_match",
+            "update_excel.read_excel_to_accounts",
+            "update_excel._apply_to_ws",
+            "update_excel.update_excel",
+            "update_excel.update_excel_batch"
+          ]
+        }
+      ],
+      "component_id": "4",
+      "can_expand": true
+    },
+    {
+      "name": "Quality Assurance & Calibration",
+      "description": "Manages the system's reliability and evolution. It tracks processed state to prevent duplicates, runs regression snapshots to ensure parser changes don't break existing logic, and provides tools for fine-tuning OCR models (TrOCR) and correction tables.",
+      "key_entities": [
+        {
+          "qualified_name": "processed.is_processed",
+          "reference_file": "processed.py",
+          "reference_start_line": 49,
+          "reference_end_line": 51
+        },
+        {
+          "qualified_name": "snapshots.run_regression",
+          "reference_file": "snapshots.py",
+          "reference_start_line": 141,
+          "reference_end_line": 188
+        },
+        {
+          "qualified_name": "train_trocr.train",
+          "reference_file": "train_trocr.py",
+          "reference_start_line": 161,
+          "reference_end_line": 199
+        }
+      ],
+      "source_cluster_ids": [
+        4,
+        8,
+        10,
+        12
+      ],
+      "file_methods": [
+        {
+          "file_path": "build_corrections.py",
+          "methods": [
+            "build_corrections._load_ppocr_file",
+            "build_corrections._load_existing_corrections",
+            "build_corrections._toml_escape",
+            "build_corrections.build"
+          ]
+        },
+        {
+          "file_path": "correct_labels.py",
+          "methods": [
+            "correct_labels.encode_image",
+            "correct_labels.ask_haiku",
+            "correct_labels.correct_label_txt"
+          ]
+        },
+        {
+          "file_path": "parser.py",
+          "methods": [
+            "parser.main"
+          ]
+        },
+        {
+          "file_path": "processed.py",
+          "methods": [
+            "processed._load",
+            "processed._save",
+            "processed.is_processed",
+            "processed.mark_processed",
+            "processed.unmark_processed"
+          ]
+        },
+        {
+          "file_path": "snapshots.py",
+          "methods": [
+            "snapshots._load_snapshots",
+            "snapshots._save_snapshots",
+            "snapshots._receipt_to_snapshot",
+            "snapshots.totals_match",
+            "snapshots.save_snapshot",
+            "snapshots.check_snapshot",
+            "snapshots.run_regression",
+            "snapshots.main"
+          ]
+        },
+        {
+          "file_path": "train_trocr.py",
+          "methods": [
+            "train_trocr.parse_rec_gt",
+            "train_trocr.ReceiptDataset",
+            "train_trocr.ReceiptDataset.__init__",
+            "train_trocr.ReceiptDataset.__len__",
+            "train_trocr.ReceiptDataset.__getitem__",
+            "train_trocr.build_lora_model",
+            "train_trocr.train",
+            "train_trocr._evaluate",
+            "train_trocr.parse_args",
+            "train_trocr.main"
+          ]
+        }
+      ],
+      "component_id": "5",
+      "can_expand": true
+    }
+  ],
+  "components_relations": [
+    {
+      "relation": "sends raw text detections and bounding box coordinates to",
+      "src_name": "Ingestion & OCR Engine",
+      "dst_name": "Spatial & Semantic Parser",
+      "src_id": "1",
+      "dst_id": "2",
+      "edge_count": 0,
+      "is_static": false
+    },
+    {
+      "relation": "provides structured Receipt objects to",
+      "src_name": "Spatial & Semantic Parser",
+      "dst_name": "Pipeline Controller",
+      "src_id": "2",
+      "dst_id": "3",
+      "edge_count": 0,
+      "is_static": false
+    },
+    {
+      "relation": "passes categorized and validated transaction data to",
+      "src_name": "Pipeline Controller",
+      "dst_name": "Accounting Exporter",
+      "src_id": "3",
+      "dst_id": "4",
+      "edge_count": 3,
+      "is_static": true
+    },
+    {
+      "relation": "queries processing state and triggers snapshot creation in",
+      "src_name": "Pipeline Controller",
+      "dst_name": "Quality Assurance & Calibration",
+      "src_id": "3",
+      "dst_id": "5",
+      "edge_count": 6,
+      "is_static": true
+    },
+    {
+      "relation": "provides updated model weights and correction tables to",
+      "src_name": "Quality Assurance & Calibration",
+      "dst_name": "Ingestion & OCR Engine",
+      "src_id": "5",
+      "dst_id": "1",
+      "edge_count": 0,
+      "is_static": false
+    },
+    {
+      "relation": "calls",
+      "src_name": "Pipeline Controller",
+      "dst_name": "Ingestion & OCR Engine",
+      "src_id": "3",
+      "dst_id": "1",
+      "edge_count": 1,
+      "is_static": true
+    },
+    {
+      "relation": "calls",
+      "src_name": "Pipeline Controller",
+      "dst_name": "Spatial & Semantic Parser",
+      "src_id": "3",
+      "dst_id": "2",
+      "edge_count": 3,
+      "is_static": true
+    },
+    {
+      "relation": "calls",
+      "src_name": "Quality Assurance & Calibration",
+      "dst_name": "Spatial & Semantic Parser",
+      "src_id": "5",
+      "dst_id": "2",
+      "edge_count": 1,
+      "is_static": true
+    },
+    {
+      "relation": "calls",
+      "src_name": "Quality Assurance & Calibration",
+      "dst_name": "Pipeline Controller",
+      "src_id": "5",
+      "dst_id": "3",
+      "edge_count": 3,
+      "is_static": true
+    },
+    {
+      "relation": "calls",
+      "src_name": "Quality Assurance & Calibration",
+      "dst_name": "Accounting Exporter",
+      "src_id": "5",
+      "dst_id": "4",
+      "edge_count": 1,
+      "is_static": true
+    }
+  ],
+  "snapshotCommit": "e2a79b7d9bb772efaf6c100acd95e09871b181dc"
+}

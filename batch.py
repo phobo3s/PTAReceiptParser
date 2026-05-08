@@ -238,7 +238,8 @@ def _run_paddleocr(ocr_engine, image_path: Path, img_array, w: int, h: int) -> d
     guided_receipts_dir = GUIDED_RECEIPTS_DIR
     guided_receipts_dir.mkdir(exist_ok=True)
     output_path = guided_receipts_dir / image_path.name
-    result[0].img['ocr_res_img'].save(str(output_path))
+    if result:
+        result[0].img['ocr_res_img'].save(str(output_path))
 
     detections = []
     for i, ocr_result in enumerate(result):
@@ -652,7 +653,7 @@ def main():
         ocr_engine = get_ocr_engine()
 
     # İşle
-    success, failed, skipped = 0, 0, 0
+    success, failed = 0, 0
     for image_path in images:
         ok = process_receipt(image_path, ocr_engine, rules, api_key,
                              journal_path=journal_path,
@@ -662,7 +663,7 @@ def main():
             success += 1
         else:
             failed += 1
-    
+
     # Özet
     print(f"\n{'═' * 60}")
     print(f"  Tamamlandı: {success} güncellendi, {failed} başarısız")

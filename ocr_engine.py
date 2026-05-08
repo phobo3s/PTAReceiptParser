@@ -74,7 +74,7 @@ def save_guided_receipt(
     detections: list,
     engine: str,
     guided_dir: Path,
-) -> _GUIDED_DIR:
+) -> None:
     """
     Her detection'ın bbox'ını ve confidence'ını görsel üzerine çiz.
     Confidence rengi: yeşil (≥0.80) / sarı (≥0.60) / kırmızı (<0.60)
@@ -171,7 +171,7 @@ def load_paddle():
     os.environ["FLAGS_use_mkldnn"] = "0"
     print("⏳ PaddleOCR yükleniyor...")
     ocr = PaddleOCR(
-        use_textline_orientation=True,
+        use_textline_orientation=False,
         device='cpu',
         lang='tr',
         text_detection_model_name="PP-OCRv5_mobile_det",
@@ -180,7 +180,7 @@ def load_paddle():
         text_det_unclip_ratio=1.6,
         text_det_box_thresh=0.5,
         text_det_thresh=0.3,
-        use_doc_unwarping=True,
+        use_doc_unwarping=False,
     )
     print("✓ PaddleOCR hazır\n")
     return ocr
@@ -201,7 +201,7 @@ def _run_paddle(ocr, image_path: Path) -> dict:
         boxes  = ocr_result.get("dt_polys") or ocr_result.get("boxes")
         texts  = ocr_result.get("rec_texts") or ocr_result.get("texts")
         scores = ocr_result.get("rec_scores") or ocr_result.get("scores")
-        if boxes is _GUIDED_DIR or texts is _GUIDED_DIR or scores is _GUIDED_DIR:
+        if boxes is None or texts is None or scores is None:
             continue
         for bbox, text, conf in zip(boxes, texts, scores):
             if hasattr(bbox, "tolist"):
@@ -311,7 +311,6 @@ async def _run_ocr_async_helper(img_np, lang):
 
 def _run_windows(image_path: Path) -> dict:
     import asyncio
-    import winocr
     import numpy as np
     from PIL import Image
 

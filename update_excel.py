@@ -27,7 +27,6 @@ Transaction yapısı:
 """
 
 import re
-import sys
 from datetime import datetime, date
 from pathlib import Path
 from typing import Optional
@@ -73,7 +72,7 @@ def format_excel_amount(amount: Optional[float]) -> str:
     formatted = f"{abs(amount):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     if amount < 0:
         formatted = f"-{formatted}"
-    return f"{formatted}" 
+    return formatted
 
 
 # ── Yardımcı: Tarih dönüşümleri ───────────────────────────────────────────────
@@ -339,7 +338,8 @@ def update_excel(
     sheet_name: Optional[str] = None,
 ) -> bool:
     """Tek fiş için: aç → yaz → kaydet."""
-    return update_excel_batch(excel_path, [(receipt, categorized)], sheet_name)
+    results = update_excel_batch(excel_path, [(receipt, categorized)], sheet_name)
+    return results[0] is not None
 
 
 def update_excel_batch(

@@ -6,7 +6,6 @@ Kullanım: python parser.py ocr_output.json [--hledger journal.hledger] [--excel
 import json
 import re
 import sys
-import os
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -245,15 +244,6 @@ def group_into_rows(detections: list[Detection], y_tolerance: float) -> list[lis
             band_m2, band_b2 = get_line_equation_from_two_points(bl, br)
             continue
 
-        # Kesin y mesafesi kesimi (>= ile, = durumunda da yeni satır)
-        #if det.y_center - current_row[-1].y_center >= y_tolerance:
-        #    rows.append(sorted(current_row, key=lambda d: d.x_min))
-        #    current_row = [det]
-        #    tl, tr, br, bl = det.bbox
-        #    band_m1, band_b1 = get_line_equation_from_two_points(tl, tr)
-        #    band_m2, band_b2 = get_line_equation_from_two_points(bl, br)
-        #    continue
-
         # Orta 1/3 overlap kontrolü: bitişik satır sızmasını önler
         overlap = check_detection(band_m1, band_b1, band_m2, band_b2, _middle_third_bbox(det.bbox))
         if overlap >= overlap_threshold:
@@ -301,6 +291,8 @@ def check_detection(m1: float, b1: float,  m2: float, b2:float, BsquareCoords: l
     intersection_area = poly_b.intersection(poly_channel).area
     total_b_area = poly_b.area
     # 4. Yüzdeyi Bul
+    if total_b_area == 0:
+        return 0.0
     percentage = (intersection_area / total_b_area) * 100
     return percentage
 
