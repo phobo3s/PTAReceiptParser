@@ -585,7 +585,11 @@ class ViewerScreen(Screen):
         self.query_one("#receipt_view", Static).update("⏳ [dim]Yeniden parse ediliyor...[/]")
         self._reparse_single_worker(idx)
 
-    def action_write_hledger(self) -> None:
+    def _run_write(self, mode: str) -> None:
+        """H ve X için ortak yazma formu.
+        mode: 'hledger' | 'excel'
+        Önceki değerler processed.json'dan default olarak gösterilir.
+        """
         idx = self._selected_orig_idx
         if idx >= len(self._files) or idx not in self._cache:
             return
@@ -593,91 +597,76 @@ class ViewerScreen(Screen):
             return
 
         json_file = self._files[idx]
+        prev       = self._processed.get(mode, {}).get(json_file.name, {})
 
         with self.app.suspend():
             console.print()
-            console.print(Rule(f"[cyan]hledger'a Yaz — {json_file.name}[/]", style="cyan"))
+            label = "hledger" if mode == "hledger" else "Excel"
+            console.print(Rule(f"[cyan]{label}'a Yaz — {json_file.name}[/]", style="cyan"))
 
-            # Zaten işlendi mi?
-            if json_file.name in self._processed.get("hledger", {}):
-                h = self._processed["hledger"][json_file.name]
-                console.print(
-                    f"  [yellow]⚠  Bu fiş daha önce hledger'a yazılmış[/] "
-                    f"(satır {h.get('tx_line','?')}, {h.get('updated_at','')})"
-                )
-                if not Confirm.ask("  Yine de üzerine yaz?", default=False):
-                    return
+            if prev:
+                if mode == "hledger":
+                    console.print(
+                        f"  [dim]Önceki: satır {prev.get('tx_line','?')}  "
+                        f"{prev.get('updated_at','')}[/]"
+                    )
+                else:
+                    console.print(
+                        f"  [dim]Önceki: satır {prev.get('row','?')}  "
+                        f"sheet:{prev.get('sheet','?')}  "
+                        f"{prev.get('updated_at','')}[/]"
+                    )
+            console.print()
 
             try:
-                path = Prompt.ask("  hledger dosyası").strip()
+                # Dosya yolu
+                if mode == "hledger":
+                    path_default = prev.get("file", "")
+                    path = Prompt.ask("  hledger dosyası", default=path_default).strip()
+                else:
+                    path_default = prev.get("file", "")
+                    path = Prompt.ask("  Excel dosyası (.xlsx/.xlsm)", default=path_default).strip()
+
                 if not path or path.lower() == "q":
                     return
                 if not Path(path).exists():
                     console.print(f"  [red]Dosya bulunamadı:[/] {path}")
                     Prompt.ask("[dim]Enter[/]", default="", show_default=False)
                     return
-                api_key = Prompt.ask(
-                    "  Anthropic API key [Enter=env/atla]", default="", password=True
-                ) or None
-                cmd = [PY, "parser.py", str(json_file), "--hledger", path, "--force"]
-                if api_key:
-                    cmd += ["--api-key", api_key]
-                console.print()
-                subprocess.run(cmd)
-            except KeyboardInterrupt:
-                console.print("\n  [yellow]İptal.[/]")
-            finally:
-                Prompt.ask("\n[dim]Devam için Enter[/]", default="", show_default=False)
 
-        # processed.json'ı yenile ve ikonları güncelle
-        self._load_processed()
-        self._update_item(idx)
-        self._refresh_right()
+                # Sheet adı (sadece excel)
+                sheet: str | None = None
+                if mode == "excel":
+                    sheet_default = prev.get("sheet", "")
+                    sheet = Prompt.ask(
+                        "  Sheet adı [Enter=ilk sheet]", default=sheet_default
+                    ).strip() or None
 
-    def action_write_excel(self) -> None:
-        idx = self._selected_orig_idx
-        if idx >= len(self._files) or idx not in self._cache:
-            return
-        if isinstance(self._cache[idx], Exception):
-            return
-
-        json_file = self._files[idx]
-
-        with self.app.suspend():
-            console.print()
-            console.print(Rule(f"[cyan]Excel'e Yaz — {json_file.name}[/]", style="cyan"))
-
-            # Zaten işlendi mi?
-            if json_file.name in self._processed.get("excel", {}):
-                x = self._processed["excel"][json_file.name]
-                console.print(
-                    f"  [yellow]⚠  Bu fiş daha önce Excel'e yazılmış[/] "
-                    f"(satır {x.get('row','?')}, sheet:{x.get('sheet','?')}, {x.get('updated_at','')})"
+                # Override?
+                force = prev and Confirm.ask(
+                    "  Zaten işlendi — üzerine yaz?", default=True
                 )
-                if not Confirm.ask("  Yine de üzerine yaz?", default=False):
+                if prev and not force:
                     return
 
-            try:
-                path = Prompt.ask("  Excel dosyası (.xlsx/.xlsm)").strip()
-                if not path or path.lower() == "q":
-                    return
-                if not Path(path).exists():
-                    console.print(f"  [red]Dosya bulunamadı:[/] {path}")
-                    Prompt.ask("[dim]Enter[/]", default="", show_default=False)
-                    return
-                sheet = Prompt.ask(
-                    "  Sheet adı [Enter=ilk sheet]", default=""
-                ).strip() or None
+                # API key
                 api_key = Prompt.ask(
                     "  Anthropic API key [Enter=env/atla]", default="", password=True
                 ) or None
-                cmd = [PY, "parser.py", str(json_file), "--excel", path, "--force"]
+
+                # Komutu çalıştır
+                flag = f"--{mode}"
+                cmd  = [PY, "parser.py", str(json_file), flag, path]
+                if force:
+                    cmd += ["--force"]
                 if sheet:
                     cmd += ["--sheet", sheet]
                 if api_key:
                     cmd += ["--api-key", api_key]
+
                 console.print()
                 subprocess.run(cmd)
+
             except KeyboardInterrupt:
                 console.print("\n  [yellow]İptal.[/]")
             finally:
@@ -686,3 +675,9 @@ class ViewerScreen(Screen):
         self._load_processed()
         self._update_item(idx)
         self._refresh_right()
+
+    def action_write_hledger(self) -> None:
+        self._run_write("hledger")
+
+    def action_write_excel(self) -> None:
+        self._run_write("excel")
