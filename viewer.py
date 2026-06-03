@@ -82,8 +82,9 @@ _HELP_TEXT = """\
 
 [bold]İşlemler[/]
   [yellow]R[/]          Seçili dosyayı yeniden parse et
-  [yellow]H[/]          Seçili fişi hledger dosyasına yaz
-  [yellow]X[/]          Seçili fişi Excel dosyasına yaz
+  [yellow]T[/]          Yazma hedeflerini ayarla (hledger / excel / sheet)
+  [yellow]H[/]          Seçili fişi hledger hedefine yaz
+  [yellow]X[/]          Seçili fişi Excel hedefine yaz
 
 [bold]İkonlar[/]
   [green]✓[/]  Parse başarılı, tutarlar eşleşiyor
@@ -150,6 +151,7 @@ class ViewerScreen(Screen):
         Binding("j",      "show_json",    "JSON"),
         Binding("s",      "cycle_sort",   "Sırala"),
         Binding("r",      "reparse",      "Re-parse"),
+        Binding("t",      "set_targets",  "Hedef"),
         Binding("h",      "write_hledger","→ hledger"),
         Binding("x",      "write_excel",  "→ Excel"),
         Binding("[",      "narrow_panel", "◀",          show=False),
@@ -184,6 +186,12 @@ class ViewerScreen(Screen):
         background: $surface-darken-1;
         color: $text-muted;
     }
+    #target_bar {
+        height: 1;
+        padding: 0 1;
+        background: $surface-darken-2;
+        color: $text-muted;
+    }
     """
 
     def __init__(self) -> None:
@@ -197,8 +205,12 @@ class ViewerScreen(Screen):
         self._display_order: list[int] = []
         # Seçili dosyanın orijinal indeksi
         self._selected_orig_idx: int = 0
-        # processed.json içeriği
+        # processed.json içeriği (ikonlar için)
         self._processed: dict = {"hledger": {}, "excel": {}}
+        # ── Session hedefleri ────────────────────────────────────────────────
+        self._target_hledger: str = ""   # hledger dosya yolu
+        self._target_excel:   str = ""   # Excel dosya yolu
+        self._target_sheet:   str = ""   # Excel sheet adı (boş = ilk)
         # Görünüm modu ve sıralama
         self._mode: str = "p"
         self._sort_idx: int = 0
@@ -208,7 +220,8 @@ class ViewerScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
-        yield Static("", id="sort_bar", markup=True)
+        yield Static("", id="sort_bar",    markup=True)
+        yield Static("", id="target_bar",  markup=True)
         with Horizontal(id="viewer_main"):
             yield ListView(id="file_list")
             with ScrollableContainer(id="right_panel"):
@@ -239,6 +252,7 @@ class ViewerScreen(Screen):
         self._display_order = list(range(len(self._files)))
         self._rebuild_list()
         self._update_sort_bar()
+        self._update_target_bar()
         self.query_one("#receipt_view", Static).update("⏳ [dim]Parse ediliyor...[/]")
         self._parse_all_worker()
 
@@ -317,6 +331,25 @@ class ViewerScreen(Screen):
         )
         self.query_one("#sort_bar", Static).update(
             f" Sıralama: {modes_str}   [dim]S=değiştir[/]"
+        )
+
+    def _update_target_bar(self) -> None:
+        parts: list[str] = []
+        if self._target_hledger:
+            fname = Path(self._target_hledger).name
+            parts.append(f"📒 [cyan]{fname}[/]")
+        else:
+            parts.append("📒 [dim]—[/]")
+
+        if self._target_excel:
+            fname = Path(self._target_excel).name
+            sheet = f"[{self._target_sheet}]" if self._target_sheet else ""
+            parts.append(f"📊 [cyan]{fname}{sheet}[/]")
+        else:
+            parts.append("📊 [dim]—[/]")
+
+        self.query_one("#target_bar", Static).update(
+            " Hedef:  " + "   ".join(parts) + "   [dim]T=değiştir[/]"
         )
 
     # ── Arka plan worker ─────────────────────────────────────────────────────
@@ -585,82 +618,102 @@ class ViewerScreen(Screen):
         self.query_one("#receipt_view", Static).update("⏳ [dim]Yeniden parse ediliyor...[/]")
         self._reparse_single_worker(idx)
 
+    def action_set_targets(self) -> None:
+        """T — session yazma hedeflerini ayarla / değiştir."""
+        with self.app.suspend():
+            console.print()
+            console.print(Rule("[cyan]Yazma Hedefleri[/]", style="cyan"))
+            console.print("  [dim]Boş bırakılan değer değişmez. q = iptal.[/]\n")
+            try:
+                # hledger
+                h = Prompt.ask(
+                    "  hledger dosyası",
+                    default=self._target_hledger
+                ).strip()
+                if h.lower() == "q":
+                    return
+                if h:
+                    if not Path(h).exists():
+                        console.print(f"  [red]Dosya bulunamadı:[/] {h}")
+                    else:
+                        self._target_hledger = h
+
+                # Excel
+                x = Prompt.ask(
+                    "  Excel dosyası (.xlsx/.xlsm)",
+                    default=self._target_excel
+                ).strip()
+                if x.lower() == "q":
+                    return
+                if x:
+                    if not Path(x).exists():
+                        console.print(f"  [red]Dosya bulunamadı:[/] {x}")
+                    else:
+                        self._target_excel = x
+
+                # Sheet (sadece excel ayarlıysa anlam ifade eder)
+                s = Prompt.ask(
+                    "  Sheet adı [Enter=ilk sheet]",
+                    default=self._target_sheet
+                ).strip()
+                if s.lower() == "q":
+                    return
+                self._target_sheet = s
+
+                console.print()
+                if self._target_hledger:
+                    console.print(f"  📒 hledger : [cyan]{self._target_hledger}[/]")
+                if self._target_excel:
+                    sheet_str = f"  [{self._target_sheet}]" if self._target_sheet else ""
+                    console.print(f"  📊 Excel   : [cyan]{self._target_excel}{sheet_str}[/]")
+
+            except KeyboardInterrupt:
+                console.print("\n  [yellow]İptal.[/]")
+            finally:
+                Prompt.ask("\n[dim]Devam için Enter[/]", default="", show_default=False)
+
+        self._update_target_bar()
+
     def _run_write(self, mode: str) -> None:
-        """H ve X için ortak yazma formu.
-        mode: 'hledger' | 'excel'
-        Önceki değerler processed.json'dan default olarak gösterilir.
-        """
+        """H ve X için yazma işlemi — session hedefini kullanır."""
         idx = self._selected_orig_idx
         if idx >= len(self._files) or idx not in self._cache:
             return
         if isinstance(self._cache[idx], Exception):
             return
 
+        # Hedef ayarlı mı?
+        target = self._target_hledger if mode == "hledger" else self._target_excel
+        if not target:
+            label = "hledger" if mode == "hledger" else "Excel"
+            with self.app.suspend():
+                console.print(
+                    f"\n  [yellow]⚠  {label} hedefi ayarlanmamış.[/]  "
+                    f"[dim]T tuşuyla ayarla.[/]"
+                )
+                Prompt.ask("[dim]Enter[/]", default="", show_default=False)
+            return
+
         json_file = self._files[idx]
-        prev       = self._processed.get(mode, {}).get(json_file.name, {})
 
         with self.app.suspend():
             console.print()
             label = "hledger" if mode == "hledger" else "Excel"
             console.print(Rule(f"[cyan]{label}'a Yaz — {json_file.name}[/]", style="cyan"))
-
-            if prev:
-                if mode == "hledger":
-                    console.print(
-                        f"  [dim]Önceki: satır {prev.get('tx_line','?')}  "
-                        f"{prev.get('updated_at','')}[/]"
-                    )
-                else:
-                    console.print(
-                        f"  [dim]Önceki: satır {prev.get('row','?')}  "
-                        f"sheet:{prev.get('sheet','?')}  "
-                        f"{prev.get('updated_at','')}[/]"
-                    )
+            console.print(f"  Hedef: [cyan]{target}[/]")
+            if mode == "excel" and self._target_sheet:
+                console.print(f"  Sheet: [cyan]{self._target_sheet}[/]")
             console.print()
 
             try:
-                # Dosya yolu
-                if mode == "hledger":
-                    path_default = prev.get("file", "")
-                    path = Prompt.ask("  hledger dosyası", default=path_default).strip()
-                else:
-                    path_default = prev.get("file", "")
-                    path = Prompt.ask("  Excel dosyası (.xlsx/.xlsm)", default=path_default).strip()
-
-                if not path or path.lower() == "q":
-                    return
-                if not Path(path).exists():
-                    console.print(f"  [red]Dosya bulunamadı:[/] {path}")
-                    Prompt.ask("[dim]Enter[/]", default="", show_default=False)
-                    return
-
-                # Sheet adı (sadece excel)
-                sheet: str | None = None
-                if mode == "excel":
-                    sheet_default = prev.get("sheet", "")
-                    sheet = Prompt.ask(
-                        "  Sheet adı [Enter=ilk sheet]", default=sheet_default
-                    ).strip() or None
-
-                # Override?
-                force = prev and Confirm.ask(
-                    "  Zaten işlendi — üzerine yaz?", default=True
-                )
-                if prev and not force:
-                    return
-
-                # API key
                 api_key = Prompt.ask(
                     "  Anthropic API key [Enter=env/atla]", default="", password=True
                 ) or None
 
-                # Komutu çalıştır
                 flag = f"--{mode}"
-                cmd  = [PY, "parser.py", str(json_file), flag, path]
-                if force:
-                    cmd += ["--force"]
-                if sheet:
-                    cmd += ["--sheet", sheet]
+                cmd  = [PY, "parser.py", str(json_file), flag, target, "--force"]
+                if mode == "excel" and self._target_sheet:
+                    cmd += ["--sheet", self._target_sheet]
                 if api_key:
                     cmd += ["--api-key", api_key]
 
