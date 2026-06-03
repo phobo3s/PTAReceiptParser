@@ -82,9 +82,11 @@ _HELP_TEXT = """\
 
 [bold]İşlemler[/]
   [yellow]R[/]          Seçili dosyayı yeniden parse et
+  [yellow]Space[/]      Dosyayı seçim listesine ekle / çıkar
+  [yellow]A[/]          Tümünü seç / tümünün seçimini kaldır
   [yellow]T[/]          Yazma hedeflerini ayarla (hledger / excel / sheet)
-  [yellow]H[/]          Seçili fişi hledger hedefine yaz
-  [yellow]X[/]          Seçili fişi Excel hedefine yaz
+  [yellow]H[/]          Seçili(ler)i hledger hedefine yaz  (seçim yoksa mevcut dosya)
+  [yellow]X[/]          Seçili(ler)i Excel hedefine yaz    (seçim yoksa mevcut dosya)
 
 [bold]İkonlar[/]
   [green]✓[/]  Parse başarılı, tutarlar eşleşiyor
@@ -151,6 +153,8 @@ class ViewerScreen(Screen):
         Binding("j",      "show_json",    "JSON"),
         Binding("s",      "cycle_sort",   "Sırala"),
         Binding("r",      "reparse",      "Re-parse"),
+        Binding("space",  "toggle_select","Seç",        show=False),
+        Binding("a",      "select_all",   "Tümü"),
         Binding("t",      "set_targets",  "Hedef"),
         Binding("h",      "write_hledger","→ hledger"),
         Binding("x",      "write_excel",  "→ Excel"),
@@ -211,6 +215,8 @@ class ViewerScreen(Screen):
         self._target_hledger: str = ""   # hledger dosya yolu
         self._target_excel:   str = ""   # Excel dosya yolu
         self._target_sheet:   str = ""   # Excel sheet adı (boş = ilk)
+        # ── Toplu seçim ──────────────────────────────────────────────────────
+        self._selected_files: set[int] = set()  # seçili dosyaların orig_idx'leri
         # Görünüm modu ve sıralama
         self._mode: str = "p"
         self._sort_idx: int = 0
@@ -277,16 +283,17 @@ class ViewerScreen(Screen):
         result = self._cache.get(orig_idx)
         proc_h = f.name in self._processed.get("hledger", {})
         proc_x = f.name in self._processed.get("excel",   {})
-        badges = ("📒" if proc_h else "") + ("📊" if proc_x else "")
+        badges  = ("📒" if proc_h else "") + ("📊" if proc_x else "")
+        sel_pfx = "[bold cyan]●[/] " if orig_idx in self._selected_files else "  "
 
         if result is None:
-            return f"⏳ [dim]{f.name}[/]"
+            return f"{sel_pfx}⏳ [dim]{f.name}[/]"
 
         icon, color, detail = self._receipt_icon(result)
         name_part = f"[{color}]{icon}[/] {f.name}"
         if badges:
             name_part += f"  {badges}"
-        return f"{name_part}\n  [dim]{detail}[/]"
+        return f"{sel_pfx}{name_part}\n    [dim]{detail}[/]"
 
     def _rebuild_list(self) -> None:
         """İlk mount'ta ListItem'ları oluşturur.
@@ -348,8 +355,13 @@ class ViewerScreen(Screen):
         else:
             parts.append("📊 [dim]—[/]")
 
+        sel_str = (
+            f"   [bold cyan]{len(self._selected_files)} seçili[/]  [dim]A=tümü  Space=seç/kaldır[/]"
+            if self._selected_files else
+            "   [dim]Space=seç  A=tümü[/]"
+        )
         self.query_one("#target_bar", Static).update(
-            " Hedef:  " + "   ".join(parts) + "   [dim]T=değiştir[/]"
+            " Hedef:  " + "   ".join(parts) + "   [dim]T=değiştir[/]" + sel_str
         )
 
     # ── Arka plan worker ─────────────────────────────────────────────────────
@@ -675,17 +687,11 @@ class ViewerScreen(Screen):
         self._update_target_bar()
 
     def _run_write(self, mode: str) -> None:
-        """H ve X için yazma işlemi — session hedefini kullanır."""
-        idx = self._selected_orig_idx
-        if idx >= len(self._files) or idx not in self._cache:
-            return
-        if isinstance(self._cache[idx], Exception):
-            return
-
+        """H ve X için yazma — seçili varsa toplu, yoksa mevcut dosya."""
         # Hedef ayarlı mı?
         target = self._target_hledger if mode == "hledger" else self._target_excel
+        label  = "hledger" if mode == "hledger" else "Excel"
         if not target:
-            label = "hledger" if mode == "hledger" else "Excel"
             with self.app.suspend():
                 console.print(
                     f"\n  [yellow]⚠  {label} hedefi ayarlanmamış.[/]  "
@@ -694,15 +700,38 @@ class ViewerScreen(Screen):
                 Prompt.ask("[dim]Enter[/]", default="", show_default=False)
             return
 
-        json_file = self._files[idx]
+        # Yazılacak dosyaları belirle
+        if self._selected_files:
+            write_idxs = sorted(self._selected_files)
+        else:
+            write_idxs = [self._selected_orig_idx]
+
+        # Sadece parse edilebilen dosyalar
+        valid = [
+            i for i in write_idxs
+            if i < len(self._files)
+            and i in self._cache
+            and not isinstance(self._cache[i], Exception)
+        ]
+
+        if not valid:
+            with self.app.suspend():
+                console.print("\n  [yellow]⚠  Yazılabilecek seçili fiş yok.[/]")
+                Prompt.ask("[dim]Enter[/]", default="", show_default=False)
+            return
 
         with self.app.suspend():
             console.print()
-            label = "hledger" if mode == "hledger" else "Excel"
-            console.print(Rule(f"[cyan]{label}'a Yaz — {json_file.name}[/]", style="cyan"))
+            n = len(valid)
+            title = f"{label}'a Yaz — {n} fiş" if n > 1 else f"{label}'a Yaz — {self._files[valid[0]].name}"
+            console.print(Rule(f"[cyan]{title}[/]", style="cyan"))
             console.print(f"  Hedef: [cyan]{target}[/]")
             if mode == "excel" and self._target_sheet:
                 console.print(f"  Sheet: [cyan]{self._target_sheet}[/]")
+            if n > 1:
+                console.print()
+                for i, idx in enumerate(valid):
+                    console.print(f"  [dim]{i+1:>2}.[/] {self._files[idx].name}")
             console.print()
 
             try:
@@ -711,23 +740,53 @@ class ViewerScreen(Screen):
                 ) or None
 
                 flag = f"--{mode}"
-                cmd  = [PY, "parser.py", str(json_file), flag, target, "--force"]
+                base_cmd = [flag, target, "--force"]
                 if mode == "excel" and self._target_sheet:
-                    cmd += ["--sheet", self._target_sheet]
+                    base_cmd += ["--sheet", self._target_sheet]
                 if api_key:
-                    cmd += ["--api-key", api_key]
+                    base_cmd += ["--api-key", api_key]
 
                 console.print()
-                subprocess.run(cmd)
+                for i, idx in enumerate(valid):
+                    json_file = self._files[idx]
+                    if n > 1:
+                        console.print(Rule(
+                            f"[dim]({i+1}/{n}) {json_file.name}[/]", style="dim"
+                        ))
+                    cmd = [PY, "parser.py", str(json_file)] + base_cmd
+                    subprocess.run(cmd)
+                    if n > 1:
+                        console.print()
 
             except KeyboardInterrupt:
                 console.print("\n  [yellow]İptal.[/]")
             finally:
                 Prompt.ask("\n[dim]Devam için Enter[/]", default="", show_default=False)
 
+        # Seçimi temizle, ikonları güncelle
+        self._selected_files.clear()
         self._load_processed()
-        self._update_item(idx)
+        for idx in valid:
+            self._update_item(idx)
         self._refresh_right()
+        self._update_target_bar()
+
+    def action_toggle_select(self) -> None:
+        idx = self._selected_orig_idx
+        if idx in self._selected_files:
+            self._selected_files.discard(idx)
+        else:
+            self._selected_files.add(idx)
+        self._update_item(idx)
+        self._update_target_bar()
+
+    def action_select_all(self) -> None:
+        if len(self._selected_files) == len(self._files):
+            self._selected_files.clear()
+        else:
+            self._selected_files = set(range(len(self._files)))
+        self._resort_list()
+        self._update_target_bar()
 
     def action_write_hledger(self) -> None:
         self._run_write("hledger")
