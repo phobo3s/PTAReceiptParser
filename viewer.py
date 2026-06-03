@@ -244,13 +244,27 @@ class ViewerScreen(Screen):
         calc = sum(i.amount for i in r.items)
         lines.append(f"  {'Hesaplanan toplam':<38} [bold]{calc:>8.2f} TL[/]")
 
+        warnings: list[str] = []
+
         if r.total:
             lines.append(f"  {'Fişteki toplam':<38} [bold]{r.total:>8.2f} TL[/]")
             diff = abs(calc - r.total)
             if diff > 0.02:
-                lines.append(f"\n[yellow]⚠  Fark: {diff:.2f} TL (KDV/indirim olabilir)[/]")
+                warnings.append(f"⚠  Fark: {diff:.2f} TL (KDV/indirim olabilir)")
             else:
-                lines.append(f"\n[green]✓ Tutarlar eşleşiyor[/]")
+                warnings.append("✓ Tutarlar eşleşiyor")
+        elif r.items:
+            warnings.append("⚠  Toplam bulunamadı")
+
+        if not r.date:
+            warnings.append("⚠  Tarih bulunamadı")
+
+        if not r.items:
+            warnings.append("⚠  Hiç kalem çıkarılamadı")
+
+        for w in warnings:
+            color = "green" if w.startswith("✓") else "yellow"
+            lines.append(f"\n[{color}]{w}[/]")
 
         lines.append(
             f"\n[dim]{len(r.items)} kalem  │  "
@@ -323,7 +337,9 @@ class ViewerScreen(Screen):
         if not result.store or result.store.upper() in ("UNKNOWN", "?", ""):
             issues.append("mağaza tanımsız")
 
-        if result.total and result.items:
+        if result.items and not result.total:
+            issues.append("toplam yok")
+        elif result.total and result.items:
             calc = sum(i.amount for i in result.items)
             if abs(calc - result.total) > 0.02:
                 issues.append(f"toplam uyuşmuyor Δ{abs(calc - result.total):.2f}")
