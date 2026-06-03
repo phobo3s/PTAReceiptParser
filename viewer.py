@@ -218,7 +218,11 @@ class ViewerScreen(Screen):
     }
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        engine_idx: int = 0,
+        targets: dict | None = None,
+    ) -> None:
         super().__init__()
         # Dosya listesi (orijinal sıra, hiç değişmez)
         self._files: list[Path] = []
@@ -232,13 +236,14 @@ class ViewerScreen(Screen):
         # processed.json içeriği (ikonlar için)
         self._processed: dict = {"hledger": {}, "excel": {}}
         # ── Session hedefleri ────────────────────────────────────────────────
-        self._target_hledger: str = ""   # hledger dosya yolu
-        self._target_excel:   str = ""   # Excel dosya yolu
-        self._target_sheet:   str = ""   # Excel sheet adı (boş = ilk)
+        _t = targets or {}
+        self._target_hledger: str = _t.get("hledger", "")
+        self._target_excel:   str = _t.get("excel",   "")
+        self._target_sheet:   str = _t.get("sheet",   "")
         # ── Toplu seçim ──────────────────────────────────────────────────────
         self._selected_files: set[int] = set()  # seçili dosyaların orig_idx'leri
         # ── Engine seçimi ────────────────────────────────────────────────────
-        self._engine_idx: int = 0   # _ENGINES listesindeki index
+        self._engine_idx: int = engine_idx
         # Görünüm modu ve sıralama
         self._mode: str = "p"
         self._sort_idx: int = 0
@@ -336,17 +341,12 @@ class ViewerScreen(Screen):
         return f"{sel_pfx}{name_part}\n    [dim]{detail}[/]"
 
     def _rebuild_list(self) -> None:
-        """Liste içeriğini sıfırdan oluşturur.
-        clear() + append() aynı render döngüsünde çakışmasın diye
-        clear önce, populate call_after_refresh ile sonra çalışır.
+        """İlk mount'ta ListItem'ları oluşturur.
+        ID'ler display pozisyonuna göre (fi_0..fi_n) — hiç değişmez.
+        Engine switch'te Screen yeniden açılır, bu metot bir kez çalışır.
         """
         lv = self.query_one("#file_list", ListView)
         lv.clear()
-        self.call_after_refresh(self._populate_list)
-
-    def _populate_list(self) -> None:
-        """_rebuild_list'in ikinci adımı: temizlenmiş listeyi doldur."""
-        lv = self.query_one("#file_list", ListView)
         for display_pos, orig_idx in enumerate(self._display_order):
             lv.append(ListItem(
                 Static(self._build_item_text(orig_idx), markup=True),
@@ -354,9 +354,7 @@ class ViewerScreen(Screen):
             ))
 
     def _resort_list(self) -> None:
-        """Sıralama değişince tüm item metinlerini yerinde günceller.
-        DOM add/remove yok → ID çakışması yok.
-        """
+        """Sıralama değişince tüm item metinlerini yerinde günceller."""
         for display_pos, orig_idx in enumerate(self._display_order):
             try:
                 item  = self.query_one(f"#fi_{display_pos}", ListItem)
@@ -690,16 +688,22 @@ class ViewerScreen(Screen):
 
     def action_cycle_engine(self) -> None:
         # Sıradaki mevcut cache'e geç (olmayan klasörleri atla)
-        start = self._engine_idx
+        new_idx = self._engine_idx
         for _ in range(len(_ENGINES)):
-            self._engine_idx = (self._engine_idx + 1) % len(_ENGINES)
-            _, cache_dir = _ENGINES[self._engine_idx]
+            new_idx = (new_idx + 1) % len(_ENGINES)
+            _, cache_dir = _ENGINES[new_idx]
             if cache_dir.exists():
                 break
-        if self._engine_idx == start:
+        if new_idx == self._engine_idx:
             return  # Tek engine var, değişme
-        self._update_engine_bar()
-        self._reload()
+
+        # Hedefleri yeni Screen'e aktar, mevcut Screen'i kapat
+        targets = {
+            "hledger": self._target_hledger,
+            "excel":   self._target_excel,
+            "sheet":   self._target_sheet,
+        }
+        self.app.switch_screen(ViewerScreen(engine_idx=new_idx, targets=targets))
 
     def action_cycle_sort(self) -> None:
         self._sort_idx = (self._sort_idx + 1) % len(_SORT_MODES)
