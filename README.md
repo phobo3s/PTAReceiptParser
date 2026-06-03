@@ -131,28 +131,38 @@ All keys are optional — omitting any key falls back to the default in `config.
 
 ## Quick Start
 
-### 0. Interactive Menu (Recommended)
+### 0. Install Dependencies
+
+> **Python 3.12 required.** PaddleOCR does not yet support Python 3.13+.
 
 ```bash
-pip install rich   # tek ek bağımlılık
+py -3.12 -m pip install -r requirements.txt
+```
+
+For TrOCR fine-tuning (optional), install PyTorch matching your CUDA version:
+```bash
+# CUDA 11.8
+py -3.12 -m pip install torch --index-url https://download.pytorch.org/whl/cu118
+py -3.12 -m pip install transformers peft accelerate
+
+# CPU only
+py -3.12 -m pip install torch transformers peft accelerate
+```
+
+For optional OCR engines:
+```bash
+py -3.12 -m pip install easyocr          # EasyOCR
+winget install UB-Mannheim.TesseractOCR  # Tesseract (+ pip install pytesseract)
+py -3.12 -m pip install winocr           # Windows built-in OCR
+```
+
+### 1. Interactive Menu (Recommended)
+
+```bash
 py menu.py
 ```
 
 Tüm araçları menü üzerinden çalıştırabilirsiniz — parametre ezberlemeye gerek yok.
-
-### 1. Install Dependencies
-
-```bash
-pip install paddleocr anthropic openpyxl pillow opencv-python numpy shapely rich
-```
-
-Optional engines:
-```bash
-pip install easyocr                          # EasyOCR (Turkish character support)
-pip install pytesseract                      # Tesseract (+ winget install UB-Mannheim.TesseractOCR)
-pip install winocr                           # Windows built-in OCR
-pip install transformers torch peft          # TrOCR hybrid engine
-```
 
 ### 2. Process Receipts
 

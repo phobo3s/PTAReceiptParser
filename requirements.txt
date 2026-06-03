@@ -1,0 +1,34 @@
+# PTA Receipt Parser — Python bağımlılıkları
+# Kurulum: pip install -r requirements.txt
+#
+# Not: PaddleOCR ve PyTorch Python 3.12 gerektirir.
+#      py -3.12 -m pip install -r requirements.txt
+
+# ── Temel ─────────────────────────────────────────────────────────────────────
+paddleocr>=3.5.0          # OCR motoru
+shapely>=2.0.0            # Bounding box hesaplamaları (parser.py)
+opencv-python>=4.10.0     # Görüntü işleme (preProcess.py)
+Pillow>=10.0.0            # Görüntü yükleme
+numpy>=1.24.0             # Dizi işlemleri
+
+# ── TUI ───────────────────────────────────────────────────────────────────────
+rich>=13.0.0              # Terminal formatlama
+textual>=8.0.0            # Interaktif TUI (menu.py, viewer.py)
+
+# ── Excel (Windows) ───────────────────────────────────────────────────────────
+pywin32>=310              # COM otomasyonu ile Excel güncelleme (Windows only)
+
+# ── Claude API (opsiyonel) ────────────────────────────────────────────────────
+anthropic>=0.37.0         # Kalem kategorilendirme ve label düzeltme
+
+# ── TrOCR fine-tuning (opsiyonel) ─────────────────────────────────────────────
+# torch>=2.0.0            # GPU/CPU eğitim — sürümü CUDA versiyonuna göre seç:
+#                         # CUDA 11.8: pip install torch --index-url https://download.pytorch.org/whl/cu118
+#                         # CUDA 12.x: pip install torch --index-url https://download.pytorch.org/whl/cu121
+#                         # CPU only:  pip install torch
+# transformers>=4.40.0
+# peft>=0.10.0
+# accelerate>=0.27.0
+
+# ── EasyOCR (opsiyonel, alternatif motor) ─────────────────────────────────────
+# easyocr>=1.7.0
