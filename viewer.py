@@ -275,19 +275,35 @@ class ViewerScreen(Screen):
         return f"{name_part}\n  [dim]{detail}[/]"
 
     def _rebuild_list(self) -> None:
-        """_display_order'a göre ListView'ı sıfırdan oluşturur."""
+        """İlk mount'ta ListItem'ları oluşturur.
+        ID'ler display pozisyonuna göre (fi_0..fi_n) — hiç değişmez.
+        Sıralama değişince sadece içerik güncellenir, DOM rebuild olmaz.
+        """
         lv = self.query_one("#file_list", ListView)
         lv.clear()
-        for orig_idx in self._display_order:
+        for display_pos, orig_idx in enumerate(self._display_order):
             lv.append(ListItem(
                 Static(self._build_item_text(orig_idx), markup=True),
-                id=f"fi_{orig_idx}",
+                id=f"fi_{display_pos}",
             ))
 
+    def _resort_list(self) -> None:
+        """Sıralama değişince tüm item metinlerini yerinde günceller.
+        DOM add/remove yok → ID çakışması yok.
+        """
+        for display_pos, orig_idx in enumerate(self._display_order):
+            try:
+                item  = self.query_one(f"#fi_{display_pos}", ListItem)
+                label = item.query_one(Static)
+                label.update(self._build_item_text(orig_idx))
+            except Exception:
+                pass
+
     def _update_item(self, orig_idx: int) -> None:
-        """Tek bir ListItem'ı günceller."""
+        """Worker'dan gelen güncelleme: orig_idx'in display pozisyonunu bul, metni güncelle."""
         try:
-            item  = self.query_one(f"#fi_{orig_idx}", ListItem)
+            display_pos = self._display_order.index(orig_idx)
+            item  = self.query_one(f"#fi_{display_pos}", ListItem)
             label = item.query_one(Static)
             label.update(self._build_item_text(orig_idx))
         except Exception:
@@ -341,7 +357,8 @@ class ViewerScreen(Screen):
         item_id = event.item.id or ""
         if item_id.startswith("fi_"):
             try:
-                self._selected_orig_idx = int(item_id[3:])
+                display_pos = int(item_id[3:])
+                self._selected_orig_idx = self._display_order[display_pos]
                 self._refresh_right()
             except (ValueError, IndexError):
                 pass
@@ -554,7 +571,7 @@ class ViewerScreen(Screen):
     def action_cycle_sort(self) -> None:
         self._sort_idx = (self._sort_idx + 1) % len(_SORT_MODES)
         self._display_order.sort(key=self._sort_key)
-        self._rebuild_list()
+        self._resort_list()       # DOM rebuild yok, sadece text güncelle
         self._update_sort_bar()
 
     def action_reparse(self) -> None:
@@ -580,6 +597,17 @@ class ViewerScreen(Screen):
         with self.app.suspend():
             console.print()
             console.print(Rule(f"[cyan]hledger'a Yaz — {json_file.name}[/]", style="cyan"))
+
+            # Zaten işlendi mi?
+            if json_file.name in self._processed.get("hledger", {}):
+                h = self._processed["hledger"][json_file.name]
+                console.print(
+                    f"  [yellow]⚠  Bu fiş daha önce hledger'a yazılmış[/] "
+                    f"(satır {h.get('tx_line','?')}, {h.get('updated_at','')})"
+                )
+                if not Confirm.ask("  Yine de üzerine yaz?", default=False):
+                    return
+
             try:
                 path = Prompt.ask("  hledger dosyası").strip()
                 if not path or path.lower() == "q":
@@ -618,6 +646,17 @@ class ViewerScreen(Screen):
         with self.app.suspend():
             console.print()
             console.print(Rule(f"[cyan]Excel'e Yaz — {json_file.name}[/]", style="cyan"))
+
+            # Zaten işlendi mi?
+            if json_file.name in self._processed.get("excel", {}):
+                x = self._processed["excel"][json_file.name]
+                console.print(
+                    f"  [yellow]⚠  Bu fiş daha önce Excel'e yazılmış[/] "
+                    f"(satır {x.get('row','?')}, sheet:{x.get('sheet','?')}, {x.get('updated_at','')})"
+                )
+                if not Confirm.ask("  Yine de üzerine yaz?", default=False):
+                    return
+
             try:
                 path = Prompt.ask("  Excel dosyası (.xlsx/.xlsm)").strip()
                 if not path or path.lower() == "q":
