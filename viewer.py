@@ -398,15 +398,31 @@ class ViewerScreen(Screen):
         if orig_idx == self._selected_orig_idx:
             self._refresh_right()
 
-    def on_list_view_selected(self, event: ListView.Selected) -> None:
-        item_id = event.item.id or ""
+    def _item_id_to_orig_idx(self, item_id: str) -> int | None:
+        """fi_{display_pos} → orig_idx dönüşümü."""
         if item_id.startswith("fi_"):
             try:
                 display_pos = int(item_id[3:])
-                self._selected_orig_idx = self._display_order[display_pos]
-                self._refresh_right()
+                return self._display_order[display_pos]
             except (ValueError, IndexError):
                 pass
+        return None
+
+    def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
+        """Ok tuşlarıyla gezinince tetiklenir — sağ paneli güncelle."""
+        if event.item is None:
+            return
+        orig_idx = self._item_id_to_orig_idx(event.item.id or "")
+        if orig_idx is not None:
+            self._selected_orig_idx = orig_idx
+            self._refresh_right()
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        """Enter/tıklama ile seçimde tetiklenir."""
+        orig_idx = self._item_id_to_orig_idx(event.item.id or "")
+        if orig_idx is not None:
+            self._selected_orig_idx = orig_idx
+            self._refresh_right()
 
     # ── Sağ panel ─────────────────────────────────────────────────────────────
 
