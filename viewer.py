@@ -619,7 +619,7 @@ class ViewerScreen(Screen):
                 api_key = Prompt.ask(
                     "  Anthropic API key [Enter=env/atla]", default="", password=True
                 ) or None
-                cmd = [PY, "parser.py", str(json_file), "--hledger", path]
+                cmd = [PY, "parser.py", str(json_file), "--hledger", path, "--force"]
                 if api_key:
                     cmd += ["--api-key", api_key]
                 console.print()
@@ -671,7 +671,7 @@ class ViewerScreen(Screen):
                 api_key = Prompt.ask(
                     "  Anthropic API key [Enter=env/atla]", default="", password=True
                 ) or None
-                cmd = [PY, "parser.py", str(json_file), "--excel", path]
+                cmd = [PY, "parser.py", str(json_file), "--excel", path, "--force"]
                 if sheet:
                     cmd += ["--sheet", sheet]
                 if api_key:
