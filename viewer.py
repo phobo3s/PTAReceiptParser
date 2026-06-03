@@ -59,12 +59,18 @@ class ViewerScreen(Screen):
     TITLE = "Fiş Görüntüleyici"
 
     BINDINGS = [
-        Binding("q",      "go_back",    "Ana Menü"),
-        Binding("escape", "go_back",    "Geri",    show=False),
-        Binding("p",      "show_parse", "Parse"),
-        Binding("d",      "show_debug", "Debug"),
-        Binding("j",      "show_json",  "JSON"),
+        Binding("q",      "go_back",      "Ana Menü"),
+        Binding("escape", "go_back",      "Geri",      show=False),
+        Binding("p",      "show_parse",   "Parse"),
+        Binding("d",      "show_debug",   "Debug"),
+        Binding("j",      "show_json",    "JSON"),
+        Binding("[",      "narrow_panel", "◀ Daralt",  show=False),
+        Binding("]",      "widen_panel",  "▶ Genişlet", show=False),
     ]
+
+    _LIST_WIDTH_MIN = 20
+    _LIST_WIDTH_MAX = 80
+    _LIST_WIDTH_DEF = 38
 
     DEFAULT_CSS = """
     ViewerScreen {
@@ -101,6 +107,7 @@ class ViewerScreen(Screen):
         self._file_index: dict[str, int] = {}   # filename → index
         self._mode: str = "p"                   # p | d | j
         self._selected_idx: int = 0
+        self._list_width: int = self._LIST_WIDTH_DEF
 
     # ── Compose ──────────────────────────────────────────────────────────────
 
@@ -169,20 +176,8 @@ class ViewerScreen(Screen):
         try:
             item  = self.query_one(f"#fi_{idx}", ListItem)
             label = item.query_one(Static)
-            if isinstance(result, Receipt):
-                store = result.store or "?"
-                date  = result.date  or "?"
-                total = f"{result.total:.2f}" if result.total else "?"
-                label.update(
-                    f"[green]✓[/] {f.name}\n"
-                    f"  [dim]{store}  {date}  ₺{total}[/]"
-                )
-            else:
-                short_err = str(result)[:50]
-                label.update(
-                    f"[red]✗[/] {f.name}\n"
-                    f"  [dim red]{short_err}[/]"
-                )
+            icon, color, detail = self._receipt_icon(result)
+            label.update(f"[{color}]{icon}[/] {f.name}\n  [dim]{detail}[/]")
         except Exception:
             pass
 
@@ -299,6 +294,59 @@ class ViewerScreen(Screen):
             lines.append(f"  Items : {len(result.items)}")
 
         return "\n".join(lines)
+
+    # ── Fiş kalite ikonu ─────────────────────────────────────────────────────
+
+    @staticmethod
+    def _receipt_icon(result) -> tuple[str, str, str]:
+        """(ikon, renk, detay_metni) döndürür.
+
+        ✓ yeşil  — parse başarılı, kalemler var, toplam eşleşiyor
+        ⚠ sarı   — parse başarılı ama sorun var (kalem yok, toplam uyuşmuyor,
+                    tarih/mağaza yok)
+        ✗ kırmızı — exception
+        """
+        if isinstance(result, Exception):
+            return "✗", "red", str(result)[:55]
+
+        if not isinstance(result, Receipt):
+            return "✗", "red", "Bilinmeyen hata"
+
+        issues: list[str] = []
+
+        if not result.items:
+            issues.append("kalem yok")
+
+        if not result.date:
+            issues.append("tarih yok")
+
+        if not result.store or result.store.upper() in ("UNKNOWN", "?", ""):
+            issues.append("mağaza tanımsız")
+
+        if result.total and result.items:
+            calc = sum(i.amount for i in result.items)
+            if abs(calc - result.total) > 0.02:
+                issues.append(f"toplam uyuşmuyor Δ{abs(calc - result.total):.2f}")
+
+        store = result.store or "?"
+        date  = result.date  or "?"
+        total = f"₺{result.total:.2f}" if result.total else "?"
+        summary = f"{store}  {date}  {total}"
+
+        if issues:
+            return "⚠", "yellow", f"{summary}  [{', '.join(issues)}]"
+
+        return "✓", "green", summary
+
+    # ── Panel genişlik aksiyonları ────────────────────────────────────────────
+
+    def action_widen_panel(self) -> None:
+        self._list_width = min(self._list_width + 4, self._LIST_WIDTH_MAX)
+        self.query_one("#file_list").styles.width = self._list_width
+
+    def action_narrow_panel(self) -> None:
+        self._list_width = max(self._list_width - 4, self._LIST_WIDTH_MIN)
+        self.query_one("#file_list").styles.width = self._list_width
 
     # ── Aksiyonlar ───────────────────────────────────────────────────────────
 
