@@ -132,32 +132,41 @@ def _excel_workbook(excel_path: Path, sheet_name: Optional[str] = None):
             "pywin32 kurulu değil. Kurmak için: pip install pywin32"
         )
 
-    abs_path  = str(excel_path.resolve())
-    xl_app    = None
-    we_opened = False   # bu bağlamda biz mi açtık?
-    old_alerts = None   # mevcut instance'ın DisplayAlerts değeri
+    target_path = excel_path.resolve()
+    xl_app      = None
+    wb          = None
+    we_opened   = False   # bu bağlamda biz mi açtık?
+    old_alerts  = None    # mevcut instance'ın DisplayAlerts değeri
 
-    # Önce açık Excel instance'ına bağlanmayı dene
+    # Açık Excel instance'larında istediğimiz dosyayı ara
+    # (GetActiveObject sadece tek instance döndürür; birden fazla Excel
+    #  açıksa bu yeterli değil — ama tipik kullanım için yeterli)
     try:
         xl_app = win32com.client.GetActiveObject("Excel.Application")
-        # Dialog'ları kapat — eski değeri saklayıp sonra geri yükle
         old_alerts = xl_app.DisplayAlerts
         xl_app.DisplayAlerts = False
-        # Dosya zaten açık mı?
-        wb = None
+        # Path karşılaştırması: Path.resolve() ile normalize et
         for i in range(1, xl_app.Workbooks.Count + 1):
-            if xl_app.Workbooks(i).FullName.lower() == abs_path.lower():
-                wb = xl_app.Workbooks(i)
-                break
+            try:
+                wb_path = Path(xl_app.Workbooks(i).FullName).resolve()
+                if wb_path == target_path:
+                    wb = xl_app.Workbooks(i)
+                    print(f"  [Excel] Açık dosyaya bağlandı: {wb_path.name}")
+                    break
+            except Exception:
+                continue
         if wb is None:
-            wb = xl_app.Workbooks.Open(abs_path)
+            # Excel açık ama bu dosya değil — aynı instance'da aç
+            print(f"  [Excel] Yeni workbook açılıyor (Excel çalışıyor ama dosya açık değil)")
+            wb = xl_app.Workbooks.Open(str(target_path))
             we_opened = True
     except pywintypes.com_error:
-        # Excel açık değil — yeni görünmez instance başlat
+        # Excel hiç açık değil — görünmez yeni instance başlat
+        print(f"  [Excel] Yeni Excel instance başlatılıyor")
         xl_app = win32com.client.Dispatch("Excel.Application")
         xl_app.Visible = False
         xl_app.DisplayAlerts = False
-        wb = xl_app.Workbooks.Open(abs_path)
+        wb = xl_app.Workbooks.Open(str(target_path))
         we_opened = True
 
     try:
