@@ -1144,6 +1144,7 @@ def main():
                 "date":    tx.date,
                 "total":   tx.total,
                 "tx_line": tx.start_line + 1,
+                "file":    str(journal_path),
             })
         print(f"  Toplam {len(pending_hledger)} transaction güncellendi → {journal_path}")
 
@@ -1163,6 +1164,7 @@ def main():
                     "items":  len(receipt.items),
                     "sheet":  sheet_name or "active",
                     "row":    from_row,
+                    "file":   str(excel_path),
                 })
         print(f"  Toplam {ok_count}/{len(pending_excel)} fiş güncellendi → {excel_path}")
 
