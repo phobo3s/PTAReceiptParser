@@ -60,11 +60,39 @@ Receipt Image (jpg/png)
 
 | File | Description |
 |---|---|
-| `config.toml` | Central configuration: paths for OCR cache, guided receipts, rules, snapshots, TrOCR adapter, etc. All paths are relative to the project root. |
+| `config.toml` | Central configuration: paths for OCR cache, guided receipts, rules, snapshots, TrOCR adapter, etc. **Machine-specific, git-ignored.** Create from the template below. |
 | `stores.toml` | Store profiles (BIM, Migros, Metro, ...) and universal rules (skip patterns, date formats, name cleanup regexes). |
 | `rules.toml` | Hand-written categorization rules. Assigns hledger accounts by item name regex, store regex, or amount range. |
 | `rules_learned.toml` | Categories learned interactively through Claude or manual input. Auto-appended by `rules.py`. |
 | `corrections.toml` | OCR correction dictionary (wrong → right, exact match). Applied during `load_detections()` before parsing. Updated via `build_corrections.py`. |
+
+#### config.toml Template
+
+`config.toml` is machine-specific and **not committed to git**. Create it once per machine:
+
+```toml
+# PTA Receipt Parser — machine-specific paths
+# Adjust all paths to match your local setup.
+
+[paths]
+receipts            = "C:/path/to/Receipts"           # source receipt images
+ocr_cache           = "C:/path/to/.ocr_cache"         # PaddleOCR JSON results
+ocr_cache_trocr     = "C:/path/to/.ocr_cache_trocr"   # TrOCR JSON results
+ocr_cache_easyocr   = "C:/path/to/.ocr_cache_easyocr" # EasyOCR JSON results
+rules               = "C:/path/to/rules.toml"
+rules_learned       = "C:/path/to/rules_learned.toml"
+ppocr_data          = "C:/path/to/PPOCRLabel_Data/Receipts"
+guided_receipts     = "C:/path/to/.guidedReceipts"
+processed_receipts  = "C:/path/to/.processedReceipts"
+trocr_adapter       = "C:/path/to/.trocr_adapter"
+parse_snapshots     = "C:/path/to/.parse_snapshots"
+parse_llm_cache     = "C:/path/to/.parse_llm_cache"
+
+# Default hledger account when no rule matches
+default_account = "Gider:Bilinmeyen"
+```
+
+All keys are optional — omitting any key falls back to the default in `config.py`.
 
 ### TrOCR Fine-tuning
 

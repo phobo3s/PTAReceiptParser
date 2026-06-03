@@ -1063,12 +1063,12 @@ def main():
                 else:
                     new_lines = build_new_transaction(tx, categorized, receipt)
                     preview(new_lines)
-                    print("\nJournal güncellensin mi? [e/H] ", end="")
+                    print("\nJournal güncellensin mi? [E/h] ", end="")
                     try:
                         answer = input().strip().lower()
                     except (EOFError, KeyboardInterrupt):
                         answer = "h"
-                    if answer == "e":
+                    if answer in ("e", ""):
                         hledger_pending = (ocr_name, tx, new_lines)
 
         # ── Excel önizleme + onay toplama ─────────────────────────────────────
@@ -1093,12 +1093,12 @@ def main():
                     ]
 
                 preview_excel(categorized, receipt)
-                print("\nExcel güncellensin mi? [e/H] ", end="")
+                print("\nExcel güncellensin mi? [E/h] ", end="")
                 try:
                     answer = input().strip().lower()
                 except (EOFError, KeyboardInterrupt):
                     answer = "h"
-                if answer == "e":
+                if answer in ("e", ""):
                     excel_pending = (ocr_name, receipt, categorized)
 
         return hledger_pending, excel_pending
@@ -1144,6 +1144,7 @@ def main():
                 "date":    tx.date,
                 "total":   tx.total,
                 "tx_line": tx.start_line + 1,
+                "file":    str(journal_path),
             })
         print(f"  Toplam {len(pending_hledger)} transaction güncellendi → {journal_path}")
 
@@ -1163,6 +1164,7 @@ def main():
                     "items":  len(receipt.items),
                     "sheet":  sheet_name or "active",
                     "row":    from_row,
+                    "file":   str(excel_path),
                 })
         print(f"  Toplam {ok_count}/{len(pending_excel)} fiş güncellendi → {excel_path}")
 

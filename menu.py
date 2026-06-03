@@ -1,19 +1,20 @@
 """
 menu.py — PTA Receipt Parser TUI Menü
 ======================================
-Tüm araçları tek bir interaktif menüden kullanmak için.
+Tüm araçları tek bir interaktif Textual TUI'dan kullanmak için.
 
 Kullanım:
     py menu.py
 
-Herhangi bir parametre sorusunda 'q' yazarak ana menüye dönebilirsiniz.
+Alt menülerde 'q' yazarak veya Esc'e basarak ana menüye dönebilirsiniz.
 """
 
-import sys
 import json
 import subprocess
+import sys
 from pathlib import Path
 
+# ── Rich (alt-menüler suspend modunda kullanır) ───────────────────────────────
 try:
     from rich.console import Console
     from rich.panel import Panel
@@ -25,6 +26,21 @@ try:
 except ImportError:
     print("rich kütüphanesi gerekli:  pip install rich")
     sys.exit(1)
+
+# ── Textual ───────────────────────────────────────────────────────────────────
+try:
+    from textual.app import App, ComposeResult
+    from textual.binding import Binding
+    from textual.containers import Horizontal, Vertical, ScrollableContainer
+    from textual.screen import Screen
+    from textual.widgets import Footer, Header, Static
+    from textual.timer import Timer
+except ImportError:
+    print("textual kütüphanesi gerekli:  pip install textual")
+    sys.exit(1)
+
+# ── Viewer ────────────────────────────────────────────────────────────────────
+from viewer import ViewerScreen
 
 # ── Sabitler ──────────────────────────────────────────────────────────────────
 
@@ -54,12 +70,14 @@ except Exception:
     PROCESSED_RECEIPTS_DIR = Path(".processedReceipts")
     _CFG_OK = False
 
+
 # ── Geri dönüş sinyali ────────────────────────────────────────────────────────
 
 class GoBack(Exception):
     """Kullanıcı 'q' yazarak bu menüden çıkmak istedi."""
 
-# ── Yardımcı: görünüm ─────────────────────────────────────────────────────────
+
+# ── Yardımcı: görünüm (suspend mod içinde kullanılır) ────────────────────────
 
 def clear() -> None:
     console.clear()
@@ -87,7 +105,6 @@ def section(title: str) -> None:
 
 
 def back_hint() -> None:
-    """Her parametre ekranında gösterilen 'q=geri' ipucu."""
     console.print("  [dim](Herhangi bir soruya [bold]q[/] yazarak ana menüye dönebilirsin)[/]\n")
 
 
@@ -132,7 +149,7 @@ def ask_str(prompt: str, default: str = "", choices: list[str] | None = None) ->
     """
     Serbest metin sor.
     'q' → GoBack exception
-    choices verilmişse bunlarla kısıtla (q zaten ekleniyor).
+    choices verilmişse bunlarla kısıtla.
     """
     if choices:
         choices_with_q = choices + ["q"]
@@ -168,66 +185,6 @@ def run_cmd(cmd: list[str], *, confirm: bool = True) -> None:
     console.print()
     console.print(Rule("[dim]Tamamlandı[/]", style="dim"))
     pause()
-
-
-# ── Durum paneli (ana menü için) ──────────────────────────────────────────────
-
-def _status_panel() -> Panel:
-    """OCR cache, rules, snapshot istatistikleri."""
-    rows: list[tuple[str, str]] = []
-
-    # OCR cache
-    if OCR_CACHE_DIR.exists():
-        jsons = [f for f in OCR_CACHE_DIR.glob("*.json") if f.name != "processed.json"]
-        rows.append(("OCR cache", f"{len(jsons)} fiş"))
-    else:
-        rows.append(("OCR cache", "[dim]—[/]"))
-
-    # İşlenen fişler
-    if PROCESSED_FILE.exists():
-        try:
-            data = json.loads(PROCESSED_FILE.read_text(encoding="utf-8"))
-            hledger_n = len(data.get("hledger", {}))
-            excel_n   = len(data.get("excel", {}))
-            rows.append(("İşlendi", f"hledger:{hledger_n}  excel:{excel_n}"))
-        except Exception:
-            rows.append(("İşlendi", "[dim]—[/]"))
-    else:
-        rows.append(("İşlendi", "[dim]—[/]"))
-
-    # Rules
-    n_rules = 0
-    for rf in [RULES_FILE, RULES_LEARNED]:
-        if rf.exists():
-            try:
-                import tomllib
-                with open(rf, "rb") as f:
-                    n_rules += len(tomllib.load(f).get("rule", []))
-            except Exception:
-                pass
-    rows.append(("Kurallar", f"{n_rules} kural"))
-
-    # Snapshots
-    snap_file = PARSE_SNAPSHOTS_DIR / "snapshots.json"
-    if snap_file.exists():
-        try:
-            snaps = json.loads(snap_file.read_text(encoding="utf-8"))
-            rows.append(("Snapshot", f"{len(snaps)} fiş"))
-        except Exception:
-            rows.append(("Snapshot", "[dim]—[/]"))
-    else:
-        rows.append(("Snapshot", "[dim]—[/]"))
-
-    if not _CFG_OK:
-        rows.append(("", "[red dim]config.toml yok[/]"))
-
-    t = Table(box=None, show_header=False, padding=(0, 2))
-    t.add_column(style="dim", no_wrap=True)
-    t.add_column(style="white")
-    for label, val in rows:
-        t.add_row(label, val)
-
-    return Panel(t, title="[dim]Durum[/]", border_style="dim", padding=(0, 1))
 
 
 # ── Alt menü: Fişleri İşle ───────────────────────────────────────────────────
@@ -277,7 +234,6 @@ def menu_parse() -> None:
     section("Parametreler")
     back_hint()
 
-    # Default: config'deki OCR cache klasörü
     cache_default = str(OCR_CACHE_DIR)
 
     input_path    = ask_path("OCR JSON dosyası veya klasörü", must_exist=True,
@@ -315,7 +271,6 @@ def menu_preprocess() -> None:
     section("Parametreler")
     back_hint()
 
-    # Receipts/ yoksa PROCESSED_RECEIPTS_DIR dene, son çare boş
     if RECEIPTS_DIR.is_dir():
         target_default = str(RECEIPTS_DIR)
     elif PROCESSED_RECEIPTS_DIR.is_dir():
@@ -410,7 +365,6 @@ def menu_regression() -> None:
     section("Parametreler")
     back_hint()
 
-    # Default: config'deki OCR cache klasörü
     cache_dir = ask_str("OCR cache klasörü", default=str(OCR_CACHE_DIR))
 
     run_cmd([PY, "snapshots.py", "--regression", "--cache-dir", cache_dir])
@@ -499,79 +453,185 @@ def menu_llm() -> None:
             run_cmd([PY, "llm_parser.py", "--dry-run"], confirm=False)
 
 
-# ── Ana menü ─────────────────────────────────────────────────────────────────
+# ── Durum metni (Textual Static için) ────────────────────────────────────────
 
-MENU_ITEMS = [
-    ("1", "Fişleri İşle",           "batch.py",              menu_process),
-    ("2", "Fiş Analiz / Parse",      "parser.py",             menu_parse),
-    ("3", "Görüntü Ön İşle",        "preProcess.py",         menu_preprocess),
-    ("4", "OCR Düzeltme Araçları",  "corrections / import",  menu_corrections),
-    ("5", "Regresyon Testi",         "snapshots.py",          menu_regression),
-    ("6", "TrOCR Fine-tuning",       "train_trocr.py",        menu_trocr),
-    ("7", "LLM Parser",              "llm_parser.py",         menu_llm),
+def _build_status_markup() -> str:
+    """Ana menü durum panelinin rich markup metnini döndürür."""
+    rows: list[tuple[str, str]] = []
+
+    # OCR cache
+    if OCR_CACHE_DIR.exists():
+        jsons = [f for f in OCR_CACHE_DIR.glob("*.json") if f.name != "processed.json"]
+        rows.append(("OCR cache", f"{len(jsons)} fiş"))
+    else:
+        rows.append(("OCR cache", "—"))
+
+    # İşlenen fişler
+    if PROCESSED_FILE.exists():
+        try:
+            data = json.loads(PROCESSED_FILE.read_text(encoding="utf-8"))
+            hledger_n = len(data.get("hledger", {}))
+            excel_n   = len(data.get("excel", {}))
+            rows.append(("İşlendi", f"hledger:{hledger_n}  excel:{excel_n}"))
+        except Exception:
+            rows.append(("İşlendi", "—"))
+    else:
+        rows.append(("İşlendi", "—"))
+
+    # Rules
+    n_rules = 0
+    for rf in [RULES_FILE, RULES_LEARNED]:
+        if rf.exists():
+            try:
+                import tomllib
+                with open(rf, "rb") as f:
+                    n_rules += len(tomllib.load(f).get("rule", []))
+            except Exception:
+                pass
+    rows.append(("Kurallar", f"{n_rules} kural"))
+
+    # Snapshots
+    snap_file = PARSE_SNAPSHOTS_DIR / "snapshots.json"
+    if snap_file.exists():
+        try:
+            snaps = json.loads(snap_file.read_text(encoding="utf-8"))
+            rows.append(("Snapshot", f"{len(snaps)} fiş"))
+        except Exception:
+            rows.append(("Snapshot", "—"))
+    else:
+        rows.append(("Snapshot", "—"))
+
+    lines = ["[bold dim]Durum[/]\n"]
+    for label, val in rows:
+        lines.append(f"  [dim]{label:<12}[/] {val}")
+
+    if not _CFG_OK:
+        lines.append("\n  [red dim]config.toml yok[/]")
+
+    return "\n".join(lines)
+
+
+# ── Menü tablosu metni ────────────────────────────────────────────────────────
+
+_MENU_ITEMS = [
+    ("1", "Fişleri İşle",          "batch.py"),
+    ("2", "Fiş Analiz / Parse",     "parser.py"),
+    ("3", "Görüntü Ön İşle",       "preProcess.py"),
+    ("4", "OCR Düzeltme Araçları", "corrections / import"),
+    ("5", "Regresyon Testi",        "snapshots.py"),
+    ("6", "TrOCR Fine-tuning",      "train_trocr.py"),
+    ("7", "LLM Parser",             "llm_parser.py"),
+    ("8", "Fiş Görüntüleyici",      "viewer.py ✨"),
 ]
 
+_SUBMENU_FNS = {
+    "1": menu_process,
+    "2": menu_parse,
+    "3": menu_preprocess,
+    "4": menu_corrections,
+    "5": menu_regression,
+    "6": menu_trocr,
+    "7": menu_llm,
+}
 
-def main_menu() -> None:
-    while True:
-        clear()
-        header()
 
-        # ── Sol: Menü tablosu ──────────────────────────────────────────────
-        menu_table = Table(
-            box=box.SIMPLE,
-            show_header=False,
-            padding=(0, 1),
-            min_width=46,
+def _build_menu_markup() -> str:
+    lines = [f"[bold cyan]{TITLE}[/]  [dim]|[/]  {SUBTITLE}\n"]
+    for key, label, hint in _MENU_ITEMS:
+        lines.append(
+            f"  [bold green]\\[{key}][/]  {label:<28} [dim]{hint}[/]"
         )
-        menu_table.add_column(style="bold green", no_wrap=True, width=4)
-        menu_table.add_column(width=30)
-        menu_table.add_column(style="dim", width=22)
+    lines.append("")
+    lines.append("  [bold red]\\[q][/]  Çıkış")
+    return "\n".join(lines)
 
-        for key, label, hint, _ in MENU_ITEMS:
-            menu_table.add_row(f"[{key}]", label, hint)
 
-        menu_table.add_row("", "", "")
-        menu_table.add_row("[q]", "[red]Çıkış[/]", "")
+# ── Textual: Ana Menü Screen ──────────────────────────────────────────────────
 
-        # ── Sağ: Durum paneli ─────────────────────────────────────────────
+class MainMenuScreen(Screen):
+    """Ana menü — Textual tabanlı."""
+
+    BINDINGS = [
+        Binding("1", "submenu('1')", "Fişleri İşle",     show=False),
+        Binding("2", "submenu('2')", "Fiş Analiz",        show=False),
+        Binding("3", "submenu('3')", "Görüntü Ön İşle",  show=False),
+        Binding("4", "submenu('4')", "Düzeltme",          show=False),
+        Binding("5", "submenu('5')", "Regresyon",         show=False),
+        Binding("6", "submenu('6')", "TrOCR",             show=False),
+        Binding("7", "submenu('7')", "LLM Parser",        show=False),
+        Binding("8", "open_viewer", "Görüntüleyici",      show=True),
+        Binding("q", "app.quit",    "Çıkış",              show=True),
+    ]
+
+    DEFAULT_CSS = """
+    MainMenuScreen {
+        layout: vertical;
+    }
+    #main_row {
+        layout: horizontal;
+        height: 1fr;
+        padding: 1 2;
+        align: center middle;
+    }
+    #menu_box {
+        width: 58;
+        height: auto;
+        border: round $primary;
+        padding: 1 2;
+        margin-right: 2;
+    }
+    #status_box {
+        width: 32;
+        height: auto;
+        border: round $surface-lighten-2;
+        padding: 1 2;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        yield Header(show_clock=True)
+        with Horizontal(id="main_row"):
+            yield Static(_build_menu_markup(), id="menu_box",   markup=True)
+            yield Static(_build_status_markup(), id="status_box", markup=True)
+        yield Footer()
+
+    def on_mount(self) -> None:
+        self.set_interval(30, self._refresh_status)
+
+    def _refresh_status(self) -> None:
         try:
-            status = _status_panel()
+            self.query_one("#status_box", Static).update(_build_status_markup())
         except Exception:
-            status = Panel("[dim]config.toml yüklenemedi[/]", title="[dim]Durum[/]",
-                           border_style="dim", padding=(0, 1))
+            pass
 
-        # ── Yan yana göster ───────────────────────────────────────────────
-        menu_panel = Panel(
-            menu_table,
-            title="[bold]ANA MENÜ[/]",
-            border_style="cyan",
-            padding=(1, 2),
-        )
-        console.print(Columns([menu_panel, status], padding=(0, 2), expand=False))
-        console.print()
+    def action_submenu(self, key: str) -> None:
+        fn = _SUBMENU_FNS.get(key)
+        if fn is None:
+            return
+        with self.app.suspend():
+            try:
+                fn()
+            except (GoBack, KeyboardInterrupt):
+                pass
 
-        valid = [item[0] for item in MENU_ITEMS] + ["q"]
-        choice = Prompt.ask("  Seçim", choices=valid)
+    def action_open_viewer(self) -> None:
+        self.app.push_screen(ViewerScreen())
 
-        if choice == "q":
-            clear()
-            console.print("[dim]Görüşürüz![/]\n")
-            break
 
-        for key, _, _, fn in MENU_ITEMS:
-            if choice == key:
-                try:
-                    fn()
-                except GoBack:
-                    pass  # q'ya basıldı, ana menüye dön
-                break
+# ── Textual App ───────────────────────────────────────────────────────────────
+
+class PTAApp(App):
+    TITLE   = TITLE
+    CSS_PATH = None   # DEFAULT_CSS kullan
+
+    def on_mount(self) -> None:
+        self.push_screen(MainMenuScreen())
 
 
 # ── Giriş noktası ─────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     try:
-        main_menu()
+        PTAApp().run()
     except KeyboardInterrupt:
-        console.print("\n\n[dim]Çıkış.[/]\n")
+        pass
