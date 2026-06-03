@@ -132,13 +132,17 @@ def _excel_workbook(excel_path: Path, sheet_name: Optional[str] = None):
             "pywin32 kurulu değil. Kurmak için: pip install pywin32"
         )
 
-    abs_path = str(excel_path.resolve())
-    xl_app   = None
-    we_opened = False  # bu bağlamda biz mi açtık?
+    abs_path  = str(excel_path.resolve())
+    xl_app    = None
+    we_opened = False   # bu bağlamda biz mi açtık?
+    old_alerts = None   # mevcut instance'ın DisplayAlerts değeri
 
     # Önce açık Excel instance'ına bağlanmayı dene
     try:
         xl_app = win32com.client.GetActiveObject("Excel.Application")
+        # Dialog'ları kapat — eski değeri saklayıp sonra geri yükle
+        old_alerts = xl_app.DisplayAlerts
+        xl_app.DisplayAlerts = False
         # Dosya zaten açık mı?
         wb = None
         for i in range(1, xl_app.Workbooks.Count + 1):
@@ -170,6 +174,12 @@ def _excel_workbook(excel_path: Path, sheet_name: Optional[str] = None):
         yield wb, ws
 
     finally:
+        # Mevcut instance'ın DisplayAlerts değerini geri yükle
+        if old_alerts is not None and xl_app is not None:
+            try:
+                xl_app.DisplayAlerts = old_alerts
+            except Exception:
+                pass
         if we_opened:
             wb.Close(SaveChanges=False)  # kaydetmeyi çağıran taraf yapar
             if xl_app.Workbooks.Count == 0:
