@@ -39,10 +39,22 @@ from textual.containers import Horizontal, ScrollableContainer
 from textual._work_decorator import work
 
 try:
-    from config import OCR_CACHE_DIR, PROCESSED_FILE
+    from config import (
+        OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR, OCR_CACHE_DIR_EASY,
+        PROCESSED_FILE,
+    )
 except Exception:
-    OCR_CACHE_DIR  = Path(".ocr_cache")
-    PROCESSED_FILE = Path(".ocr_cache/processed.json")
+    OCR_CACHE_DIR       = Path(".ocr_cache")
+    OCR_CACHE_DIR_TROCR = Path(".ocr_cache_trocr")
+    OCR_CACHE_DIR_EASY  = Path(".ocr_cache_easyocr")
+    PROCESSED_FILE      = Path(".ocr_cache/processed.json")
+
+# Engine listesi — sadece var olan cache klasörleri gösterilir
+_ENGINES: list[tuple[str, Path]] = [
+    ("paddle",  OCR_CACHE_DIR),
+    ("trocr",   OCR_CACHE_DIR_TROCR),
+    ("easyocr", OCR_CACHE_DIR_EASY),
+]
 
 try:
     from parser import parse_receipt, load_detections, Receipt
@@ -78,6 +90,7 @@ _HELP_TEXT = """\
 
 [bold]Liste[/]
   [yellow]S[/]          Sıralama modu döngüsü  (isim → durum → tarih → toplam)
+  [yellow]E[/]          OCR engine değiştir  (paddle → trocr → easyocr)
   [yellow][ / ][/]      Sol panel daralt / genişlet (4'er karakter)
 
 [bold]İşlemler[/]
@@ -152,6 +165,7 @@ class ViewerScreen(Screen):
         Binding("d",      "show_debug",   "Debug"),
         Binding("j",      "show_json",    "JSON"),
         Binding("s",      "cycle_sort",   "Sırala"),
+        Binding("e",      "cycle_engine", "Engine"),
         Binding("r",      "reparse",      "Re-parse"),
         Binding("space",  "toggle_select","Seç",        show=False),
         Binding("a",      "select_all",   "Tümü"),
@@ -190,6 +204,12 @@ class ViewerScreen(Screen):
         background: $surface-darken-1;
         color: $text-muted;
     }
+    #engine_bar {
+        height: 1;
+        padding: 0 1;
+        background: $surface-darken-3;
+        color: $text-muted;
+    }
     #target_bar {
         height: 1;
         padding: 0 1;
@@ -217,6 +237,8 @@ class ViewerScreen(Screen):
         self._target_sheet:   str = ""   # Excel sheet adı (boş = ilk)
         # ── Toplu seçim ──────────────────────────────────────────────────────
         self._selected_files: set[int] = set()  # seçili dosyaların orig_idx'leri
+        # ── Engine seçimi ────────────────────────────────────────────────────
+        self._engine_idx: int = 0   # _ENGINES listesindeki index
         # Görünüm modu ve sıralama
         self._mode: str = "p"
         self._sort_idx: int = 0
@@ -226,6 +248,7 @@ class ViewerScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
+        yield Static("", id="engine_bar",  markup=True)
         yield Static("", id="sort_bar",    markup=True)
         yield Static("", id="target_bar",  markup=True)
         with Horizontal(id="viewer_main"):
@@ -237,21 +260,38 @@ class ViewerScreen(Screen):
     # ── Mount ─────────────────────────────────────────────────────────────────
 
     def on_mount(self) -> None:
+        self._update_engine_bar()
+        self._reload()
+
+    def _reload(self) -> None:
+        """Aktif engine'in cache klasörünü yükle, listeyi sıfırla, parse başlat."""
         if _PARSER_ERR:
             self.query_one("#receipt_view", Static).update(
                 f"[red]parser.py yüklenemedi:[/]\n{_PARSER_ERR}"
             )
             return
 
+        _, cache_dir = _ENGINES[self._engine_idx]
+
+        # State sıfırla
+        self._cache.clear()
+        self._raw_jsons.clear()
+        self._selected_files.clear()
+        self._selected_orig_idx = 0
+
         self._files = sorted(
-            f for f in OCR_CACHE_DIR.glob("*.json")
+            f for f in cache_dir.glob("*.json")
             if f.name != "processed.json"
-        )
+        ) if cache_dir.exists() else []
 
         if not self._files:
+            self.query_one("#file_list", ListView).clear()
             self.query_one("#receipt_view", Static).update(
-                f"[dim]OCR cache boş:[/] {OCR_CACHE_DIR}"
+                f"[yellow]Bu engine için cache boş:[/] {cache_dir}"
             )
+            self._display_order = []
+            self._update_sort_bar()
+            self._update_target_bar()
             return
 
         self._load_processed()
@@ -329,6 +369,20 @@ class ViewerScreen(Screen):
             label.update(self._build_item_text(orig_idx))
         except Exception:
             pass
+
+    def _update_engine_bar(self) -> None:
+        parts = []
+        for i, (name, cache_dir) in enumerate(_ENGINES):
+            exists = cache_dir.exists()
+            if i == self._engine_idx:
+                parts.append(f"[bold cyan]🔍 {name}[/]")
+            elif exists:
+                parts.append(f"[dim]{name}[/]")
+            else:
+                parts.append(f"[dim strike]{name}[/]")
+        self.query_one("#engine_bar", Static).update(
+            " Engine:  " + "  │  ".join(parts) + "   [dim]E=değiştir[/]"
+        )
 
     def _update_sort_bar(self) -> None:
         mode = _SORT_MODES[self._sort_idx]
@@ -628,6 +682,19 @@ class ViewerScreen(Screen):
     def action_narrow_panel(self) -> None:
         self._list_width = max(self._list_width - 4, self._LIST_WIDTH_MIN)
         self.query_one("#file_list").styles.width = self._list_width
+
+    def action_cycle_engine(self) -> None:
+        # Sıradaki mevcut cache'e geç (olmayan klasörleri atla)
+        start = self._engine_idx
+        for _ in range(len(_ENGINES)):
+            self._engine_idx = (self._engine_idx + 1) % len(_ENGINES)
+            _, cache_dir = _ENGINES[self._engine_idx]
+            if cache_dir.exists():
+                break
+        if self._engine_idx == start:
+            return  # Tek engine var, değişme
+        self._update_engine_bar()
+        self._reload()
 
     def action_cycle_sort(self) -> None:
         self._sort_idx = (self._sort_idx + 1) % len(_SORT_MODES)
