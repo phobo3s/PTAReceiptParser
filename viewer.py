@@ -336,12 +336,17 @@ class ViewerScreen(Screen):
         return f"{sel_pfx}{name_part}\n    [dim]{detail}[/]"
 
     def _rebuild_list(self) -> None:
-        """İlk mount'ta ListItem'ları oluşturur.
-        ID'ler display pozisyonuna göre (fi_0..fi_n) — hiç değişmez.
-        Sıralama değişince sadece içerik güncellenir, DOM rebuild olmaz.
+        """Liste içeriğini sıfırdan oluşturur.
+        clear() + append() aynı render döngüsünde çakışmasın diye
+        clear önce, populate call_after_refresh ile sonra çalışır.
         """
         lv = self.query_one("#file_list", ListView)
         lv.clear()
+        self.call_after_refresh(self._populate_list)
+
+    def _populate_list(self) -> None:
+        """_rebuild_list'in ikinci adımı: temizlenmiş listeyi doldur."""
+        lv = self.query_one("#file_list", ListView)
         for display_pos, orig_idx in enumerate(self._display_order):
             lv.append(ListItem(
                 Static(self._build_item_text(orig_idx), markup=True),
