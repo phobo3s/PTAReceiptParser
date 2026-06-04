@@ -21,6 +21,7 @@ Klavye:
 
 from __future__ import annotations
 
+import importlib
 import io
 import json
 import re
@@ -446,9 +447,12 @@ class ViewerScreen(Screen):
     def _reparse_single_worker(self, orig_idx: int) -> None:
         f = self._files[orig_idx]
         try:
+            if _parser_mod is not None:
+                importlib.reload(_parser_mod)
             data = json.loads(f.read_text(encoding="utf-8"))
             self._raw_jsons[orig_idx] = data
-            self._cache[orig_idx] = parse_receipt(data)
+            _fn = _parser_mod.parse_receipt if _parser_mod is not None else parse_receipt
+            self._cache[orig_idx] = _fn(data)
         except Exception as exc:
             self._cache[orig_idx] = exc
         self.post_message(FileReady(orig_idx))

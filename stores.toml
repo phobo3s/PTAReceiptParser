@@ -436,7 +436,6 @@ total_pattern = '^TOPLAM(?!\s*K[DO]V)'
 skip_patterns = [
     '^\d+[\.,]\d{2}$',
     '^KREDi?\s*$',
-    '^\d+\s*[Xx×]\s*\w',       # "1 X CARLSBERG" — adet-prefix satırı (fiyat ayrı satırda)
 ]
 name_cleanup = [
     ['^[=\-]+\s*', ''],
