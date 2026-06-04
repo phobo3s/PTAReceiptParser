@@ -23,7 +23,7 @@ from parser import parse_receipt, Receipt
 from config import PARSE_SNAPSHOTS_DIR, OCR_CACHE_DIR
 
 SNAPSHOTS_FILE = PARSE_SNAPSHOTS_DIR / "snapshots.json"
-AMOUNT_TOLERANCE = 0.02  # TL
+AMOUNT_TOLERANCE = 0.009  # TL
 
 
 # ── Snapshot okuma/yazma ───────────────────────────────────────────────────────

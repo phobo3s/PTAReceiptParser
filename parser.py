@@ -689,8 +689,9 @@ def parse_receipt(ocr_json: dict) -> Receipt:
     store_key = detect_store(detections)
     if store_key is None:
         #raise ValueError("Market tespit edilemedi! Desteklenen marketler: " + ", ".join(STORE_PROFILES.keys()))
-        print("Market tespit edilemedi! Desteklenen marketler: " + ", ".join(STORE_PROFILES.keys()))
-        store_key = "migros"
+        print("⚠️  Market tespit edilemedi! BİLİNMEYEN profili kullanılıyor.")
+        print("    Desteklenen marketler: " + ", ".join(k for k in STORE_PROFILES.keys() if k != "bilinmeyen"))
+        store_key = "bilinmeyen"
 
     profile = STORE_PROFILES[store_key]
     layout = profile["layout"]

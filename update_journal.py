@@ -13,8 +13,8 @@ from parser import parse_receipt, Receipt, ReceiptItem
 from rules import load_rules, find_account, append_learned_rule, DEFAULT_ACCOUNT
 
 
-from config import RULES_FILE
-AMOUNT_TOLERANCE = 0.02  # TL cinsinden eşleşme toleransı
+from config import RULES_FILE, RULES_LEARNED
+AMOUNT_TOLERANCE = 0.009  # TL cinsinden eşleşme toleransı
 
 
 # ── hledger journal parse ──────────────────────────────────────────────────────
@@ -98,13 +98,77 @@ def find_matching_transaction(
         return candidates[0]
 
     if len(candidates) > 1:
-        # Birden fazla eşleşme → market adına da bak
-        for tx in candidates:
-            if re.search(receipt.store, tx.description, re.IGNORECASE):
-                return tx
-        return candidates[0]  # yine de ilkini seç
+        # Önce market adıyla daralt
+        named = [tx for tx in candidates
+                 if re.search(receipt.store or "", tx.description, re.IGNORECASE)]
+        if len(named) == 1:
+            return named[0]
+
+        # Hâlâ belirsiz → kullanıcıya sor
+        choices = named if named else candidates
+        print(f"\n  ⚠️  {len(choices)} eşleşen transaction bulundu ({receipt.date}  {receipt.total:.2f} TL):")
+        for i, tx in enumerate(choices, 1):
+            print(f"     {i}) satır {tx.start_line + 1}: {tx.raw_lines[0].strip()}")
+        print(f"     Hangisi? [1-{len(choices)}] (boş → iptal): ", end="", flush=True)
+        try:
+            ans = input().strip()
+        except (EOFError, KeyboardInterrupt):
+            ans = ""
+        if ans.isdigit() and 1 <= int(ans) <= len(choices):
+            return choices[int(ans) - 1]
+        return None
 
     return None
+
+
+# ── Claude API fallback ────────────────────────────────────────────────────────
+
+def ask_claude(item_name: str, store: str, amount: float, api_key: str) -> Optional[str]:
+    """Rule bulunamazsa Claude'a sor. Sadece account adını döndürür."""
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=api_key)
+
+        prompt = f"""Sen bir kişisel finans asistanısın. Türk hledger kullanıcısı için market fişi kalemlerini kategorilendiriyorsun.
+
+Market: {store}
+Ürün adı: {item_name}
+Tutar: {amount:.2f} TL
+
+Aşağıdaki hledger account hiyerarşisini kullan:
+- gider:market:gida:meyve
+- gider:market:gida:sebze
+- gider:market:gida:et
+- gider:market:gida:tavuk
+- gider:market:gida:sut-urunleri
+- gider:market:gida:ekmek-tahil
+- gider:market:gida:bakliyat
+- gider:market:gida:icecek
+- gider:market:gida:atistirmalik
+- gider:market:gida:kahvaltilik
+- gider:market:gida:kuru-gida
+- gider:market:temizlik
+- gider:market:kisisel-bakim
+- gider:market:poset
+- gider:market:diger
+- gider:kitap
+- gider:kirtasiye
+- gider:ulasim:yakit
+
+SADECE account adını yaz, başka hiçbir şey yazma. Örnek: gider:market:gida:meyve"""
+
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=50,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        account = response.content[0].text.strip().lower()
+        if account.startswith("gider:"):
+            return account
+        return None
+    except Exception as e:
+        print(f"  ⚠️  Claude API hatası: {e}")
+        return None
 
 
 # ── Kategori tespiti & interaktif onay ───────────────────────────────────────
@@ -112,24 +176,39 @@ def find_matching_transaction(
 def categorize_items(
     receipt: Receipt,
     rules: list,
+    api_key: Optional[str] = None,
 ) -> list[tuple[ReceiptItem, str]]:
-    """Her item için account tespit et. Bilinmeyenleri kullanıcıya sor."""
+    """
+    Her item için account tespit et.
+    Önce rule engine, ardından Claude API (api_key verilmişse), son olarak manuel giriş.
+    """
     results = []
-    unknown_cache = {}  # aynı ismi tekrar sorma
+    unknown_cache: dict[str, str] = {}
 
     for item in receipt.items:
+        # 1. Rule engine
         account = find_account(item.name, receipt.store, item.amount, rules)
-
         if account:
             results.append((item, account))
             continue
 
-        # Cache'de var mı?
+        # 2. Oturum cache'i (aynı ürünü tekrar sorma)
         if item.name in unknown_cache:
             results.append((item, unknown_cache[item.name]))
             continue
 
-        # Kullanıcıya sor
+        # 3. Claude API fallback
+        if api_key:
+            print(f"  🤖 Claude'a soruluyor: {item.name} ({item.amount:.2f} TL)")
+            account = ask_claude(item.name, receipt.store, item.amount, api_key)
+            if account:
+                print(f"     → {account}")
+                unknown_cache[item.name] = account
+                append_learned_rule(item.name, account)
+                results.append((item, account))
+                continue
+
+        # 4. Manuel giriş
         print(f"\n  ❓ Tanınmayan ürün: \033[1m{item.name}\033[0m  ({item.amount:.2f} TL)")
         print(f"     Hangi hesaba gidecek? (boş bırakırsan '{DEFAULT_ACCOUNT}')")
         print(f"     Örnek: gider:market:gida:meyve")
@@ -246,7 +325,7 @@ def main():
     print("\n── Kategoriler tespit ediliyor ─────────────────────")
     rules = load_rules(RULES_FILE)
     # Öğrenilmiş kurallar varsa onları da ekle (önce uygulansın)
-    learned_file = Path("rules_learned.toml")
+    learned_file = RULES_LEARNED
     if learned_file.exists():
         learned = load_rules(learned_file)
         rules = learned + rules  # öğrenilmiş kurallar önce

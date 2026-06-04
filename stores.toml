@@ -330,3 +330,24 @@ skip_patterns = [
 ]
 name_cleanup = []
 parse_mode = "normal"
+
+# ── BİLİNMEYEN / Fallback ────────────────────────────────────────────────────
+# Hiçbir market identifier'ına uymayan fişler için kullanılır.
+# detect_store() asla bu profili seçmez — yalnızca fallback olarak atanır.
+[store.bilinmeyen]
+name = "BİLİNMEYEN MARKET"
+identifiers = []
+y_tolerance   = 20
+header_y_max  = 900
+footer_y_min  = 9999
+price_pattern = '^[\*x×](-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$'
+total_pattern = '^TOPLAM|^EFT-[PF]OS'
+skip_patterns = [
+    '^KOV\s+Z',
+    '^\d+[\.,]\d{2}$',
+]
+name_cleanup = [
+    ['^[=\-]+\s*', ''],
+    ['\s*(?:\d+%|%\d+)\s*$', ''],
+]
+parse_mode = "normal"

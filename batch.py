@@ -30,10 +30,11 @@ from dataclasses import dataclass
 from typing import Optional
 
 from parser import parse_receipt, print_summary, Receipt, ReceiptItem
-from rules import load_rules, find_account, append_learned_rule, DEFAULT_ACCOUNT
+from rules import load_rules, DEFAULT_ACCOUNT
 from update_journal import (
     parse_journal, find_matching_transaction,
     build_new_transaction, update_journal, preview,
+    categorize_items,
 )
 from snapshots import save_snapshot, check_snapshot
 from preProcess import process_image as preprocess_image
@@ -307,106 +308,6 @@ def ocr_with_cache(ocr_engine, image_path: Path, engine_name: str = "paddleocr")
     return result
 
 
-# ── Claude API fallback ────────────────────────────────────────────────────────
-
-def ask_claude(item_name: str, store: str, amount: float, api_key: str) -> Optional[str]:
-    """
-    Rule bulunamazsa Claude'a sor.
-    Sadece account adını döndürmesini iste — kısa, ucuz.
-    """
-    try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=api_key)
-
-        prompt = f"""Sen bir kişisel finans asistanısın. Türk hledger kullanıcısı için market fişi kalemlerini kategorilendiriyorsun.
-
-Market: {store}
-Ürün adı: {item_name}
-Tutar: {amount:.2f} TL
-
-Aşağıdaki hledger account hiyerarşisini kullan:
-- gider:market:gida:meyve
-- gider:market:gida:sebze
-- gider:market:gida:et
-- gider:market:gida:tavuk
-- gider:market:gida:sut-urunleri
-- gider:market:gida:ekmek-tahil
-- gider:market:gida:bakliyat
-- gider:market:gida:icecek
-- gider:market:gida:atistirmalik
-- gider:market:gida:kahvaltilik
-- gider:market:gida:kuru-gida
-- gider:market:temizlik
-- gider:market:kisisel-bakim
-- gider:market:poset
-- gider:market:diger
-- gider:kitap
-- gider:kirtasiye
-- gider:ulasim:yakit
-
-SADECE account adını yaz, başka hiçbir şey yazma. Örnek: gider:market:gida:meyve"""
-
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",  # en ucuz model, bu iş için yeterli
-            max_tokens=50,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        account = response.content[0].text.strip().lower()
-        # Güvenlik: sadece gider: ile başlayan cevapları kabul et
-        if account.startswith("gider:"):
-            return account
-        return None
-    except Exception as e:
-        print(f"  ⚠️  Claude API hatası: {e}")
-        return None
-
-
-# ── Kategori tespiti ───────────────────────────────────────────────────────────
-
-def categorize_items(
-    receipt: Receipt,
-    rules: list,
-    api_key: Optional[str],
-) -> list[tuple[ReceiptItem, str]]:
-    results = []
-    unknown_cache = {}  # aynı ürünü tekrar sorma
-
-    for item in receipt.items:
-        # 1. Rule engine
-        account = find_account(item.name, receipt.store, item.amount, rules)
-        if account:
-            results.append((item, account))
-            continue
-
-        # 2. Cache
-        if item.name in unknown_cache:
-            results.append((item, unknown_cache[item.name]))
-            continue
-
-        # 3. Claude API fallback
-        if api_key:
-            print(f"  🤖 Claude'a soruluyor: {item.name} ({item.amount:.2f} TL)")
-            account = ask_claude(item.name, receipt.store, item.amount, api_key)
-            if account:
-                print(f"     → {account}")
-                unknown_cache[item.name] = account
-                append_learned_rule(item.name, account, LEARNED_RULES_FILE)
-                results.append((item, account))
-                continue
-
-        # 4. Manuel giriş (API yoksa veya başarısızsa)
-        print(f"\n  ❓ Tanınmayan ürün: \033[1m{item.name}\033[0m  ({item.amount:.2f} TL)")
-        print(f"     Hangi hesaba? (boş → '{DEFAULT_ACCOUNT}')")
-        try:
-            answer = input("     > ").strip()
-        except (EOFError, KeyboardInterrupt):
-            answer = ""
-        chosen = answer if answer else DEFAULT_ACCOUNT
-        unknown_cache[item.name] = chosen
-        append_learned_rule(item.name, chosen, LEARNED_RULES_FILE)
-        results.append((item, chosen))
-
-    return results
 
 
 # ── Tek fiş işleme ─────────────────────────────────────────────────────────────
