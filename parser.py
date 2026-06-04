@@ -73,6 +73,10 @@ def _load_config() -> tuple[dict, list]:
                 "footer_y_min": s.get("footer_y_min", 9999),
             },
             "price_pattern": s["price_pattern"],
+            # total_price_pattern: toplam satırı için ayrı fiyat pattern'i.
+            # Yıldızsız toplam değerlerini yakalar (ör. TK Market "1969.6").
+            # Tanımlanmamışsa price_pattern kullanılır.
+            "total_price_pattern": s.get("total_price_pattern", s["price_pattern"]),
             "skip_patterns": common_skip + s.get("skip_patterns", []),
             "total_pattern": s["total_pattern"],
             "date_pattern": common_date,
@@ -173,8 +177,8 @@ def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[s
                 date_str = m.group(1)
                 if DEBUG:
                     print(f"  [DATE_CHECK #{i}] '{d.text}' | Y:{d.y_center:.0f}")
-                # DD.MM.YYYY veya DD-MM-YYYY -> YYYY-MM-DD
-                parts = re.split(r'[-./]', date_str)
+                # DD.MM.YYYY veya DD-MM-YYYY veya DD-MM YYYY -> YYYY-MM-DD
+                parts = re.split(r'[-./\s]+', date_str)
                 if len(parts) == 2 and len(parts[1]) == 6:
                     # DD.MMYYYY (ayırıcı yok, ör. 13.122025) → ayır
                     parts = [parts[0], parts[1][:2], parts[1][2:]]
@@ -184,10 +188,15 @@ def extract_date(detections: list[Detection], profile: dict) -> tuple[Optional[s
                         year = "20" + year  # "26" → "2026"
                     # Imkansiz tarih degerlerini reddet (orn. "33-34-35-36"den gelen 33/34/2035)
                     try:
-                        day_v, mon_v = int(parts[0]), int(parts[1])
+                        day_v, mon_v, year_v = int(parts[0]), int(parts[1]), int(year)
                         if not (1 <= day_v <= 31 and 1 <= mon_v <= 12):
                             if DEBUG:
                                 print(f"    [-] INVALID: day={day_v} month={mon_v}")
+                            continue
+                        # OCR tarih+saat birleşmesi: "2026" → "2616" gibi yıllar
+                        if not (2000 <= year_v <= 2100):
+                            if DEBUG:
+                                print(f"    [-] INVALID year: {year_v}")
                             continue
                     except ValueError:
                         continue
@@ -763,10 +772,11 @@ def parse_receipt(ocr_json: dict) -> Receipt:
         if re.search(profile["total_pattern"], row_text, re.IGNORECASE):
             if DEBUG:
                 print(f"    [T] TOPLAM satiri (pattern: {profile['total_pattern']})")
+            total_pp = profile["total_price_pattern"]
             # split_row_into_name_price: tek blob 'NET TOPLAM: *2.777,63' durumunu da yakalar
-            _, price_dets_t = split_row_into_name_price(row, profile["price_pattern"])
+            _, price_dets_t = split_row_into_name_price(row, total_pp)
             for pd in reversed(price_dets_t):
-                price = parse_price(pd.text, profile["price_pattern"])
+                price = parse_price(pd.text, total_pp)
                 if price:
                     total = price
                     break
@@ -776,7 +786,7 @@ def parse_receipt(ocr_json: dict) -> Receipt:
             if row_idx + 1 < len(rows):
                 next_row = rows[row_idx + 1]
                 if len(next_row) == 1:
-                    p = parse_price(next_row[0].text, profile["price_pattern"])
+                    p = parse_price(next_row[0].text, total_pp)
                     if p is not None:
                         total = p
                         break
@@ -909,9 +919,10 @@ def parse_receipt(ocr_json: dict) -> Receipt:
             print(f"[FOOTER] ROW: {repr(frow_text[:50])}")
         if re.search(profile["total_pattern"], frow_text, re.IGNORECASE):
             # Reversed loop'ta en büyük fiyatı seç (KDV satırında birden fazla sayı olabilir)
+            total_pp = profile["total_price_pattern"]
             prices_in_row = []
             for d in reversed(frow):
-                price = parse_price(d.text, profile["price_pattern"])
+                price = parse_price(d.text, total_pp)
                 if price:
                     prices_in_row.append(price)
             if prices_in_row:

@@ -43,6 +43,8 @@ skip_patterns = [
     '^#+\s',                               # ## BarkoPOS gibi POS sistem satırları
     '^[BI]:[\d]+',                         # B:706 S:9638 gibi
     '^\d{4,6}\*+\d{4}$',                  # kart numarası
+    '^\*{5,}',                             # ****2911 tipi — POS kart son4
+    '^\*{3,}\d{1,4}$',                    # ***2911 varyantı
     '^%[\s\d]+\s*$',                       # %1, %20, % 2 0 gibi KDV kodu satırları
     '^\$\d*\.?$',                          # $0. — mobile OCR gürültüsü
     '^[\$各\\]',                           # 各1 $c}$ gibi saçma karakterler
@@ -54,6 +56,8 @@ skip_patterns = [
     '^\([\d）]+\)$',
     '^AFATOPLAM',                          # Ara toplam (Tankar)
     '^ARATOPLAM',
+    '^ARATOPLAN',                          # OCR varyantı
+    '^APATOPLAM',                          # Restoran fişi (Denizkent vb.)
     '^TOP(LAH|PLAH)?$',                    # Sadece "TOP" / "TOPLAH" label'ı
     '^JOPLAM',                             # OCR hatası: "TOPLAM" → "JOPLAM"
     '^KDV$',
@@ -112,6 +116,7 @@ date_patterns = [
     '^.*?([01]\d{1}\.(20)\d{4})\b',                               # 31.122026 (delimiter yok)
     '(\d{2})([\.\-]?)(\d{2})\2(\d{4})',                           # Boşluklu: "31 . 12 . 2026"
     '^.*?(\d{2}([\.\-\/])\d{2}\2\d{2})\b',                       # 18/04/26 — 2 haneli yıl
+    '(\d{2}-\d{2}\s+\d{4})',                                      # 02-06 2026 (boşluklu yıl)
 ]
 
 # ── BİM ───────────────────────────────────────────────────────────────────────
@@ -329,6 +334,115 @@ skip_patterns = [
     '^\d+[\.,]\d{2}$',
 ]
 name_cleanup = []
+parse_mode = "normal"
+
+# ── BAY DÖNER / Restoran ─────────────────────────────────────────────────────
+[store.bavdoner]
+name = "BAY DÖNER / Restoran"
+identifiers = [
+    'BAV?DONER',
+    'BAYDONER',
+    'BAYDöNER',
+    'BAVDONER\s+RESTOR',
+]
+y_tolerance   = 20
+header_y_max  = 900
+footer_y_min  = 9999
+price_pattern = '^\*(-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$'
+total_pattern = '^TOPLAM(?!\s*K[DO]V)'
+skip_patterns = [
+    '^\d+\s*[Aa]dt?\s*[Xx×]',   # "2Adt X" — adet × birim fiyat satırı (gerçek fiyat sonraki satırda)
+    '^\d+[\.,]\d{2}$',
+    '^KREDi?\s*$',
+    '^TEB\s*$',
+]
+name_cleanup = [
+    ['^[=\-]+\s*', ''],
+    ['\s*%\d+\s*$', ''],
+]
+parse_mode = "normal"
+
+# ── HARRAS / FILE Market ──────────────────────────────────────────────────────
+[store.harras]
+name = "HARRAS / Market"
+identifiers = [
+    'FILE\s+HERKET',
+    'FILE\s+MARKET',
+    'HARRAS',
+    'FiLEKAZIM',
+    'FILE\s+KAZIM',
+]
+y_tolerance   = 20
+header_y_max  = 900
+footer_y_min  = 9999
+# Fiyatlar hem "." hem "," ondalık kullanıyor — her ikisini de yakala
+price_pattern = '^\*(-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$'
+total_pattern = '^(Odenecek|TOPLAM(?!\s*K[DO]V))'
+skip_patterns = [
+    '\*GLUTENSIZ',              # *GLUTENSIZ URUN* label satırları
+    '^TOPIRM',                  # OCR: "TOPLAM KDV" → "TOPIRM KDV"
+    '^TOP[^K]\w*\s+KDV',       # "TOPLAM KDV" OCR varyantları (TOPIRM KDV vb.)
+    '^\d+[\.,]\d{2}$',
+]
+name_cleanup = [
+    ['^[=\-]+\s*', ''],
+    ['\s*%\d+\.?\s*$', ''],    # trailing "%1." veya "%10" — HARRAS'ın KDV kodu eki
+]
+parse_mode = "normal"
+
+# ── TK MARKET / Tarım Kredi ───────────────────────────────────────────────────
+[store.tk_market]
+name = "TK Market / Tarım Kredi"
+identifiers = [
+    'TK\s+TARIM\s+KRE[OD]I',
+    'TKTARIM',
+    'TARIM\s+KRE[OD]I\s+PAZ',
+    'kooperatifmarket',
+    'TK\s+TARIM\s+KRE[OD]',
+]
+y_tolerance   = 20
+header_y_max  = 1100
+footer_y_min  = 9999
+# Ürün fiyatları yıldızlı; toplam yıldızsız ("1969.6", "26")
+price_pattern = '^\*(-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$'
+total_pattern = '^Topla[rmnRMN]{1,2}\s*$|^TOPLAM\s*$'
+# Toplam değeri yıldızsız — sayısal format: "1969.6", "26,00", "26" vb.
+total_price_pattern = '^\*?(\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|\d+[.,]\d{1,2}|\d{2,})$'
+skip_patterns = [
+    '^Toplam\s+K[DO]',          # "Toplam KDV" / "Toplam KOy" — KDV özeti
+    '^Toplam\s+Ko',             # "Toplam Koy:" OCR varyantı
+    '^\d+[\.,]\d{2}$',
+]
+name_cleanup = [
+    ['^[=\-]+\s*', ''],
+]
+parse_mode = "normal"
+
+# ── DENİZKENT KAFE / Restoran ─────────────────────────────────────────────────
+[store.denizkent]
+name = "DENİZKENT KAFE"
+identifiers = [
+    'DEN[İI]ZKENT\s+KAFE',
+    'DENIZKENT',
+    'KARSIYAKA\s+SOS\.TES',
+    'YENI\s+KARSIYAKA\s+SOS',
+    'KENT\s+KARSIYAKA\s+SOS',
+]
+y_tolerance   = 20
+header_y_max  = 900
+footer_y_min  = 9999
+price_pattern = '^\*(-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$'
+total_pattern = '^TOPLAM(?!\s*K[DO]V)'
+skip_patterns = [
+    '^\d+[\.,]\d{2}$',
+    '^KREDi?\s*$',
+    '^\d+\s*[Xx×]\s*\w',       # "1 X CARLSBERG" — adet-prefix satırı (fiyat ayrı satırda)
+]
+name_cleanup = [
+    ['^[=\-]+\s*', ''],
+    ['\s*%\d+\s*$', ''],
+    ['^\d+\s*[Xx×]\s*', ''],   # "1 X " öneki temizle
+]
 parse_mode = "normal"
 
 # ── BİLİNMEYEN / Fallback ────────────────────────────────────────────────────

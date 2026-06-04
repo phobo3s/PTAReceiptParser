@@ -11,6 +11,7 @@ Klavye:
   J        — raw JSON görünümü
   S        — sıralama modu değiştir (isim / durum / tarih / toplam)
   R        — seçili dosyayı yeniden parse et
+  C        — seçili(ler)in çıktısını .txt dosyasına yaz (aktif mod: P/D/J)
   H        — seçili fişi hledger'a yaz
   X        — seçili fişi Excel'e yaz
   [ / ]    — sol panel daralt / genişlet
@@ -20,9 +21,12 @@ Klavye:
 
 from __future__ import annotations
 
+import io
 import json
+import re
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Union
 
@@ -58,10 +62,12 @@ _ENGINES: list[tuple[str, Path]] = [
 
 try:
     from parser import parse_receipt, load_detections, Receipt
+    import parser as _parser_mod
 except Exception as _parser_err:
     parse_receipt   = None  # type: ignore[assignment]
     load_detections = None  # type: ignore[assignment]
     Receipt         = None  # type: ignore[assignment]
+    _parser_mod     = None  # type: ignore[assignment]
     _PARSER_ERR     = _parser_err
 else:
     _PARSER_ERR = None
@@ -100,6 +106,7 @@ _HELP_TEXT = """\
   [yellow]T[/]          Yazma hedeflerini ayarla (hledger / excel / sheet)
   [yellow]H[/]          Seçili(ler)i hledger hedefine yaz  (seçim yoksa mevcut dosya)
   [yellow]X[/]          Seçili(ler)i Excel hedefine yaz    (seçim yoksa mevcut dosya)
+  [yellow]C[/]          Seçili(ler)in çıktısını .txt dosyasına yaz (aktif mod: P/D/J)
 
 [bold]İkonlar[/]
   [green]✓[/]  Parse başarılı, tutarlar eşleşiyor
@@ -167,6 +174,7 @@ class ViewerScreen(Screen):
         Binding("s",      "cycle_sort",   "Sırala"),
         Binding("e",      "cycle_engine", "Engine"),
         Binding("r",      "reparse",      "Re-parse"),
+        Binding("c",      "dump_text",    "Metin Dök"),
         Binding("space",  "toggle_select","Seç",        show=False),
         Binding("a",      "select_all",   "Tümü"),
         Binding("t",      "set_targets",  "Hedef"),
@@ -597,6 +605,28 @@ class ViewerScreen(Screen):
             lines.append(f"  Total : {result.total}")
             lines.append(f"  Items : {len(result.items)}")
 
+        # ── Parser debug log ───────────────────────────────────────────────
+        if _parser_mod is not None:
+            buf = io.StringIO()
+            old_stdout = sys.stdout
+            old_debug  = _parser_mod.DEBUG
+            _parser_mod.DEBUG = True
+            sys.stdout = buf
+            try:
+                _parser_mod.parse_receipt(raw)
+            except Exception as exc:
+                buf.write(f"\n[PARSE HATASI] {exc}\n")
+            finally:
+                sys.stdout = old_stdout
+                _parser_mod.DEBUG = old_debug
+
+            debug_text = buf.getvalue()
+            if debug_text.strip():
+                lines.append(f"\n[bold]Parser Debug Log[/]")
+                lines.append("[dim]" + "─" * 70 + "[/]")
+                # Köşeli parantezler Rich markup olarak yorumlanmasın
+                lines.append(debug_text.replace("[", "\\["))
+
         return "\n".join(lines)
 
     # ── Kalite ikonu ──────────────────────────────────────────────────────────
@@ -885,3 +915,60 @@ class ViewerScreen(Screen):
 
     def action_write_excel(self) -> None:
         self._run_write("excel")
+
+    # ── Metin döküm ───────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _strip_markup(text: str) -> str:
+        return re.sub(r'\[/?[^\]]+\]', '', text)
+
+    def _plain_parse(self, idx: int) -> str:
+        fname = self._files[idx].name if idx < len(self._files) else "?"
+        header = f"=== FİŞ: {fname} ==="
+        result = self._cache.get(idx)
+        if isinstance(result, Exception):
+            return f"{header}\n[ATLANAMADI: {result}]"
+        if not isinstance(result, Receipt):
+            return f"{header}\n[ATLANAMADI: parse sonucu yok]"
+        return header + "\n" + self._strip_markup(self._format_receipt(result))
+
+    def _plain_debug(self, idx: int) -> str:
+        fname = self._files[idx].name if idx < len(self._files) else "?"
+        header = f"=== DEBUG: {fname} ==="
+        if idx not in self._raw_jsons:
+            return f"{header}\n[ATLANAMADI: JSON yüklenmemiş]"
+        return header + "\n" + self._strip_markup(self._format_debug(idx))
+
+    def _plain_json(self, idx: int) -> str:
+        fname = self._files[idx].name if idx < len(self._files) else "?"
+        header = f"=== JSON: {fname} ==="
+        raw = self._raw_jsons.get(idx)
+        if raw is None:
+            return f"{header}\n[ATLANAMADI: JSON yüklenmemiş]"
+        return header + "\n" + json.dumps(raw, indent=2, ensure_ascii=False)
+
+    def action_dump_text(self) -> None:
+        idxs = sorted(self._selected_files) if self._selected_files else [self._selected_orig_idx]
+
+        sep = "\n\n" + "═" * 60 + "\n\n"
+        parts: list[str] = []
+        for idx in idxs:
+            try:
+                if self._mode == "j":
+                    parts.append(self._plain_json(idx))
+                elif self._mode == "d":
+                    parts.append(self._plain_debug(idx))
+                else:
+                    parts.append(self._plain_parse(idx))
+            except Exception as exc:
+                fname = self._files[idx].name if idx < len(self._files) else str(idx)
+                parts.append(f"=== {fname} ===\n[ATLANAMADI: {exc}]")
+
+        content = sep.join(parts)
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_path = Path(__file__).parent / f"parse_dump_{ts}.txt"
+        out_path.write_text(content, encoding="utf-8")
+        self.notify(
+            f"Kaydedildi: {out_path.name}  ({len(idxs)} fiş)",
+            severity="information",
+        )
