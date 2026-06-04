@@ -1074,7 +1074,7 @@ def main():
         # ── Excel önizleme + onay toplama ─────────────────────────────────────
         if excel_path:
             from update_journal import categorize_items
-            from update_excel import preview_excel, read_excel_to_accounts
+            from update_excel import preview_excel, read_excel_receipt_context
             from rules import DEFAULT_ACCOUNT
             already = is_processed(ocr_name, "excel")
             if already and not force:
@@ -1083,8 +1083,10 @@ def main():
             else:
                 categorized = categorize_items(receipt, rules)
 
-                # Default atanan kalemleri Excel'deki mevcut to-account ile doldur
-                excel_accounts = read_excel_to_accounts(excel_path, receipt, sheet_name)
+                # Tek açılışta: from_account, C açıklaması ve mevcut to-account'lar
+                _, from_account, payee_note, excel_accounts = read_excel_receipt_context(
+                    excel_path, receipt, sheet_name
+                )
                 if excel_accounts:
                     categorized = [
                         (item, excel_accounts.get(round(item.amount, 2), account)
@@ -1092,7 +1094,7 @@ def main():
                         for item, account in categorized
                     ]
 
-                preview_excel(categorized, receipt)
+                preview_excel(categorized, receipt, from_account=from_account, payee_note=payee_note)
                 print("\nExcel güncellensin mi? [E/h] ", end="")
                 try:
                     answer = input().strip().lower()

@@ -500,8 +500,8 @@ def process_receipt(
 
     # ── Excel güncelleme ───────────────────────────────────────────────────────
     if excel_path:
-        from update_excel import find_excel_match, update_excel, preview_excel
-        from_row, account = find_excel_match(excel_path, receipt, excel_sheet)
+        from update_excel import read_excel_receipt_context, update_excel, preview_excel
+        from_row, account, payee_note, _ = read_excel_receipt_context(excel_path, receipt, excel_sheet)
 
         if from_row is None:
             total_str = f"{receipt.total:.2f}" if receipt.total is not None else "bilinmiyor"
@@ -509,7 +509,7 @@ def process_receipt(
             print(f"     Aranan: {receipt.date}  {total_str} TL")
         else:
             print(f"  ✓ Excel: satır {from_row} → {account}")
-            preview_excel(categorized, receipt)
+            preview_excel(categorized, receipt, from_account=account, payee_note=payee_note)
             print("  Excel güncellensin mi? [e/H] ", end="", flush=True)
             try:
                 answer = input().strip().lower()

@@ -251,94 +251,125 @@ def _get_to_account_rows(ws, from_row: int) -> tuple[int, int]:
     return first_to, last_to
 
 
-# ── Eşleşme kontrolü (process_receipt'ten çağrılır) ──────────────────────────
+# ── Tek geçişte tüm önizleme verisini oku ────────────────────────────────────
+
+def read_excel_receipt_context(
+    excel_path: Path,
+    receipt: Receipt,
+    sheet_name: Optional[str] = None,
+) -> tuple[Optional[int], Optional[str], Optional[str], dict[float, str]]:
+    """
+    Tek Excel açılışında from-account satırı + mevcut to-account'ları toplar.
+
+    Döndürür: (from_row, from_account, payee_note, to_accounts)
+        from_row     : eşleşen satır numarası (None = bulunamadı)
+        from_account : H sütunu — hangi hesaptan çıkış yapılmış
+        payee_note   : C sütunu — payee / açıklama
+        to_accounts  : {tutar: hesap_adı}  mevcut to-account satırları
+
+    Eşleşme bulunamazsa: (None, None, None, {})
+    """
+    if not excel_path.exists():
+        print(f"  ❌ Excel dosyası bulunamadı: {excel_path}")
+        return None, None, None, {}
+
+    try:
+        with _excel_workbook(excel_path, sheet_name) as (_, ws):
+            from_row = _find_transaction_in_ws(ws, receipt)
+            if from_row is None:
+                return None, None, None, {}
+
+            from_account = ws.Cells(from_row, 8).Value   # H
+            payee_note   = ws.Cells(from_row, 3).Value   # C
+
+            first_to, last_to = _get_to_account_rows(ws, from_row)
+            to_accounts: dict[float, str] = {}
+            for r in range(first_to, last_to + 1):
+                acc = ws.Cells(r, 8).Value
+                amt = parse_excel_amount(ws.Cells(r, 9).Value)
+                if acc and amt is not None:
+                    to_accounts[round(amt, 2)] = str(acc)
+
+            return (
+                from_row,
+                str(from_account) if from_account else None,
+                str(payee_note)   if payee_note   else None,
+                to_accounts,
+            )
+    except (ImportError, IOError) as e:
+        print(f"  ❌ {e}")
+        return None, None, None, {}
+
+
+# ── Geriye dönük uyumluluk takma adları ──────────────────────────────────────
 
 def find_excel_match(
     excel_path: Path,
     receipt: Receipt,
     sheet_name: Optional[str] = None,
 ) -> tuple[Optional[int], Optional[str]]:
-    """
-    Excel dosyasında eşleşen from-account satırını bul.
-    Döndürür: (row_number, account_name) — bulunamazsa (None, None).
-    """
-    if not excel_path.exists():
-        print(f"  ❌ Excel dosyası bulunamadı: {excel_path}")
-        return None, None
+    """Geriye dönük: sadece (from_row, from_account) döndürür."""
+    from_row, from_account, _, _ = read_excel_receipt_context(excel_path, receipt, sheet_name)
+    return from_row, from_account
 
-    try:
-        with _excel_workbook(excel_path, sheet_name) as (_, ws):
-            from_row = _find_transaction_in_ws(ws, receipt)
-            if from_row is None:
-                return None, None
-            account = ws.Cells(from_row, 8).Value  # H
-            return from_row, str(account) if account else ""
-    except (ImportError, IOError) as e:
-        print(f"  ❌ {e}")
-        return None, None
-
-
-# ── Mevcut to-account okuma ───────────────────────────────────────────────────
 
 def read_excel_to_accounts(
     excel_path: Path,
     receipt: Receipt,
     sheet_name: Optional[str] = None,
 ) -> dict[float, str]:
-    """
-    Excel'deki mevcut to-account satırlarını okur.
-    Döndürür: {tutar: hesap_adı}
-    """
-    if not excel_path.exists():
-        return {}
-
-    try:
-        with _excel_workbook(excel_path, sheet_name) as (_, ws):
-            from_row = _find_transaction_in_ws(ws, receipt)
-            if from_row is None:
-                return {}
-
-            first_to, last_to = _get_to_account_rows(ws, from_row)
-            if last_to < first_to:
-                return {}
-
-            result: dict[float, str] = {}
-            for r in range(first_to, last_to + 1):
-                account = ws.Cells(r, 8).Value   # H
-                amount  = parse_excel_amount(ws.Cells(r, 9).Value)  # I
-                if account and amount is not None:
-                    result[round(amount, 2)] = str(account)
-            return result
-    except (ImportError, IOError):
-        return {}
+    """Geriye dönük: sadece to_accounts sözlüğünü döndürür."""
+    _, _, _, to_accounts = read_excel_receipt_context(excel_path, receipt, sheet_name)
+    return to_accounts
 
 
 # ── Önizleme ──────────────────────────────────────────────────────────────────
 
-def preview_excel(categorized: list[tuple[ReceiptItem, str]], receipt: Receipt):
-    W = 72
+def preview_excel(
+    categorized: list[tuple[ReceiptItem, str]],
+    receipt: Receipt,
+    from_account: Optional[str] = None,
+    payee_note: Optional[str] = None,
+):
+    W         = 76
     date_str  = receipt_date_to_excel(receipt.date) if receipt.date else "?"
     total_str = format_excel_amount(receipt.total)
-    store     = receipt.store or "?"
+    neg_str   = format_excel_amount(-(receipt.total or 0))
+    store     = (receipt.store or "?").upper()
+    n_items   = len(categorized)
+
+    def _trunc(s: str, n: int) -> str:
+        return s[:n-2] + ".." if len(s) > n else s
 
     print()
-    print("  " + "─" * W)
-    print(f"  {'A: Tarih':<12} {'B/C: Açıklama':<28} {'H: Hesap':<28} {'I: Tutar':>10}")
-    print("  " + "─" * W)
+    print("  " + "═" * W)
+    print(f"  EXCEL ÖNİZLEME  ·  {store}  ·  {date_str}  ·  {total_str} TRY")
+    print("  " + "═" * W)
 
-    # from-account satırı (negatif tutar)
-    neg = format_excel_amount(-(receipt.total or 0))
-    print(f"  {date_str:<12} {store:<28} {'Borçlar:Kredi/Nakit':<28} {neg:>10}")
+    # ── from-account satırı (dokunulmaz) ─────────────────────────────────────
+    from_display = from_account or "[Excel'deki mevcut değer]"
+    note_display = payee_note   or "—"
+    print()
+    print(f"  FROM-ACCOUNT SATIRI  (dokunulmaz — olduğu gibi kalır)")
+    print("  " + "─" * W)
+    print(f"  {'A: Tarih':<14} {'C: Açıklama':<30} {'H: Hesap (from)':<22} {'I: Tutar':>8}")
+    print(f"  {date_str:<14} {_trunc(note_display, 30):<30} {_trunc(from_display, 22):<22} {neg_str:>8}  TRY")
 
-    # to-account satırları
-    for item, account in categorized:
-        amt = format_excel_amount(item.amount)
-        name = item.name[:26] + ".." if len(item.name) > 28 else item.name
-        print(f"  {'':12} {name:<28} {account:<28} {amt:>10}")
+    # ── to-account satırları (bunları yazıyoruz) ──────────────────────────────
+    print()
+    print(f"  TO-ACCOUNT SATIRLARI  (yazılacak — {n_items} satır)")
+    print("  " + "─" * W)
+    print(f"  {'#':<4} {'G: Ürün Adı':<32} {'H: Hesap (to)':<28} {'I: Tutar':>8}")
+    print("  " + "─" * W)
+    for idx, (item, account) in enumerate(categorized, 1):
+        g = _trunc(item.name, 32)
+        h = _trunc(account,   28)
+        i = format_excel_amount(item.amount)
+        print(f"  {idx:<4} {g:<32} {h:<28} {i:>8}")
 
     print("  " + "─" * W)
-    print(f"  {'':12} {'Toplam ' + total_str + ' TRY':>69}")
-    print("  " + "─" * W)
+    print(f"  {'':>4} {'TOPLAM':<32} {'':28} {total_str:>8}  TRY")
+    print("  " + "═" * W)
 
 
 # ── Ana güncelleme: tek worksheet'e yaz ──────────────────────────────────────
