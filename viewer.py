@@ -447,12 +447,9 @@ class ViewerScreen(Screen):
     def _reparse_single_worker(self, orig_idx: int) -> None:
         f = self._files[orig_idx]
         try:
-            if _parser_mod is not None:
-                importlib.reload(_parser_mod)
             data = json.loads(f.read_text(encoding="utf-8"))
             self._raw_jsons[orig_idx] = data
-            _fn = _parser_mod.parse_receipt if _parser_mod is not None else parse_receipt
-            self._cache[orig_idx] = _fn(data)
+            self._cache[orig_idx] = parse_receipt(data)
         except Exception as exc:
             self._cache[orig_idx] = exc
         self.post_message(FileReady(orig_idx))
@@ -746,9 +743,16 @@ class ViewerScreen(Screen):
         self._update_sort_bar()
 
     def action_reparse(self) -> None:
+        global parse_receipt, load_detections, Receipt
         idx = self._selected_orig_idx
         if idx >= len(self._files):
             return
+        # Parser modülünü yeniden yükle — stores.toml vb. değişiklikleri yansısın
+        if _parser_mod is not None:
+            importlib.reload(_parser_mod)
+            parse_receipt   = _parser_mod.parse_receipt
+            load_detections = _parser_mod.load_detections
+            Receipt         = _parser_mod.Receipt
         # Cache'i temizle, ikonu sıfırla
         self._cache.pop(idx, None)
         self._raw_jsons.pop(idx, None)
