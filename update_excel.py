@@ -39,7 +39,7 @@ from typing import Optional
 
 from parser import Receipt, ReceiptItem
 
-AMOUNT_TOLERANCE = 0.02  # TL eşleşme toleransı
+AMOUNT_TOLERANCE = 0.009  # TL eşleşme toleransı
 
 
 # ── Yardımcı: Tutar dönüşümleri ───────────────────────────────────────────────
@@ -316,16 +316,29 @@ def read_excel_to_accounts(
 # ── Önizleme ──────────────────────────────────────────────────────────────────
 
 def preview_excel(categorized: list[tuple[ReceiptItem, str]], receipt: Receipt):
-    print("\n" + "═" * 60)
-    print("  Önizleme — Excel'e yazılacak to-account satırları:")
-    print("═" * 60)
-    print(f"  Fiş: {receipt.store}  {receipt.date}  {format_excel_amount(receipt.total)} TRY")
+    W = 72
+    date_str  = receipt_date_to_excel(receipt.date) if receipt.date else "?"
+    total_str = format_excel_amount(receipt.total)
+    store     = receipt.store or "?"
+
     print()
+    print("  " + "─" * W)
+    print(f"  {'A: Tarih':<12} {'B/C: Açıklama':<28} {'H: Hesap':<28} {'I: Tutar':>10}")
+    print("  " + "─" * W)
+
+    # from-account satırı (negatif tutar)
+    neg = format_excel_amount(-(receipt.total or 0))
+    print(f"  {date_str:<12} {store:<28} {'Borçlar:Kredi/Nakit':<28} {neg:>10}")
+
+    # to-account satırları
     for item, account in categorized:
-        amount_str = format_excel_amount(item.amount)
-        print(f"  H: {account:<45}  I: {amount_str:>12}  G: {item.name}")
-    print(f"\n  Toplam: {format_excel_amount(receipt.total)}")
-    print("═" * 60)
+        amt = format_excel_amount(item.amount)
+        name = item.name[:26] + ".." if len(item.name) > 28 else item.name
+        print(f"  {'':12} {name:<28} {account:<28} {amt:>10}")
+
+    print("  " + "─" * W)
+    print(f"  {'':12} {'Toplam ' + total_str + ' TRY':>69}")
+    print("  " + "─" * W)
 
 
 # ── Ana güncelleme: tek worksheet'e yaz ──────────────────────────────────────
