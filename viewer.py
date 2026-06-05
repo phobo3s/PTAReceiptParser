@@ -46,13 +46,14 @@ from textual._work_decorator import work
 try:
     from config import (
         OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR, OCR_CACHE_DIR_EASY,
-        PROCESSED_FILE,
+        PROCESSED_FILE, PPOCR_DATA_DIR,
     )
 except Exception:
     OCR_CACHE_DIR       = Path(".ocr_cache")
     OCR_CACHE_DIR_TROCR = Path(".ocr_cache_trocr")
     OCR_CACHE_DIR_EASY  = Path(".ocr_cache_easyocr")
     PROCESSED_FILE      = Path(".ocr_cache/processed.json")
+    PPOCR_DATA_DIR      = Path("PPOCRLabel_Data/Receipts")
 
 # Engine listesi — sadece var olan cache klasörleri gösterilir
 _ENGINES: list[tuple[str, Path]] = [
@@ -794,8 +795,9 @@ class ViewerScreen(Screen):
                 # 2. import_labels.py — sadece bu engine'in cache klasörüne yaz
                 console.print(f"\n  [dim]import_labels.py çalıştırılıyor → {cache_dir}/[/]")
                 console.print()
+                label_txt = PPOCR_DATA_DIR / "Label.txt"
                 result = subprocess.run(
-                    [PY, "import_labels.py", str(cache_dir)],
+                    [PY, "import_labels.py", str(label_txt), str(cache_dir)],
                     cwd=Path(__file__).parent,
                 )
                 if result.returncode != 0:
