@@ -102,6 +102,7 @@ _HELP_TEXT = """\
 
 [bold]İşlemler[/]
   [yellow]R[/]          Seçili dosyayı yeniden parse et
+  [yellow]I[/]          Cache sil + import_labels.py çalıştır (aktif engine)
   [yellow]Space[/]      Dosyayı seçim listesine ekle / çıkar
   [yellow]A[/]          Tümünü seç / tümünün seçimini kaldır
   [yellow]T[/]          Yazma hedeflerini ayarla (hledger / excel / sheet)
@@ -175,6 +176,7 @@ class ViewerScreen(Screen):
         Binding("s",      "cycle_sort",   "Sırala"),
         Binding("e",      "cycle_engine", "Engine"),
         Binding("r",      "reparse",      "Re-parse"),
+        Binding("i",      "reimport",     "→ import_labels"),
         Binding("c",      "dump_text",    "Metin Dök"),
         Binding("space",  "toggle_select","Seç",        show=False),
         Binding("a",      "select_all",   "Tümü"),
@@ -759,6 +761,61 @@ class ViewerScreen(Screen):
         self._update_item(idx)
         self.query_one("#receipt_view", Static).update("⏳ [dim]Yeniden parse ediliyor...[/]")
         self._reparse_single_worker(idx)
+
+    def action_reimport(self) -> None:
+        """I — Seçili fişin cache dosyasını sil, import_labels.py ile yeniden yükle, reparse yap."""
+        idx = self._selected_orig_idx
+        if idx >= len(self._files):
+            return
+
+        engine_name, cache_dir = _ENGINES[self._engine_idx]
+        cache_file = self._files[idx]
+
+        with self.app.suspend():
+            console.print()
+            console.print(Rule(f"[cyan]Cache Sil + Import Labels — {engine_name}[/]", style="cyan"))
+            console.print(f"  Dosya  : [cyan]{cache_file.name}[/]")
+            console.print(f"  Cache  : [cyan]{cache_dir}[/]")
+            console.print()
+            try:
+                ok = Confirm.ask("  Devam edilsin mi?", default=False)
+                if not ok:
+                    console.print("  [yellow]İptal.[/]")
+                    Prompt.ask("\n[dim]Devam için Enter[/]", default="", show_default=False)
+                    return
+
+                # 1. Cache dosyasını sil
+                if cache_file.exists():
+                    cache_file.unlink()
+                    console.print(f"\n  [green]✓[/] Silindi: {cache_file.name}")
+                else:
+                    console.print(f"\n  [yellow]⚠[/]  Dosya zaten yok: {cache_file.name}")
+
+                # 2. import_labels.py — sadece bu engine'in cache klasörüne yaz
+                console.print(f"\n  [dim]import_labels.py çalıştırılıyor → {cache_dir}/[/]")
+                console.print()
+                result = subprocess.run(
+                    [PY, "import_labels.py", str(cache_dir)],
+                )
+                if result.returncode != 0:
+                    console.print(f"\n  [red]✗  import_labels.py hata kodu: {result.returncode}[/]")
+
+            except KeyboardInterrupt:
+                console.print("\n  [yellow]İptal.[/]")
+            finally:
+                Prompt.ask("\n[dim]Devam için Enter[/]", default="", show_default=False)
+
+        # JSON geri geldiyse reparse yap
+        if cache_file.exists():
+            self.action_reparse()
+        else:
+            self._cache.pop(idx, None)
+            self._raw_jsons.pop(idx, None)
+            self._update_item(idx)
+            self.query_one("#receipt_view", Static).update(
+                f"[yellow]⚠  import_labels sonrası {cache_file.name} bulunamadı.[/]\n"
+                "[dim]Label.txt'de bu fiş kayıtlı olmayabilir.[/]"
+            )
 
     def action_set_targets(self) -> None:
         """T — session yazma hedeflerini ayarla / değiştir."""
