@@ -395,7 +395,7 @@ parse_mode = "normal"
 name = "TK Market / Tarım Kredi"
 identifiers = [
     'TK\s+TARIM\s+KRE[OD]I',
-    'TKTARIM',
+    'TK*\sTARIM',
     'TARIM\s+KRE[OD]I\s+PAZ',
     'kooperatifmarket',
     'TK\s+TARIM\s+KRE[OD]',
@@ -405,7 +405,7 @@ header_y_max  = 1100
 footer_y_min  = 9999
 # Ürün fiyatları yıldızlı; toplam yıldızsız ("1969.6", "26")
 price_pattern = '^\*(-?[\d]+\.[\d]+,\d{2}|-?[\d\.]+,\d{2}|-?[\d]+[\.,]\d{2}|-?[\d]{3,})$'
-total_pattern = '^Topla[rmnRMN]{1,2}\s*$|^TOPLAM\s*$'
+total_pattern = '^Topla[rmnRMN]|^TOPLAM\s*$'
 # Toplam değeri yıldızsız — sayısal format: "1969.6", "26,00", "26" vb.
 total_price_pattern = '^\*?(\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|\d+[.,]\d{1,2}|\d{2,})$'
 skip_patterns = [
