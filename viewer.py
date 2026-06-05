@@ -796,6 +796,7 @@ class ViewerScreen(Screen):
                 console.print()
                 result = subprocess.run(
                     [PY, "import_labels.py", str(cache_dir)],
+                    cwd=Path(__file__).parent,
                 )
                 if result.returncode != 0:
                     console.print(f"\n  [red]✗  import_labels.py hata kodu: {result.returncode}[/]")
