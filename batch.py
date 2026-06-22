@@ -43,6 +43,7 @@ logging.basicConfig(level=logging.WARNING)  # PaddleOCR loglarını sustur
 
 from config import (RULES_FILE, RULES_LEARNED as LEARNED_RULES_FILE,
                     OCR_CACHE_DIR, OCR_CACHE_DIR_TROCR, OCR_CACHE_DIR_EASY,
+                    OCR_CACHE_DIR_PADDLE_SERVER,
                     GUIDED_RECEIPTS_DIR, PROCESSED_RECEIPTS_DIR, TROCR_ADAPTER_DIR)
 
 SUPPORTED_EXTS = {".jpg", ".jpeg", ".png"}
@@ -50,13 +51,34 @@ SUPPORTED_EXTS = {".jpg", ".jpeg", ".png"}
 
 # ── OCR ───────────────────────────────────────────────────────────────────────
 
-def get_ocr_engine():
-    """PaddleOCR'ı bir kez yükle, tüm fişlerde kullan."""
+def get_ocr_engine(tier: str = "mobile"):
+    """PaddleOCR'ı bir kez yükle, tüm fişlerde kullan.
+
+    tier="mobile" (varsayılan) → mobile_det + mobile_rec  (hızlı, mevcut davranış)
+    tier="server"              → mobile_det + server_rec   (daha yavaş, daha doğru tanıma)
+
+    NOT: tier="server" bilinçli olarak SADECE recognition modelini server'a
+    yükseltir, detection'ı mobile'da bırakır. Çünkü:
+      - PP-OCRv5_server_DET, Windows + bu paddle derlemesinde predict() sırasında
+        native ACCESS_VIOLATION (0xC0000005) ile çöküyor (test edildi).
+      - PP-OCRv5_server_REC sorunsuz çalışıyor ve fiş kalitesinde asıl belirleyici
+        olan tanıma (rakam/Türkçe karakter okuma) katmanı budur.
+    Eşikler iki tier'da da AYNI; tek değişen recognition model boyutu — adil kıyas.
+    """
     import os
     os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'
     from paddleocr import PaddleOCR
     os.environ["FLAGS_use_mkldnn"] = "0"  # oneDNN disable
-    print("⏳ PaddleOCR yükleniyor (ilk seferinde model indirilebilir)...")
+
+    if tier == "server":
+        det_model = "PP-OCRv5_mobile_det"   # server_det Windows'ta çöküyor — bkz. docstring
+        rec_model = "PP-OCRv5_server_rec"
+        print("⏳ PaddleOCR (server-rec) yükleniyor (ilk seferinde model indirilebilir)...")
+    else:
+        det_model = "PP-OCRv5_mobile_det"
+        rec_model = "PP-OCRv5_mobile_rec"
+        print("⏳ PaddleOCR yükleniyor (ilk seferinde model indirilebilir)...")
+
     ocr = PaddleOCR(
         use_textline_orientation=False,
         lang='tr',
@@ -66,8 +88,8 @@ def get_ocr_engine():
         # Türkçe için PaddleOCR'da özel model yok. en_PP-OCRv5_mobile_rec İ/Ğ/Ş gibi
         # karakterleri tamamen kaçırıyor. Multilingual model bunları "0" veya "I" olarak
         # veriyor — parser bu hataları zaten tolere ediyor, bu yüzden bu daha iyi.
-        text_detection_model_name="PP-OCRv5_mobile_det",
-        text_recognition_model_name="PP-OCRv5_mobile_rec",
+        text_detection_model_name=det_model,
+        text_recognition_model_name=rec_model,
         enable_mkldnn=(platform.system() == "Linux"),  # Linux'ta aktif; Windows'ta MKLDNN/PIR crash yapar
         # Detection (DB) Parameters
         #det_limit_side_len=1920,     # Default 960. Telefon fotoğrafları 2000-4000px uzun taraf içerebilir; küçültme küçük yazıları kaybettirir.
@@ -293,6 +315,8 @@ def ocr_with_cache(ocr_engine, image_path: Path, engine_name: str = "paddleocr")
         cache_dir = OCR_CACHE_DIR_EASY
     elif engine_name == "trocr":
         cache_dir = OCR_CACHE_DIR_TROCR
+    elif engine_name == "paddleocr_server":
+        cache_dir = OCR_CACHE_DIR_PADDLE_SERVER
     else:
         cache_dir = OCR_CACHE_DIR
     cache_dir.mkdir(exist_ok=True)
@@ -440,7 +464,7 @@ def main():
         print("  --sheet   SheetName      Excel sheet adı (default: ilk sheet)")
         print("  --api-key sk-ant-...     Anthropic API anahtarı")
         print("  --preprocess             Görüntüleri OCR öncesi ön işle")
-        print("  --engine paddleocr|easyocr  OCR motoru (default: paddleocr)")
+        print("  --engine paddleocr|paddleocr_server|easyocr|trocr  OCR motoru (default: paddleocr)")
         print("\nÖrnekler:")
         print("  python batch.py fisler/ --hledger butce.hledger")
         print("  python batch.py fisler/ --excel butce.xlsx")
@@ -541,8 +565,8 @@ def main():
         idx = sys.argv.index("--engine")
         if idx + 1 < len(sys.argv):
             engine_name = sys.argv[idx + 1].lower()
-    if engine_name not in ("paddleocr", "easyocr", "trocr"):
-        print(f"❌ Bilinmeyen engine: {engine_name}  (paddleocr, easyocr veya trocr olmalı)")
+    if engine_name not in ("paddleocr", "paddleocr_server", "easyocr", "trocr"):
+        print(f"❌ Bilinmeyen engine: {engine_name}  (paddleocr, paddleocr_server, easyocr veya trocr olmalı)")
         sys.exit(1)
 
     print(f"🔧 OCR engine: {engine_name}")
@@ -550,6 +574,8 @@ def main():
         ocr_engine = get_easyocr_engine()
     elif engine_name == "trocr":
         ocr_engine = get_trocr_engine()
+    elif engine_name == "paddleocr_server":
+        ocr_engine = get_ocr_engine(tier="server")
     else:
         ocr_engine = get_ocr_engine()
 

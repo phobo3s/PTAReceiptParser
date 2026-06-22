@@ -206,7 +206,7 @@ def menu_process() -> None:
         sheet_raw = ask_str("Excel sheet adı [Enter=ilk sheet]", default="")
         sheet = sheet_raw or None
 
-    engine     = ask_str("OCR motoru", choices=["paddleocr", "easyocr", "trocr"],
+    engine     = ask_str("OCR motoru", choices=["paddleocr", "paddleocr_server", "easyocr", "trocr"],
                           default="paddleocr")
     api_key    = Prompt.ask("  Anthropic API key [Enter=atla]", default="", password=True) or None
     preprocess = Confirm.ask("  Görüntü ön işleme uygula?", default=False)

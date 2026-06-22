@@ -14,6 +14,7 @@ _DEFAULTS = {
         "ocr_cache":          ".ocr_cache",
         "ocr_cache_trocr":    ".ocr_cache_trocr",
         "ocr_cache_easyocr":  ".ocr_cache_easyocr",
+        "ocr_cache_paddle_server": ".ocr_cache_paddle_server",
         "guided_receipts":    ".guidedReceipts",
         "processed_receipts": ".processedReceipts",
         "trocr_adapter":      ".trocr_adapter",
@@ -49,6 +50,7 @@ RECEIPTS_DIR          = Path(_cfg["paths"]["receipts"])
 OCR_CACHE_DIR         = Path(_cfg["paths"]["ocr_cache"])
 OCR_CACHE_DIR_TROCR   = Path(_cfg["paths"]["ocr_cache_trocr"])
 OCR_CACHE_DIR_EASY    = Path(_cfg["paths"]["ocr_cache_easyocr"])
+OCR_CACHE_DIR_PADDLE_SERVER = Path(_cfg["paths"]["ocr_cache_paddle_server"])
 GUIDED_RECEIPTS_DIR   = Path(_cfg["paths"]["guided_receipts"])
 PROCESSED_RECEIPTS_DIR= Path(_cfg["paths"]["processed_receipts"])
 TROCR_ADAPTER_DIR     = Path(_cfg["paths"]["trocr_adapter"])

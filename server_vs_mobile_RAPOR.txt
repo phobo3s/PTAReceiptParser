@@ -1,0 +1,120 @@
+==============================================================================
+  PADDLEOCR  MOBILE  vs  SERVER-REC  —  KAPSAMLI KARSILASTIRMA RAPORU
+==============================================================================
+  Mobile cache : 84 fis
+  Server cache : 35 fis
+  Ortak (kiyaslanan): 35 fis
+
+------------------------------------------------------------------------------
+  OZET
+------------------------------------------------------------------------------
+  Detection: server'da daha fazla satir: 33 fis | mobile'da daha fazla: 0 fis
+
+  IC TUTARLILIK  (sum(kalemler) == toplam) — dogruluk proxy'si:
+    Ikisi de tutarli      : 20
+    SADECE SERVER tutarli : 2   <-- server kazanci
+    SADECE MOBILE tutarli : 4   <-- server kaybi
+    Ikisi de tutarsiz     : 0
+
+  Parse hatasi: mobile=0  server=0
+
+  Farklar (mobile != server):
+    Market farki  : 4
+    Tarih farki   : 2
+    Toplam farki  : 7
+    Kalem sayisi farki: 12
+
+==============================================================================
+  >>> SADECE SERVER TUTARLI  (server bu fisleri DOGRU, mobile YANLIS okudu)
+==============================================================================
+  Belge 3_8
+     MOBILE: toplam=1439.00 kalem_top=1302.32 (5 kalem)
+     SERVER: toplam=1439.00 kalem_top=1439.00 (4 kalem)
+  Belge 5_4
+     MOBILE: toplam=None kalem_top=5169.00 (4 kalem)
+     SERVER: toplam=1670.00 kalem_top=1670.00 (1 kalem)
+
+==============================================================================
+  >>> SADECE MOBILE TUTARLI  (server bu fisleri BOZDU)
+==============================================================================
+  Belge 10_1
+     MOBILE: toplam=1560.00 kalem_top=1560.00 (9 kalem)
+     SERVER: toplam=1560.00 kalem_top=1520.00 (8 kalem)
+  Belge 3_1
+     MOBILE: toplam=390.00 kalem_top=390.00 (1 kalem)
+     SERVER: toplam=390.00 kalem_top=780.00 (2 kalem)
+  Belge 3_11
+     MOBILE: toplam=539.00 kalem_top=539.00 (1 kalem)
+     SERVER: toplam=539.00 kalem_top=628.83 (2 kalem)
+  Belge 4_4
+     MOBILE: toplam=75.00 kalem_top=75.00 (2 kalem)
+     SERVER: toplam=75.00 kalem_top=45.00 (1 kalem)
+
+==============================================================================
+  >>> TOPLAM DEGERI FARKLI OKUNAN FISLER
+==============================================================================
+  Belge 10_2                mobile=    596.50  server=      None  [ikisi de TUTARSIZ]
+  Belge 10_7                mobile=      None  server=    770.00  [ikisi de TUTARSIZ]
+  Belge 10_9                mobile=    250.00  server=      None  [ikisi de TUTARSIZ]
+  Belge 3_4                 mobile=   1075.00  server=      None  [ikisi de TUTARSIZ]
+  Belge 3_5                 mobile=   2777.63  server=      None  [ikisi de TUTARSIZ]
+  Belge 5_1                 mobile=      None  server=    700.00  [ikisi de TUTARSIZ]
+  Belge 5_4                 mobile=      None  server=   1670.00  [sadece SERVER tutarli]
+
+==============================================================================
+  >>> MARKET TESPIT FARKI
+==============================================================================
+  Belge 10_2                mobile='BİLİNMEYEN MARKET'  server='BİM'
+  Belge 10_4                mobile='BİLİNMEYEN MARKET'  server='Migros / Market'
+  Belge 3_1                 mobile='FSREF CAN GIDA'  server='BİLİNMEYEN MARKET'
+  Belge 3_12                mobile='BİLİNMEYEN MARKET'  server='BİM'
+
+==============================================================================
+  >>> TARIH FARKI
+==============================================================================
+  Belge 10_6                mobile='2026-06-15'  server='2026-06-10'
+  Belge 5_1                 mobile='None'  server='2025-01-25'
+
+==============================================================================
+  >>> TUM FISLER — DETAY TABLO
+==============================================================================
+  fis                        det m/s      conf m/s           toplam m/s   klm m/s  tutarlilik / farklar
+  Belge 10_1                 98/104  1.00/0.92    1560.00/1560.00     9/8    sadece MOBILE tutarli  KALEM(9->8)
+  Belge 10_10                43/45   1.00/0.89     206.00/206.00      3/3    ikisi de OK            -
+  Belge 10_2                 55/55   1.00/0.93     596.50/None        7/9    ikisi de TUTARSIZ      MARKET,TOPLAM,KALEM(7->9)
+  Belge 10_3                 60/62   1.00/0.91     434.63/434.63      7/7    ikisi de OK            -
+  Belge 10_4                 48/49   1.00/0.91       None/None        3/2    ikisi de TUTARSIZ      MARKET,KALEM(3->2)
+  Belge 10_5                 50/50   1.00/0.92     695.00/695.00      1/1    ikisi de OK            -
+  Belge 10_6                 41/51   1.00/0.76     700.00/700.00      0/0    ikisi de TUTARSIZ      TARIH
+  Belge 10_7                 75/82   1.00/0.89       None/770.00     10/3    ikisi de TUTARSIZ      TOPLAM,KALEM(10->3)
+  Belge 10_8                 82/86   1.00/0.89       None/None        0/0    ikisi de TUTARSIZ      -
+  Belge 10_9                 36/41   1.00/0.77     250.00/None        2/3    ikisi de TUTARSIZ      TOPLAM,KALEM(2->3)
+  Belge 3_1                  49/50   1.00/0.83     390.00/390.00      1/2    sadece MOBILE tutarli  MARKET,KALEM(1->2)
+  Belge 3_10                 45/49   1.00/0.87     209.50/209.50      3/3    ikisi de OK            -
+  Belge 3_11                 36/37   1.00/0.90     539.00/539.00      1/2    sadece MOBILE tutarli  KALEM(1->2)
+  Belge 3_12                 38/39   1.00/0.90     419.00/419.00      1/1    ikisi de OK            MARKET
+  Belge 3_13                 50/51   1.00/0.92    1600.00/1600.00     1/1    ikisi de OK            -
+  Belge 3_2                  43/44   1.00/0.94    2365.00/2365.00     1/1    ikisi de OK            -
+  Belge 3_3                  63/65   1.00/0.93    1210.00/1210.00     5/5    ikisi de OK            -
+  Belge 3_4                 148/168  1.00/0.79    1075.00/None       11/2    ikisi de TUTARSIZ      TOPLAM,KALEM(11->2)
+  Belge 3_5                  92/95   1.00/0.90    2777.63/None       10/9    ikisi de TUTARSIZ      TOPLAM,KALEM(10->9)
+  Belge 3_6                  58/59   1.00/0.92     509.00/509.00      7/7    ikisi de OK            -
+  Belge 3_7                  44/45   1.00/0.92     166.00/166.00      3/3    ikisi de OK            -
+  Belge 3_8                  80/86   1.00/0.86    1439.00/1439.00     5/4    sadece SERVER tutarli  KALEM(5->4)
+  Belge 4_2                  36/43   1.00/0.76    2900.29/2900.29     1/1    ikisi de OK            -
+  Belge 4_3                  50/51   1.00/0.90     250.00/250.00      1/1    ikisi de OK            -
+  Belge 4_4                  50/51   1.00/0.92      75.00/75.00       2/1    sadece MOBILE tutarli  KALEM(2->1)
+  Belge 4_8                  45/46   1.00/0.91    1275.00/1275.00     1/1    ikisi de OK            -
+  Belge 4_9                  46/50   1.00/0.86      70.00/70.00       1/1    ikisi de OK            -
+  Belge 5_1                  37/48   1.00/0.69       None/700.00      0/0    ikisi de TUTARSIZ      TARIH,TOPLAM
+  Belge 5_3                  47/49   1.00/0.86    1080.00/1080.00     1/1    ikisi de OK            -
+  Belge 5_4                  51/53   1.00/0.89       None/1670.00     4/1    sadece SERVER tutarli  TOPLAM,KALEM(4->1)
+  Belge 5_5                  42/44   1.00/0.91     472.00/472.00      2/2    ikisi de OK            -
+  Belge 5_6                  38/39   1.00/0.90      92.50/92.50       1/1    ikisi de OK            -
+  Belge 5_7                  60/61   1.00/0.94     970.95/970.95      8/8    ikisi de OK            -
+  Belge 6_2                  37/38   1.00/0.92     295.00/295.00      1/1    ikisi de OK            -
+  Belge 6_3                  34/36   1.00/0.89   28000.00/28000.00    1/1    ikisi de OK            -
+
+==============================================================================
+  RAPOR SONU
+==============================================================================
